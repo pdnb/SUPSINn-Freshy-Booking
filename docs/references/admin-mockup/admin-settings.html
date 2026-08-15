@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ตั้งค่า — แอดมิน มรส. ชุดเฟรชชี่</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div class="app" data-od-id="shell">
+    <aside class="sidebar" data-chrome="sidebar" data-od-id="sidebar"></aside>
+    <div class="app-main">
+      <header class="topbar" data-chrome="topbar" data-od-id="topbar"></header>
+      <main class="canvas" id="admin-main" data-od-id="canvas">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">ตั้งค่า</h1>
+            <p class="page-sub">เรทค่าส่งตามช่วงจำนวน และแบนเนอร์หน้าแรก</p>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="ตั้งค่า" data-od-id="settings-tabs">
+          <button type="button" class="tab" role="tab" id="tab-shipping" aria-selected="true" aria-controls="panel-shipping">ค่าส่ง</button>
+          <button type="button" class="tab" role="tab" id="tab-banners" aria-selected="false" aria-controls="panel-banners">แบนเนอร์</button>
+        </div>
+
+        <section id="panel-shipping" role="tabpanel" aria-labelledby="tab-shipping" data-od-id="panel-shipping">
+          <div id="rates-list"></div>
+        </section>
+
+        <section id="panel-banners" role="tabpanel" aria-labelledby="tab-banners" hidden data-od-id="panel-banners">
+          <div id="banners-list"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="assets/chrome.js"></script>
+  <script>
+    AdminChrome.mount({ active: "settings" });
+    const state = AdminChrome.state();
+
+    function tierText(tiers) {
+      return tiers.map((tier) => {
+        const range = tier.max ? `${tier.min}–${tier.max}` : `${tier.min}+`;
+        return `${range} ชิ้น = ${AdminChrome.money(tier.amount)} บาท`;
+      }).join(" · ");
+    }
+
+    document.getElementById("rates-list").innerHTML = state.shippingRates.map((rate) => `
+      <article class="panel" style="margin-bottom:12px">
+        <div class="panel-head">
+          <span>${rate.name}</span>
+          <span class="pill ${rate.active ? "pill-active" : "pill-disabled"}">${rate.active ? "ใช้ได้" : "ปิด"}</span>
+        </div>
+        <div class="panel-body">
+          <table class="ds-table" data-od-id="shipping-tiers-${rate.id}">
+            <thead><tr><th>min</th><th>max</th><th>ยอด</th></tr></thead>
+            <tbody>
+              ${rate.tiers.map((tier) => `<tr><td class="mono">${tier.min}</td><td class="mono">${tier.max ?? "ไม่จำกัด"}</td><td class="mono">${AdminChrome.money(tier.amount)}</td></tr>`).join("")}
+            </tbody>
+          </table>
+          <p class="page-sub">${tierText(rate.tiers)}</p>
+        </div>
+      </article>
+    `).join("");
+
+    document.getElementById("banners-list").innerHTML = state.banners.map((banner) => `
+      <article class="panel" style="margin-bottom:12px">
+        <div class="panel-head">
+          <span>${banner.title}</span>
+          <span class="pill ${banner.enabled ? "pill-active" : "pill-disabled"}">${banner.enabled ? "แสดง" : "ซ่อน"}</span>
+        </div>
+        <div class="panel-body">
+          <p class="page-sub">${banner.slot}</p>
+          <div class="media-slot" data-od-id="banner-slot-${banner.id}">ช่องรูปแบนเนอร์</div>
+        </div>
+      </article>
+    `).join("");
+
+    const tabs = [
+      { tab: document.getElementById("tab-shipping"), panel: document.getElementById("panel-shipping") },
+      { tab: document.getElementById("tab-banners"), panel: document.getElementById("panel-banners") },
+    ];
+
+    function selectTab(target) {
+      tabs.forEach(({ tab, panel }) => {
+        const on = tab === target;
+        tab.setAttribute("aria-selected", on ? "true" : "false");
+        panel.hidden = !on;
+      });
+    }
+
+    tabs.forEach(({ tab }) => {
+      tab.addEventListener("click", () => selectTab(tab));
+      tab.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          const index = tabs.findIndex((item) => item.tab === tab);
+          const next = tabs[(index + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+          next.tab.focus();
+          selectTab(next.tab);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

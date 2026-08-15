@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="settings">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="settings-main">
+      <div class="page-head">
+        <div>
+          <h1>Settings</h1>
+          <p class="sub">Store configuration stubs · no live payment changes</p>
+        </div>
+        <button type="button" class="btn btn-primary" id="save-settings" data-od-id="cta-save-settings">Save changes</button>
+      </div>
+
+      <div class="tabs" role="tablist" data-od-id="settings-tabs">
+        <button type="button" class="tab is-active" role="tab" aria-selected="true" data-tab="store">Store</button>
+        <button type="button" class="tab" role="tab" aria-selected="false" data-tab="payments">Payments</button>
+        <button type="button" class="tab" role="tab" aria-selected="false" data-tab="shipping">Shipping</button>
+        <button type="button" class="tab" role="tab" aria-selected="false" data-tab="notifications">Notifications</button>
+      </div>
+
+      <section class="panel tab-panel" data-panel="store" data-od-id="settings-store">
+        <div class="panel-head"><h2>Store profile</h2></div>
+        <div class="panel-body stack">
+          <div class="field-row">
+            <div class="field"><label for="store-name">Store name</label><input class="input" id="store-name" /></div>
+            <div class="field"><label for="store-domain">Domain</label><input class="input" id="store-domain" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="store-email">Contact email</label><input class="input" id="store-email" type="email" /></div>
+            <div class="field"><label for="store-tz">Timezone</label><input class="input" id="store-tz" /></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel tab-panel" data-panel="payments" data-od-id="settings-payments" hidden>
+        <div class="panel-head"><h2>Payments</h2></div>
+        <div class="panel-body stack">
+          <div class="list-row"><div><strong>Card payments</strong><div class="meta">Stripe · stub</div></div><span class="pill pill-active">connected</span></div>
+          <div class="list-row"><div><strong>Shop Pay</strong><div class="meta">Accelerated checkout</div></div><span class="pill pill-active">enabled</span></div>
+          <div class="list-row"><div><strong>PayPal</strong><div class="meta">Optional wallet</div></div><span class="pill pill-draft">off</span></div>
+          <p class="meta">Payment provider credentials are not editable in this prototype.</p>
+        </div>
+      </section>
+
+      <section class="panel tab-panel" data-panel="shipping" data-od-id="settings-shipping" hidden>
+        <div class="panel-head"><h2>Shipping zones</h2></div>
+        <div class="panel-body" style="padding: 0;">
+          <table class="ds-table">
+            <thead><tr><th>Zone</th><th>Carriers</th><th class="num-col">Base rate</th></tr></thead>
+            <tbody>
+              <tr><td>Domestic US</td><td class="meta">USPS · UPS</td><td class="num-col num">$8.00</td></tr>
+              <tr><td>Canada</td><td class="meta">UPS</td><td class="num-col num">$18.00</td></tr>
+              <tr><td>Rest of world</td><td class="meta">DHL</td><td class="num-col num">$32.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel tab-panel" data-panel="notifications" data-od-id="settings-notifications" hidden>
+        <div class="panel-head"><h2>Notifications</h2></div>
+        <div class="panel-body stack">
+          <label class="row"><input class="check" type="checkbox" checked /> Email on new paid order</label>
+          <label class="row"><input class="check" type="checkbox" checked /> Low-stock alerts daily digest</label>
+          <label class="row"><input class="check" type="checkbox" /> Weekly revenue summary</label>
+          <label class="row"><input class="check" type="checkbox" checked /> Customer cancellation notices</label>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const store = Meridian.state.store;
+      document.getElementById("store-name").value = store.name;
+      document.getElementById("store-domain").value = store.domain;
+      document.getElementById("store-email").value = store.email;
+      document.getElementById("store-tz").value = store.timezone;
+
+      document.querySelectorAll(".tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          const id = tab.getAttribute("data-tab");
+          document.querySelectorAll(".tab").forEach(function (t) {
+            const on = t === tab;
+            t.classList.toggle("is-active", on);
+            t.setAttribute("aria-selected", on ? "true" : "false");
+          });
+          document.querySelectorAll(".tab-panel").forEach(function (panel) {
+            panel.hidden = panel.getAttribute("data-panel") !== id;
+          });
+        });
+      });
+
+      document.getElementById("save-settings").addEventListener("click", function () {
+        Meridian.state.store.name = document.getElementById("store-name").value.trim() || store.name;
+        Meridian.state.store.domain = document.getElementById("store-domain").value.trim();
+        Meridian.state.store.email = document.getElementById("store-email").value.trim();
+        Meridian.state.store.timezone = document.getElementById("store-tz").value.trim();
+        Meridian.persist();
+        AdminUI.toast("Settings saved locally");
+      });
+    });
+  </script>
+</body>
+</html>

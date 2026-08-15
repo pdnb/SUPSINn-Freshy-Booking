@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ชำระเงิน PromptPay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../assets/theme.js"></script>
+</head>
+<body class="m-0 min-h-dvh bg-bg font-sans text-[15px] leading-relaxed text-fg antialiased">
+  <div class="relative mx-auto flex min-h-dvh w-full max-w-lg md:max-w-3xl flex-col" data-od-id="payment-phone">
+      <header class="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border bg-surface px-2" data-od-id="payment-topbar">
+        <a class="inline-flex h-11 w-11 items-center justify-center rounded-full text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" href="checkout.html" aria-label="กลับ">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <h1 class="flex-1 pr-11 text-center text-base font-semibold" data-od-id="payment-title">ชำระเงิน</h1>
+      </header>
+
+      <div class="flex-1 overflow-y-auto pb-[calc(58px+env(safe-area-inset-bottom,0px)+84px)]" data-od-id="payment-body">
+        <div class="m-3.5 grid grid-cols-4 gap-1.5" role="list" aria-label="ขั้นตอนการจอง" data-od-id="payment-steps">
+          <div class="rounded-lg bg-accent/15 px-1 py-2 text-center text-[11px] font-medium text-accent" role="listitem">ตะกร้า</div>
+          <div class="rounded-lg bg-accent/15 px-1 py-2 text-center text-[11px] font-medium text-accent" role="listitem">ข้อมูล</div>
+          <div class="rounded-lg bg-accent px-1 py-2 text-center text-[11px] font-medium text-accent-fg" role="listitem" aria-current="step">ชำระเงิน</div>
+          <div class="rounded-lg bg-border/50 px-1 py-2 text-center text-[11px] font-medium text-muted" role="listitem">เสร็จสิ้น</div>
+        </div>
+
+        <section class="mx-3.5 mb-4 rounded-2xl border border-border bg-surface p-4" data-od-id="payment-summary">
+          <div class="flex justify-between gap-3 py-1.5 text-sm"><span>ยอดสินค้า</span><span>รอประกาศราคา</span></div>
+          <div class="flex justify-between gap-3 border-t border-border pt-3 text-sm font-semibold"><span>ยอดที่ต้องชำระ</span><span class="text-accent">รอประกาศราคา</span></div>
+          <p class="mt-2.5 mb-0 text-xs text-muted">ชำระผ่าน PromptPay แล้วแนบสลิปเพื่อยืนยันการจองในขั้นตอนเดียวกัน</p>
+        </section>
+
+        <div class="mx-3.5 mb-4 rounded-2xl border border-border bg-surface p-4 text-center" data-od-id="payment-qr">
+          <p class="mb-1 text-xs font-medium text-accent">PromptPay QR</p>
+          <p class="mb-3 font-semibold">สแกนเพื่อชำระเงิน</p>
+          <img src="../assets/promptpay-qr.png" alt="ตัวอย่าง QR PromptPay (จำลอง)" class="mx-auto mb-3 w-48 rounded-xl border border-border" />
+          <p class="text-xs text-muted">QR นี้เป็นภาพจำลองสำหรับโปรโตไทป์ — เลขบัญชีจริงจะเชื่อมจากระบบเมื่อเปิดใช้</p>
+        </div>
+
+        <p id="slip-hint" class="mx-3.5 mb-3 rounded-xl bg-warn/15 px-3 py-2.5 text-sm text-fg" data-od-id="payment-slip-hint">ต้องแนบสลิปก่อนกดยืนยันการจอง</p>
+
+        <div class="mx-3.5 mb-4 flex flex-col items-center gap-1 rounded-2xl border border-dashed border-border bg-surface px-4 py-6 text-center transition" id="slip-zone" data-od-id="payment-slip">
+          <span class="font-semibold">แนบสลิปการโอน</span>
+          <span class="text-xs text-muted">รองรับรูปภาพหรือ PDF · จำเป็นก่อนยืนยันจอง</span>
+          <span class="mt-2 hidden rounded-full bg-success/15 px-3 py-1 text-xs font-medium text-success" id="slip-chip">แนบสลิปแล้ว</span>
+          <button type="button" id="slip-demo" class="mt-3 min-h-11 rounded-xl border border-border bg-bg px-4 text-sm font-medium hover:bg-border/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-describedby="slip-hint">จำลองแนบสลิป</button>
+        </div>
+      </div>
+
+      <div class="fixed bottom-tabbar left-0 right-0 z-20 mx-auto w-full max-w-lg md:max-w-3xl border-t border-border bg-surface px-3.5 py-3" data-od-id="payment-sticky">
+        <a id="confirm-pay" href="order-status.html" class="pointer-events-none flex min-h-12 w-full items-center justify-center rounded-xl bg-border text-sm font-semibold text-muted" aria-disabled="true" data-od-id="payment-confirm-cta">ยืนยันการจอง</a>
+      </div>
+
+      <nav class="fixed bottom-0 left-0 right-0 z-30 mx-auto flex h-tabbar w-full max-w-lg md:max-w-3xl border-t border-border bg-surface pb-[env(safe-area-inset-bottom,0px)]" aria-label="เมนูหลัก">
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="home.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>หน้าหลัก</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="order-status.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>คำสั่งซื้อ</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="pickup-assist.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>รับสินค้า</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="../index.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>ภาพรวม</a>
+      </nav>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var zone = document.getElementById("slip-zone");
+      var chip = document.getElementById("slip-chip");
+      var hint = document.getElementById("slip-hint");
+      var demo = document.getElementById("slip-demo");
+      var btn = document.getElementById("confirm-pay");
+
+      function markAttached() {
+        chip.classList.remove("hidden");
+        zone.classList.remove("border-dashed", "border-border");
+        zone.classList.add("border", "border-success", "bg-success/5");
+        hint.classList.add("hidden");
+        demo.classList.add("hidden");
+        btn.className = "flex min-h-12 w-full items-center justify-center rounded-xl bg-accent text-sm font-semibold text-accent-fg hover:bg-accent-press focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+        btn.removeAttribute("aria-disabled");
+        btn.classList.remove("pointer-events-none");
+      }
+
+      demo.addEventListener("click", markAttached);
+    })();
+  </script>
+</body>
+</html>

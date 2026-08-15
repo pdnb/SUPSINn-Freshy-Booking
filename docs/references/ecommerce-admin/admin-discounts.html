@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Discounts · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="discounts">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="discounts-main">
+      <div class="page-head">
+        <div>
+          <h1>Discounts</h1>
+          <p class="sub">Promo codes and automatic rules · <span class="sample-tag">Sample data</span></p>
+        </div>
+        <button type="button" class="btn btn-primary" id="open-create" data-od-id="cta-create-code">Create code</button>
+      </div>
+
+      <section class="panel" data-od-id="discounts-table-panel">
+        <div class="panel-body" style="padding: 0;">
+          <table class="ds-table" id="discounts-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Type</th>
+                <th class="num-col">Value</th>
+                <th class="num-col">Used</th>
+                <th>Window</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay" data-close></div>
+  <div class="dialog" id="create-dialog" data-od-id="create-discount-dialog" role="dialog" aria-modal="true" aria-labelledby="create-title">
+    <div class="dialog-head"><h2 id="create-title">Create discount code</h2><button type="button" class="icon-btn" data-close aria-label="Close">✕</button></div>
+    <div class="dialog-body stack">
+      <div class="field">
+        <label for="code">Code *</label>
+        <input class="input" id="code" placeholder="SUMMER20" style="text-transform: uppercase;" />
+        <span class="error" id="code-error" hidden>Enter a code.</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="type">Type</label>
+          <select class="select" id="type">
+            <option value="percent">Percent off</option>
+            <option value="fixed">Fixed amount</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="value">Value *</label>
+          <input class="input" id="value" type="number" min="1" step="1" value="10" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="limit">Usage limit</label>
+          <input class="input" id="limit" type="number" min="0" step="1" value="100" />
+        </div>
+        <div class="field">
+          <label for="ends">Ends</label>
+          <input class="input" id="ends" type="date" />
+        </div>
+      </div>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+      <button type="button" class="btn btn-primary" id="save-code" data-od-id="cta-save-code">Save code</button>
+    </div>
+  </div>
+
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    function render() {
+      document.querySelector("#discounts-table tbody").innerHTML = Meridian.state.discounts.map(function (d) {
+        const value = d.type === "percent" ? d.value + "%" : Meridian.money(d.value);
+        return "<tr>" +
+          "<td><strong>" + d.code + "</strong></td>" +
+          "<td>" + d.type + "</td>" +
+          '<td class="num-col num">' + value + "</td>" +
+          '<td class="num-col num">' + d.used + (d.limit ? " / " + d.limit : "") + "</td>" +
+          '<td class="meta">' + d.starts + (d.ends ? " → " + d.ends : "") + "</td>" +
+          "<td>" + AdminUI.statusPill(d.status) + "</td></tr>";
+      }).join("");
+    }
+
+    function closeDialog() {
+      AdminUI.closeOverlay("overlay");
+      AdminUI.closeOverlay("create-dialog");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("open-create").addEventListener("click", function () {
+        document.getElementById("code").value = "";
+        document.getElementById("code-error").hidden = true;
+        AdminUI.openOverlay("overlay");
+        AdminUI.openOverlay("create-dialog");
+        document.getElementById("code").focus();
+      });
+      document.getElementById("overlay").addEventListener("click", closeDialog);
+      document.querySelectorAll("[data-close]").forEach(function (b) {
+        b.addEventListener("click", closeDialog);
+      });
+      document.getElementById("save-code").addEventListener("click", function () {
+        const code = document.getElementById("code").value.trim().toUpperCase();
+        const value = Number(document.getElementById("value").value);
+        if (!code) {
+          document.getElementById("code-error").hidden = false;
+          return;
+        }
+        if (!(value > 0)) {
+          AdminUI.toast("Value must be greater than zero");
+          return;
+        }
+        Meridian.createDiscount({
+          code: code,
+          type: document.getElementById("type").value,
+          value: value,
+          limit: document.getElementById("limit").value,
+          ends: document.getElementById("ends").value,
+        });
+        closeDialog();
+        AdminUI.toast("Created " + code);
+        render();
+      });
+      render();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ข้อมูลการจอง — ชุดเฟรชชี่ มรส.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../assets/theme.js"></script>
+</head>
+<body class="m-0 min-h-dvh bg-bg font-sans text-[15px] leading-relaxed text-fg antialiased">
+  <div class="relative mx-auto flex min-h-dvh w-full max-w-lg md:max-w-3xl flex-col" data-od-id="checkout-phone">
+      <header class="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border bg-surface px-2" data-od-id="checkout-topbar">
+        <a class="inline-flex h-11 w-11 items-center justify-center rounded-full text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" href="cart.html" aria-label="กลับ">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <h1 class="flex-1 pr-11 text-center text-base font-semibold" data-od-id="checkout-title">ข้อมูลการจอง</h1>
+      </header>
+
+      <div class="flex-1 overflow-y-auto pb-[calc(58px+env(safe-area-inset-bottom,0px)+84px)]" data-od-id="checkout-body">
+        <div class="m-3.5 grid grid-cols-4 gap-1.5" role="list" aria-label="ขั้นตอนการจอง" data-od-id="checkout-steps">
+          <div class="rounded-lg bg-accent/15 px-1 py-2 text-center text-[11px] font-medium text-accent" role="listitem">ตะกร้า</div>
+          <div class="rounded-lg bg-accent px-1 py-2 text-center text-[11px] font-medium text-accent-fg" role="listitem" aria-current="step">ข้อมูล</div>
+          <div class="rounded-lg bg-border/50 px-1 py-2 text-center text-[11px] font-medium text-muted" role="listitem">ชำระเงิน</div>
+          <div class="rounded-lg bg-border/50 px-1 py-2 text-center text-[11px] font-medium text-muted" role="listitem">เสร็จสิ้น</div>
+        </div>
+
+        <section class="space-y-4 px-3.5 pb-4 md:px-6 md:pb-6" data-od-id="checkout-student">
+          <h2 class="text-base font-semibold">ข้อมูลนักศึกษา</h2>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-muted" for="studentId">รหัสนักศึกษา</label>
+            <input id="studentId" name="studentId" value="67011234567" inputmode="numeric" autocomplete="off" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30" />
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-muted" for="fullName">ชื่อ–นามสกุล</label>
+            <input id="fullName" name="fullName" value="สมชาย ใจดี" autocomplete="name" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30" />
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-muted" for="faculty">คณะ</label>
+            <select id="faculty" name="faculty" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30">
+              <option>คณะครุศาสตร์</option>
+              <option selected>คณะวิทยาศาสตร์และเทคโนโลยี</option>
+              <option>คณะมนุษยศาสตร์และสังคมศาสตร์</option>
+              <option>คณะวิทยาการจัดการ</option>
+              <option>คณะเทคโนโลยีการเกษตร</option>
+              <option>คณะเทคโนโลยีสารสนเทศ</option>
+              <option>คณะพยาบาลศาสตร์</option>
+              <option>คณะกฎหมาย</option>
+              <option>อื่น ๆ / ยังไม่ระบุ</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-muted" for="phone">เบอร์โทรศัพท์</label>
+            <input id="phone" name="phone" type="tel" value="081-234-5678" inputmode="tel" autocomplete="tel" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30" />
+          </div>
+        </section>
+
+        <section class="space-y-3 border-t border-border px-3.5 py-4 md:px-6 md:py-6" data-od-id="checkout-fulfillment">
+          <h2 class="text-base font-semibold">วิธีรับสินค้า</h2>
+          <p class="text-sm text-muted">รับใบเสร็จตอนรับสินค้า (ไม่ส่งใบเสร็จอิเล็กทรอนิกส์ในรอบนี้)</p>
+
+          <div class="space-y-2" role="radiogroup" aria-label="วิธีรับสินค้า">
+            <label class="flex cursor-pointer gap-3 rounded-2xl border border-accent bg-accent/5 p-3.5" data-od-id="fulfill-bookstore">
+              <input type="radio" name="fulfillment" value="bookstore" checked class="mt-1 accent-[oklch(48%_0.13_255)]" />
+              <span>
+                <strong class="block text-sm">รับที่ร้านศูนย์หนังสือฯ</strong>
+                <span class="text-xs text-muted">เปิดรับตามประกาศของศูนย์หนังสือ มรส.</span>
+              </span>
+            </label>
+            <label class="flex cursor-pointer gap-3 rounded-2xl border border-border bg-surface p-3.5" data-od-id="fulfill-hall">
+              <input type="radio" name="fulfillment" value="hall" class="mt-1 accent-[oklch(48%_0.13_255)]" />
+              <span>
+                <strong class="block text-sm">รับที่หอประชุมฯ วันรายงานตัว</strong>
+                <span class="text-xs text-muted">จุดรับชุดในวันรายงานตัวนักศึกษาใหม่</span>
+              </span>
+            </label>
+            <label class="flex cursor-pointer gap-3 rounded-2xl border border-border bg-surface p-3.5" data-od-id="fulfill-post">
+              <input type="radio" name="fulfillment" value="post" class="mt-1 accent-[oklch(48%_0.13_255)]" />
+              <span>
+                <strong class="block text-sm">จัดส่งทางไปรษณีย์</strong>
+                <span class="text-xs text-muted">มีค่าจัดส่งเพิ่ม — คำนวณตอนชำระเงิน</span>
+              </span>
+            </label>
+          </div>
+
+          <div id="address-field" class="mt-3 hidden space-y-3" data-od-id="checkout-address">
+            <h3 class="text-sm font-semibold text-fg">ที่อยู่จัดส่ง</h3>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-muted" for="addr-line">บ้านเลขที่ ถนน หมู่บ้าน/อาคาร</label>
+              <input id="addr-line" name="addrLine" type="text" placeholder="เช่น 99 หมู่ 1 ถนนมหาวิทยาลัย" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-muted" for="addr-subdistrict">ตำบล / แขวง</label>
+                <input id="addr-subdistrict" name="subdistrict" type="text" placeholder="ตำบล/แขวง" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-muted" for="addr-district">อำเภอ / เขต</label>
+                <input id="addr-district" name="district" type="text" placeholder="อำเภอ/เขต" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-muted" for="addr-province">จังหวัด</label>
+                <input id="addr-province" name="province" type="text" placeholder="จังหวัด" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-muted" for="addr-postcode">รหัสไปรษณีย์</label>
+                <input id="addr-postcode" name="postcode" type="text" inputmode="numeric" maxlength="5" placeholder="xxxxx" class="min-h-11 w-full rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="fixed bottom-tabbar left-0 right-0 z-20 mx-auto w-full max-w-lg md:max-w-3xl border-t border-border bg-surface px-3.5 py-3" data-od-id="checkout-sticky">
+        <a class="flex min-h-12 w-full items-center justify-center rounded-xl bg-accent text-sm font-semibold text-accent-fg hover:bg-accent-press focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" href="payment.html" data-od-id="checkout-next-cta">ไปชำระเงิน</a>
+      </div>
+
+      <nav class="fixed bottom-0 left-0 right-0 z-30 mx-auto flex h-tabbar w-full max-w-lg md:max-w-3xl border-t border-border bg-surface pb-[env(safe-area-inset-bottom,0px)]" aria-label="เมนูหลัก">
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="home.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>หน้าหลัก</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="order-status.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>คำสั่งซื้อ</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="pickup-assist.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>รับสินค้า</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="../index.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>ภาพรวม</a>
+      </nav>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var addressField = document.getElementById("address-field");
+      document.querySelectorAll('input[name="fulfillment"]').forEach(function (el) {
+        el.addEventListener("change", function () {
+          addressField.classList.toggle("hidden", el.value !== "post" || !el.checked);
+          document.querySelectorAll('input[name="fulfillment"]').forEach(function (r) {
+            var card = r.closest("label");
+            if (r.checked) {
+              card.className = "flex cursor-pointer gap-3 rounded-2xl border border-accent bg-accent/5 p-3.5";
+            } else {
+              card.className = "flex cursor-pointer gap-3 rounded-2xl border border-border bg-surface p-3.5";
+            }
+          });
+          if (document.querySelector('input[name="fulfillment"]:checked').value === "post") {
+            addressField.classList.remove("hidden");
+          } else {
+            addressField.classList.add("hidden");
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Analytics · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="analytics">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="analytics-main">
+      <div class="page-head">
+        <div>
+          <h1>Analytics</h1>
+          <p class="sub">Revenue and order volume · <span class="sample-tag">Sample series</span></p>
+        </div>
+        <div class="row" role="group" aria-label="Period" data-od-id="period-toggle">
+          <button type="button" class="btn btn-secondary btn-sm period" data-period="7d">7 days</button>
+          <button type="button" class="btn btn-secondary btn-sm period" data-period="30d">30 days</button>
+          <button type="button" class="btn btn-secondary btn-sm period" data-period="90d">90 days</button>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 16px;">
+        <section class="panel" data-od-id="revenue-chart">
+          <div class="panel-head">
+            <h2>Revenue</h2>
+            <span class="meta" id="rev-total"></span>
+          </div>
+          <div class="panel-body">
+            <div class="chart" id="rev-chart" aria-label="Revenue bar chart"></div>
+          </div>
+        </section>
+        <section class="panel" data-od-id="orders-chart">
+          <div class="panel-head">
+            <h2>Orders</h2>
+            <span class="meta" id="ord-total"></span>
+          </div>
+          <div class="panel-body">
+            <div class="chart" id="ord-chart" aria-label="Orders bar chart"></div>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel" data-od-id="analytics-table">
+        <div class="panel-head"><h2>Period breakdown</h2></div>
+        <div class="panel-body" style="padding: 0;">
+          <table class="ds-table" id="breakdown">
+            <thead><tr><th>Bucket</th><th class="num-col">Revenue</th><th class="num-col">Orders</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    let period = "7d";
+
+    function render() {
+      const series = Meridian.state.analytics.series[period];
+      const maxRev = Math.max.apply(null, series.revenue);
+      const maxOrd = Math.max.apply(null, series.orders);
+      const sumRev = series.revenue.reduce(function (a, b) { return a + b; }, 0);
+      const sumOrd = series.orders.reduce(function (a, b) { return a + b; }, 0);
+      document.getElementById("rev-total").textContent = Meridian.money(sumRev) + " · sample";
+      document.getElementById("ord-total").textContent = sumOrd + " · sample";
+
+      document.getElementById("rev-chart").innerHTML = series.revenue.map(function (v, i) {
+        const h = Math.max(4, Math.round((v / maxRev) * 100));
+        return '<div class="chart-bar" style="height:' + h + '%" title="' + Meridian.money(v) + '"><span>' + series.labels[i] + "</span></div>";
+      }).join("");
+
+      document.getElementById("ord-chart").innerHTML = series.orders.map(function (v, i) {
+        const h = Math.max(4, Math.round((v / maxOrd) * 100));
+        return '<div class="chart-bar" style="height:' + h + '%" title="' + v + ' orders"><span>' + series.labels[i] + "</span></div>";
+      }).join("");
+
+      document.querySelector("#breakdown tbody").innerHTML = series.labels.map(function (label, i) {
+        return "<tr><td>" + label + '</td><td class="num-col num">' + Meridian.money(series.revenue[i]) + '</td><td class="num-col num">' + series.orders[i] + "</td></tr>";
+      }).join("");
+
+      document.querySelectorAll(".period").forEach(function (btn) {
+        const active = btn.getAttribute("data-period") === period;
+        btn.style.borderColor = active ? "var(--fg)" : "";
+        btn.style.background = active ? "var(--fg-soft)" : "";
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".period").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          period = btn.getAttribute("data-period");
+          render();
+        });
+      });
+      render();
+    });
+  </script>
+</body>
+</html>

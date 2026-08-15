@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>จัดส่ง — แอดมิน มรส. ชุดเฟรชชี่</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div class="app" data-od-id="shell">
+    <aside class="sidebar" data-chrome="sidebar" data-od-id="sidebar"></aside>
+    <div class="app-main">
+      <header class="topbar" data-chrome="topbar" data-od-id="topbar"></header>
+      <main class="canvas" id="admin-main" data-od-id="canvas">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">จัดส่ง / จุดรับ</h1>
+            <p class="page-sub">บอร์ดหลังยืนยันสลิป แยกตามช่องทาง <span class="sample-tag">[ตัวอย่าง]</span></p>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="ช่องทาง" data-od-id="channel-tabs">
+          <button type="button" class="tab" role="tab" data-channel="bookstore" aria-selected="true">ศูนย์หนังสือฯ</button>
+          <button type="button" class="tab" role="tab" data-channel="hall">หอประชุมฯ</button>
+          <button type="button" class="tab" role="tab" data-channel="post">ไปรษณีย์</button>
+        </div>
+
+        <div class="filters">
+          <select class="select" id="filter-status" aria-label="สถานะ" data-od-id="fulfill-status">
+            <option value="active">รอดำเนินการ</option>
+            <option value="all">ทั้งหมดในช่องทาง</option>
+          </select>
+          <input class="input" id="filter-search" type="search" placeholder="รหัสออเดอร์หรือรหัสนักศึกษา" aria-label="ค้นหา" data-od-id="fulfill-search" />
+        </div>
+
+        <div class="split">
+          <section class="panel">
+            <div class="ds-table-wrap">
+              <table class="ds-table" data-od-id="fulfillment-table">
+                <thead>
+                  <tr>
+                    <th>ออเดอร์</th>
+                    <th>ผู้จอง</th>
+                    <th>สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody id="fulfill-body"></tbody>
+              </table>
+            </div>
+            <p class="empty" id="fulfill-empty" hidden>ไม่มีออเดอร์ในช่องทางนี้</p>
+          </section>
+          <section class="panel" data-od-id="fulfill-drawer" id="fulfill-detail">
+            <div class="panel-head">รายละเอียด</div>
+            <div class="panel-body" id="fulfill-detail-body">
+              <p class="empty">เลือกแถวทางซ้าย</p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="assets/chrome.js"></script>
+  <script>
+    AdminChrome.mount({ active: "fulfillment" });
+    let channel = AdminChrome.queryParam("channel") || "bookstore";
+    let selectedId = AdminChrome.queryParam("id");
+
+    function activeStatuses() {
+      return ["confirmed", "ready_for_pickup"];
+    }
+
+    function rows() {
+      const q = document.getElementById("filter-search").value.trim();
+      const statusMode = document.getElementById("filter-status").value;
+
+      return AdminChrome.state().orders.filter((order) => {
+        if (order.fulfillment !== channel) {
+          return false;
+        }
+        if (statusMode === "active" && !activeStatuses().includes(order.status) && order.status !== "shipped") {
+          return false;
+        }
+        if (statusMode === "active" && order.status === "shipped") {
+          return false;
+        }
+
+        return q === "" || order.id.includes(q) || order.name.includes(q) || order.studentId.includes(q);
+      });
+    }
+
+    function renderList() {
+      document.querySelectorAll("[data-channel]").forEach((tab) => {
+        tab.setAttribute("aria-selected", tab.dataset.channel === channel ? "true" : "false");
+      });
+
+      const list = rows();
+      document.getElementById("fulfill-empty").hidden = list.length > 0;
+      document.getElementById("fulfill-body").innerHTML = list.map((order) => `
+        <tr>
+          <td><button type="button" class="order-row-btn mono" data-select="${order.id}" data-od-id="fulfill-row-${order.id}">${order.id}</button></td>
+          <td>${order.name}<br><span class="meta">${order.studentId}</span></td>
+          <td>${AdminChrome.pill(order.status)}</td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll("[data-select]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedId = button.dataset.select;
+          renderDetail();
+        });
+      });
+
+      if (selectedId && !list.some((order) => order.id === selectedId)) {
+        selectedId = list[0]?.id || null;
+      }
+
+      renderDetail();
+    }
+
+    function renderDetail() {
+      const body = document.getElementById("fulfill-detail-body");
+      const order = AdminChrome.state().orders.find((row) => row.id === selectedId);
+
+      if (!order) {
+        body.innerHTML = `<p class="empty">เลือกแถวทางซ้าย</p>`;
+        return;
+      }
+
+      const pickupAction = order.fulfillment !== "post" && order.status === "confirmed";
+      const shipAction = order.fulfillment === "post" && order.status === "confirmed";
+      const markPicked = order.fulfillment !== "post" && order.status === "ready_for_pickup";
+
+      body.innerHTML = `
+        <p><span class="mono">${order.id}</span> · ${order.name}<br>${order.studentId}</p>
+        <p>${order.items.map((item) => item.name + " × " + item.qty).join("<br>")}</p>
+        ${order.address ? `<p>ที่อยู่ ${order.address}</p>` : ""}
+        ${order.tracking ? `<p>เลขพัสดุ <span class="mono">${order.tracking}</span></p>` : ""}
+        <p id="fulfill-status">${AdminChrome.pill(order.status)}</p>
+        <ol class="timeline">${order.timeline.map((event) => `<li><time>${event.at}</time>${event.text}</li>`).join("")}</ol>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          ${pickupAction ? `<button type="button" class="btn btn-primary" data-od-id="cta-ready">ทำเครื่องหมายพร้อมรับ</button>` : ""}
+          ${shipAction ? `<button type="button" class="btn btn-primary" data-od-id="cta-ship">จัดส่งแล้ว</button>` : ""}
+          ${markPicked ? `<button type="button" class="btn btn-primary" data-od-id="cta-picked">มาร์ครับแล้ว</button>` : ""}
+          <a class="btn btn-ghost" href="admin-order-detail.html?id=${order.id}">ดูสลิป</a>
+        </div>
+      `;
+
+      const ready = body.querySelector("[data-od-id='cta-ready']");
+      const ship = body.querySelector("[data-od-id='cta-ship']");
+      const picked = body.querySelector("[data-od-id='cta-picked']");
+
+      if (ready) {
+        ready.addEventListener("click", () => {
+          AdminChrome.dialog({
+            title: "พร้อมรับ",
+            bodyHtml: `<p>แจ้งว่า ${order.id} พร้อมรับที่ ${AdminChrome.channel(order.fulfillment)}</p>`,
+            primaryLabel: "บันทึก",
+            onPrimary() {
+              AdminChrome.updateOrder(order.id, { status: "ready_for_pickup" }, "พร้อมรับที่ " + AdminChrome.channel(order.fulfillment));
+              AdminChrome.toast("อัปเดตเป็นพร้อมรับ");
+              renderList();
+            },
+          });
+        });
+      }
+
+      if (ship) {
+        ship.addEventListener("click", () => {
+          AdminChrome.dialog({
+            title: "จัดส่งแล้ว",
+            bodyHtml: `<label class="field">เลขพัสดุ (ไม่บังคับ)<input class="input" id="tracking-input" data-od-id="tracking-input" /></label>`,
+            primaryLabel: "บันทึกจัดส่ง",
+            onPrimary(root) {
+              const tracking = root.querySelector("#tracking-input").value.trim();
+              AdminChrome.updateOrder(
+                order.id,
+                { status: "shipped", tracking },
+                tracking ? "จัดส่งแล้ว เลขพัสดุ " + tracking : "จัดส่งแล้ว"
+              );
+              AdminChrome.toast("บันทึกการจัดส่งแล้ว");
+              renderList();
+            },
+          });
+        });
+      }
+
+      if (picked) {
+        picked.addEventListener("click", () => {
+          AdminChrome.updateOrder(order.id, { status: "completed" }, "รับของแล้ว — ออกใบเสร็จ");
+          AdminChrome.toast("มาร์ครับแล้ว");
+          renderList();
+        });
+      }
+    }
+
+    document.querySelectorAll("[data-channel]").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        channel = tab.dataset.channel;
+        selectedId = null;
+        renderList();
+      });
+    });
+    document.getElementById("filter-status").addEventListener("change", renderList);
+    document.getElementById("filter-search").addEventListener("input", renderList);
+    renderList();
+  </script>
+</body>
+</html>

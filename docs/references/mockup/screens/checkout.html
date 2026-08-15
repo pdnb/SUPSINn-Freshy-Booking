@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ข้อมูลการจอง — ชุดเฟรชชี่ มรส.</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+</head>
+<body>
+  <div class="stage">
+    <div class="phone" data-od-id="checkout-phone">
+      <header class="topbar" data-od-id="checkout-topbar">
+        <a class="back" href="cart.html" aria-label="กลับ"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <h1 data-od-id="checkout-title">ข้อมูลการจอง</h1>
+      </header>
+
+      <div class="app-body has-sticky-cta" data-od-id="checkout-body">
+        <div class="steps" role="list" aria-label="ขั้นตอนการจอง" data-od-id="checkout-steps">
+          <div class="step done" role="listitem"><span>ตะกร้า</span></div>
+          <div class="step current" role="listitem" aria-current="step"><span>ข้อมูล</span></div>
+          <div class="step" role="listitem"><span>ชำระเงิน</span></div>
+          <div class="step" role="listitem"><span>เสร็จสิ้น</span></div>
+        </div>
+
+        <form id="checkout-form" novalidate>
+          <section class="form-stack" data-od-id="checkout-student">
+            <h2 class="section-title mb-0">ข้อมูลนักศึกษา</h2>
+
+            <div class="field" data-field="studentId">
+              <label class="field-label" for="studentId">รหัสนักศึกษา</label>
+              <input id="studentId" name="studentId" inputmode="numeric" autocomplete="off" placeholder="เช่น 67011234567" required aria-describedby="studentId-err" />
+              <p class="err-msg" id="studentId-err" role="alert">กรุณากรอกรหัสนักศึกษา</p>
+            </div>
+
+            <div class="field" data-field="fullName">
+              <label class="field-label" for="fullName">ชื่อ–นามสกุล</label>
+              <input id="fullName" name="fullName" autocomplete="name" placeholder="ชื่อ–นามสกุล ตามบัตรนักศึกษา" required aria-describedby="fullName-err" />
+              <p class="err-msg" id="fullName-err" role="alert">กรุณากรอกชื่อ–นามสกุล</p>
+            </div>
+
+            <div class="field" data-field="faculty">
+              <label class="field-label" for="faculty">คณะ</label>
+              <select id="faculty" name="faculty" required aria-describedby="faculty-err">
+                <option value="">เลือกคณะ</option>
+                <option>คณะครุศาสตร์</option>
+                <option>คณะมนุษยศาสตร์และสังคมศาสตร์</option>
+                <option>คณะวิทยาศาสตร์และเทคโนโลยี</option>
+                <option>คณะวิทยาการจัดการ</option>
+                <option>คณะเทคโนโลยีการเกษตร</option>
+                <option>คณะเทคโนโลยีสารสนเทศ</option>
+                <option>คณะพยาบาลศาสตร์</option>
+                <option>คณะกฎหมาย</option>
+                <option>อื่น ๆ / ยังไม่ระบุ</option>
+              </select>
+              <p class="err-msg" id="faculty-err" role="alert">กรุณาเลือกคณะ</p>
+            </div>
+
+            <div class="field" data-field="phone">
+              <label class="field-label" for="phone">เบอร์โทรศัพท์</label>
+              <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="08x-xxx-xxxx" required aria-describedby="phone-err" />
+              <p class="err-msg" id="phone-err" role="alert">กรุณากรอกเบอร์โทรศัพท์</p>
+            </div>
+          </section>
+
+          <section class="form-stack is-sep" data-od-id="checkout-fulfillment">
+            <h2 class="section-title mb-0">วิธีรับสินค้า</h2>
+            <p class="caption mb-0">รับใบเสร็จตอนรับสินค้า (ไม่ส่งใบเสร็จอิเล็กทรอนิกส์ในรอบนี้)</p>
+
+            <div class="radio-list" role="radiogroup" aria-label="วิธีรับสินค้า">
+              <label class="radio-card" data-od-id="fulfill-bookstore">
+                <input type="radio" name="fulfillment" value="bookstore" checked />
+                <span>
+                  <strong>รับที่ร้านศูนย์หนังสือฯ</strong>
+                  <span class="caption">เปิดรับตามประกาศของศูนย์หนังสือ มรส.</span>
+                </span>
+              </label>
+              <label class="radio-card" data-od-id="fulfill-hall">
+                <input type="radio" name="fulfillment" value="hall" />
+                <span>
+                  <strong>รับที่หอประชุมฯ วันรายงานตัว</strong>
+                  <span class="caption">จุดรับชุดในวันรายงานตัวนักศึกษาใหม่</span>
+                </span>
+              </label>
+              <label class="radio-card" data-od-id="fulfill-post">
+                <input type="radio" name="fulfillment" value="post" />
+                <span>
+                  <strong>จัดส่งทางไปรษณีย์</strong>
+                  <span class="caption">มีค่าจัดส่งเพิ่ม — คำนวณตอนชำระเงิน</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="field" id="address-field" hidden data-field="address">
+              <label class="field-label" for="address">ที่อยู่จัดส่ง</label>
+              <textarea id="address" name="address" placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์" aria-describedby="address-err"></textarea>
+              <p class="err-msg" id="address-err" role="alert">กรุณากรอกที่อยู่จัดส่ง</p>
+            </div>
+          </section>
+        </form>
+      </div>
+
+      <div class="sticky-cta" data-od-id="checkout-sticky">
+        <button type="submit" form="checkout-form" class="btn btn-primary btn-lg btn-block" data-od-id="checkout-next-cta">ไปชำระเงิน</button>
+      </div>
+
+      <nav class="tabbar" aria-label="เมนูหลัก">
+        <a class="tab" href="home.html"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>หน้าหลัก</a>
+        <a class="tab" href="order-status.html"><svg viewBox="0 0 24 24"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>คำสั่งซื้อ</a>
+        <a class="tab" href="pickup-assist.html"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>รับสินค้า</a>
+        <a class="tab" href="../index.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>ภาพรวม</a>
+      </nav>
+    </div>
+  </div>
+  <script src="../assets/app.js"></script>
+  <script>
+    (function () {
+      if (!FreshyApp.getCart().length) {
+        location.replace("home.html");
+        return;
+      }
+
+      var form = document.getElementById("checkout-form");
+      var addressField = document.getElementById("address-field");
+      var saved = FreshyApp.getCheckout();
+      if (saved) {
+        ["studentId", "fullName", "faculty", "phone", "address"].forEach(function (k) {
+          if (saved[k] && form.elements[k]) form.elements[k].value = saved[k];
+        });
+        if (saved.fulfillment) {
+          var r = form.querySelector('input[name="fulfillment"][value="' + saved.fulfillment + '"]');
+          if (r) r.checked = true;
+        }
+      }
+
+      function syncAddress() {
+        var post = form.fulfillment.value === "post";
+        addressField.hidden = !post;
+        form.address.required = post;
+      }
+      form.querySelectorAll('input[name="fulfillment"]').forEach(function (el) {
+        el.addEventListener("change", syncAddress);
+      });
+      syncAddress();
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var ok = true;
+        ["studentId", "fullName", "faculty", "phone"].forEach(function (name) {
+          var field = form.querySelector('[data-field="' + name + '"]');
+          var el = form.elements[name];
+          var valid = el.value && String(el.value).trim().length > 0;
+          field.classList.toggle("error", !valid);
+          el.setAttribute("aria-invalid", valid ? "false" : "true");
+          if (!valid) ok = false;
+        });
+        if (form.fulfillment.value === "post") {
+          var af = form.querySelector('[data-field="address"]');
+          var av = form.address.value.trim().length > 8;
+          af.classList.toggle("error", !av);
+          form.address.setAttribute("aria-invalid", av ? "false" : "true");
+          if (!av) ok = false;
+        }
+        if (!ok) {
+          FreshyApp.toast("กรุณากรอกข้อมูลให้ครบ");
+          var bad = form.querySelector('.field.error input, .field.error select, .field.error textarea');
+          if (bad) bad.focus();
+          return;
+        }
+        FreshyApp.setCheckout({
+          studentId: form.studentId.value.trim(),
+          fullName: form.fullName.value.trim(),
+          faculty: form.faculty.value,
+          phone: form.phone.value.trim(),
+          fulfillment: form.fulfillment.value,
+          address: form.address.value.trim(),
+        });
+        location.href = "payment.html";
+      });
+    })();
+  </script>
+</body>
+</html>

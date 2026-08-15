@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Products · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="products">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="products-main">
+      <div class="page-head">
+        <div>
+          <h1>Products</h1>
+          <p class="sub">Home goods catalog · <span class="sample-tag">Sample data</span></p>
+        </div>
+        <a class="btn btn-primary" href="admin-product-edit.html?id=new" data-od-id="cta-add-product">Add product</a>
+      </div>
+
+      <div class="toolbar" data-od-id="products-filters">
+        <div class="filters">
+          <input class="input" id="q" type="search" placeholder="Search title or SKU" style="max-width: 240px;" />
+          <select class="select" id="status" style="max-width: 140px;">
+            <option value="">All statuses</option>
+            <option>active</option>
+            <option>draft</option>
+          </select>
+          <button type="button" class="btn btn-ghost btn-sm" id="clear">Clear</button>
+        </div>
+        <span class="meta" id="selection-meta"></span>
+      </div>
+
+      <section class="panel" data-od-id="products-table-panel">
+        <div class="panel-body" style="padding: 0;">
+          <table class="ds-table" id="products-table">
+            <thead>
+              <tr>
+                <th style="width:40px;"><input class="check" type="checkbox" id="check-all" aria-label="Select all" /></th>
+                <th>Product</th>
+                <th>Status</th>
+                <th>Inventory</th>
+                <th class="num-col">Price</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const status = document.getElementById("status").value;
+      let rows = Meridian.state.products.slice();
+      if (q) rows = rows.filter(function (p) {
+        return p.title.toLowerCase().indexOf(q) >= 0 || p.sku.toLowerCase().indexOf(q) >= 0;
+      });
+      if (status) rows = rows.filter(function (p) { return p.status === status; });
+
+      document.querySelector("#products-table tbody").innerHTML = rows.map(function (p) {
+        const low = p.inventory <= p.threshold;
+        return '<tr>' +
+          '<td><input class="check row-check" type="checkbox" data-id="' + p.id + '" aria-label="Select ' + p.title + '" /></td>' +
+          '<td><div class="row" style="gap:10px;"><div class="ph-img sm" aria-hidden="true">IMG</div><div><a class="linkish" href="admin-product-edit.html?id=' + p.id + '">' + p.title + '</a><div class="meta">' + p.sku + " · " + p.category + "</div></div></div></td>" +
+          "<td>" + AdminUI.statusPill(p.status) + "</td>" +
+          "<td>" + (low ? '<span class="pill pill-low">' + p.inventory + "</span>" : '<span class="num">' + p.inventory + "</span>") + "</td>" +
+          '<td class="num-col num">' + Meridian.money(p.price) + "</td></tr>";
+      }).join("") || '<tr><td colspan="5"><div class="empty">No products match.</div></td></tr>';
+
+      document.querySelectorAll(".row-check").forEach(function (c) {
+        c.addEventListener("change", updateSelection);
+      });
+      updateSelection();
+    }
+
+    function updateSelection() {
+      const n = document.querySelectorAll(".row-check:checked").length;
+      document.getElementById("selection-meta").textContent = n ? n + " selected" : "";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      ["q", "status"].forEach(function (id) {
+        document.getElementById(id).addEventListener("input", render);
+        document.getElementById(id).addEventListener("change", render);
+      });
+      document.getElementById("clear").addEventListener("click", function () {
+        document.getElementById("q").value = "";
+        document.getElementById("status").value = "";
+        render();
+      });
+      document.getElementById("check-all").addEventListener("change", function () {
+        document.querySelectorAll(".row-check").forEach(function (c) { c.checked = document.getElementById("check-all").checked; });
+        updateSelection();
+      });
+      render();
+    });
+  </script>
+</body>
+</html>

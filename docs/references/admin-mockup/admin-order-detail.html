@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>รายละเอียดออเดอร์ — แอดมิน มรส. ชุดเฟรชชี่</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div class="app" data-od-id="shell">
+    <aside class="sidebar" data-chrome="sidebar" data-od-id="sidebar"></aside>
+    <div class="app-main">
+      <header class="topbar" data-chrome="topbar" data-od-id="topbar"></header>
+      <main class="canvas" id="admin-main" data-od-id="canvas"></main>
+    </div>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="assets/chrome.js"></script>
+  <script>
+    AdminChrome.mount({ active: "orders" });
+
+    function queueIds() {
+      return AdminChrome.state().orders
+        .filter((order) => order.status === "pending_review" || order.status === "need_reslip")
+        .map((order) => order.id);
+    }
+
+    function neighbor(id, delta) {
+      const ids = queueIds();
+      const index = ids.indexOf(id);
+      if (index === -1) {
+        return ids[0] || null;
+      }
+
+      return ids[index + delta] || null;
+    }
+
+    function render() {
+      const id = AdminChrome.queryParam("id") || "FR-70021";
+      const order = AdminChrome.state().orders.find((row) => row.id === id);
+      const canvas = document.getElementById("admin-main");
+
+      if (!order) {
+        canvas.innerHTML = `<p class="empty">ไม่พบออเดอร์นี้</p>`;
+        return;
+      }
+
+      const nextId = neighbor(order.id, 1);
+      const prevId = neighbor(order.id, -1);
+      const canReview = order.status === "pending_review" || order.status === "need_reslip";
+
+      canvas.innerHTML = `
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">ออเดอร์ <span class="mono">${order.id}</span></h1>
+            <p class="page-sub">${order.name} · ${order.studentId} · ${AdminChrome.channel(order.fulfillment)}</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a class="btn btn-ghost" href="admin-orders.html" data-od-id="back-queue">กลับคิว</a>
+            ${prevId ? `<a class="btn btn-ghost" href="admin-order-detail.html?id=${prevId}" data-od-id="cta-prev">ก่อนหน้า</a>` : ""}
+            ${nextId ? `<a class="btn btn-ghost" href="admin-order-detail.html?id=${nextId}" data-od-id="cta-next">ถัดไป</a>` : ""}
+          </div>
+        </div>
+        <p class="hotkeys" data-od-id="hotkey-hints">
+          <kbd>j</kbd> ถัดไป
+          <kbd>k</kbd> ก่อนหน้า
+          <kbd>c</kbd> ยืนยัน
+          <kbd>r</kbd> ปฏิเสธ
+        </p>
+        <div class="split" style="margin-top:16px">
+          <section class="panel" data-od-id="slip-panel">
+            <div class="panel-head">สลิป PromptPay</div>
+            <div class="panel-body">
+              <div class="media-slot" data-od-id="slip-slot">ช่องสลิปตัวอย่าง · ยอด ${AdminChrome.money(order.amount)} บาท</div>
+              <p style="margin:12px 0 0">แนบเมื่อ <span class="mono">${order.paidAt}</span></p>
+            </div>
+          </section>
+          <div>
+            <section class="panel" data-od-id="order-summary">
+              <div class="panel-head">
+                <span>สรุป</span>
+                <span id="status-chip">${AdminChrome.pill(order.status)}</span>
+              </div>
+              <div class="panel-body">
+                <p>คณะ ${order.faculty}<br>โทร ${order.phone}</p>
+                ${order.address ? `<p>ที่อยู่จัดส่ง ${order.address}</p>` : ""}
+                <table class="ds-table" data-od-id="line-items">
+                  <thead><tr><th>รายการ</th><th>ตัวเลือก</th><th>จำนวน</th></tr></thead>
+                  <tbody>
+                    ${order.items.map((item) => `<tr><td>${item.name}</td><td>${item.choices}</td><td class="mono">${item.qty}</td></tr>`).join("")}
+                  </tbody>
+                </table>
+                <p>ยอดสุทธิ <strong class="mono">${AdminChrome.money(order.amount)}</strong> บาท</p>
+                ${canReview ? `
+                  <div style="display:flex;gap:8px;margin-top:12px">
+                    <button type="button" class="btn btn-primary" data-od-id="cta-confirm">ยืนยันสลิป</button>
+                    <button type="button" class="btn btn-danger" data-od-id="cta-reject">ปฏิเสธ · ขอสลิปใหม่</button>
+                  </div>
+                ` : `
+                  <p class="page-sub">ออเดอร์นี้ออกจากคิวตรวจแล้ว — ไปต่อที่
+                    <a href="admin-fulfillment.html?id=${order.id}&channel=${order.fulfillment}">จัดส่ง</a>
+                  </p>
+                `}
+              </div>
+            </section>
+            <section class="panel" data-od-id="timeline-panel">
+              <div class="panel-head">ไทม์ไลน์</div>
+              <div class="panel-body">
+                <ol class="timeline" id="timeline">${order.timeline.map((event) => `<li><time>${event.at}</time>${event.text}</li>`).join("")}</ol>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      const confirmBtn = canvas.querySelector("[data-od-id='cta-confirm']");
+      const rejectBtn = canvas.querySelector("[data-od-id='cta-reject']");
+
+      if (confirmBtn) {
+        confirmBtn.addEventListener("click", () => {
+          AdminChrome.dialog({
+            title: "ยืนยันสลิป",
+            bodyHtml: `<p>ยืนยันยอด ${AdminChrome.money(order.amount)} บาท ของ ${order.name}?</p>`,
+            primaryLabel: "ยืนยัน",
+            onPrimary() {
+              AdminChrome.updateOrder(order.id, { status: "confirmed" }, "ยืนยันสลิป");
+              AdminChrome.toast("ยืนยันสลิปแล้ว");
+              const next = neighbor(order.id, 1);
+              window.location.href = next ? `admin-order-detail.html?id=${next}` : "admin-orders.html";
+            },
+          });
+        });
+      }
+
+      if (rejectBtn) {
+        rejectBtn.addEventListener("click", () => {
+          AdminChrome.dialog({
+            title: "ปฏิเสธสลิป",
+            bodyHtml: `<p>ขอสลิปใหม่จาก ${order.name} — สถานะจะเป็นขอสลิปใหม่</p>`,
+            primaryLabel: "ปฏิเสธ",
+            danger: true,
+            onPrimary() {
+              AdminChrome.updateOrder(order.id, { status: "need_reslip" }, "ปฏิเสธสลิป — ขอสลิปใหม่");
+              AdminChrome.toast("ขอสลิปใหม่แล้ว");
+              const next = neighbor(order.id, 1);
+              window.location.href = next ? `admin-order-detail.html?id=${next}` : "admin-orders.html";
+            },
+          });
+        });
+      }
+
+      window.__orderHotkeys = { nextId, prevId, canReview, confirmBtn, rejectBtn };
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.target.matches("input, textarea, select")) {
+        return;
+      }
+
+      const keys = window.__orderHotkeys || {};
+      if (event.key === "j" && keys.nextId) {
+        window.location.href = `admin-order-detail.html?id=${keys.nextId}`;
+      }
+      if (event.key === "k" && keys.prevId) {
+        window.location.href = `admin-order-detail.html?id=${keys.prevId}`;
+      }
+      if (event.key === "c" && keys.canReview && keys.confirmBtn) {
+        keys.confirmBtn.click();
+      }
+      if (event.key === "r" && keys.canReview && keys.rejectBtn) {
+        keys.rejectBtn.click();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>

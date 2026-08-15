@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Customers · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="customers">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="customers-main">
+      <div class="page-head">
+        <div>
+          <h1>Customers</h1>
+          <p class="sub">Segments and recent order peek · <span class="sample-tag">Sample data</span></p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="filters">
+          <input class="input" id="q" type="search" placeholder="Search name or email" style="max-width: 260px;" />
+          <select class="select" id="segment" style="max-width: 140px;">
+            <option value="">All segments</option>
+            <option>New</option>
+            <option>Repeat</option>
+            <option>VIP</option>
+          </select>
+        </div>
+      </div>
+
+      <section class="panel" data-od-id="customers-table-panel">
+        <div class="panel-body" style="padding: 0;">
+          <table class="ds-table" id="customers-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Segment</th>
+                <th class="num-col">Orders</th>
+                <th class="num-col">Spent</th>
+                <th>Last order</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" data-od-id="customer-peek" style="margin-top: 16px;" hidden>
+        <div class="panel-head"><h2 id="peek-title">Orders</h2></div>
+        <div class="panel-body" id="peek-body"></div>
+      </section>
+    </main>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const segment = document.getElementById("segment").value;
+      let rows = Meridian.state.customers.slice();
+      if (q) rows = rows.filter(function (c) {
+        return c.name.toLowerCase().indexOf(q) >= 0 || c.email.toLowerCase().indexOf(q) >= 0;
+      });
+      if (segment) rows = rows.filter(function (c) { return c.segment === segment; });
+
+      document.querySelector("#customers-table tbody").innerHTML = rows.map(function (c) {
+        return '<tr class="is-clickable" data-id="' + c.id + '">' +
+          "<td><strong>" + c.name + '</strong><div class="meta">' + c.email + "</div></td>" +
+          '<td><span class="tag">' + c.segment + "</span></td>" +
+          '<td class="num-col num">' + c.orders + "</td>" +
+          '<td class="num-col num">' + Meridian.money(c.spent) + "</td>" +
+          '<td class="meta">' + Meridian.formatDay(c.lastOrder) + "</td></tr>";
+      }).join("");
+
+      document.querySelectorAll("#customers-table tbody tr").forEach(function (tr) {
+        tr.addEventListener("click", function () { peek(tr.getAttribute("data-id")); });
+      });
+    }
+
+    function peek(id) {
+      const c = Meridian.state.customers.find(function (x) { return x.id === id; });
+      if (!c) return;
+      const orders = Meridian.state.orders.filter(function (o) { return o.customerId === id; });
+      const panel = document.querySelector("[data-od-id='customer-peek']");
+      panel.hidden = false;
+      document.getElementById("peek-title").textContent = c.name + " · order history";
+      document.getElementById("peek-body").innerHTML = orders.length
+        ? orders.map(function (o) {
+            return '<a class="list-row" href="admin-order-detail.html?id=' + o.id + '"><span>' + o.id + " · " + AdminUI.statusPill(o.status) + '</span><span class="num">' + Meridian.money(o.total) + "</span></a>";
+          }).join("")
+        : '<p class="empty">No orders for this customer in the sample set.</p>';
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("q").addEventListener("input", render);
+      document.getElementById("segment").addEventListener("change", render);
+      render();
+    });
+  </script>
+</body>
+</html>

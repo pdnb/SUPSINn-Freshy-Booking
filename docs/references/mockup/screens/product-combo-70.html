@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SRU คอมโบเซ็ต ปี 70</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+</head>
+<body>
+  <div class="stage">
+    <div class="phone" data-od-id="combo70-phone">
+      <header class="topbar" data-od-id="combo70-topbar">
+        <a class="back" href="home.html" aria-label="กลับ" data-od-id="combo70-back">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <h1>รายละเอียดสินค้า</h1>
+        <a class="icon-btn icon-btn--on-light" href="cart.html" aria-label="ตะกร้า" data-od-id="combo70-cart">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 5h2l1.4 9.2a1.5 1.5 0 0 0 1.5 1.3h8.4a1.5 1.5 0 0 0 1.5-1.2L20 8H8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="19" r="1.3" fill="currentColor"/><circle cx="17" cy="19" r="1.3" fill="currentColor"/></svg>
+          <span class="badge" data-cart-badge hidden>0</span>
+        </a>
+      </header>
+
+      <div class="app-body has-sticky-cta" data-od-id="combo70-body">
+        <div class="hero-media" data-od-id="combo70-media">
+          <img src="../assets/combo-set-70.png" alt="SRU คอมโบเซ็ต ปี 70" />
+        </div>
+
+        <section class="detail-panel" data-od-id="combo70-detail">
+          <span class="chip">คอมโบ · ไม่ขายแยก</span>
+          <h2>SRU คอมโบเซ็ต ปี 70</h2>
+          <div class="price-row">
+            <span class="price-lg" data-od-id="combo70-price">รอประกาศราคา</span>
+            <span class="caption">ศูนย์หนังสือ มรส.</span>
+          </div>
+          <p class="bundle-note" data-od-id="combo70-bundle-note">
+            ชุดนี้บังคับซื้อครบ 4 รายการ ไม่สามารถซื้อแยกได้ กรุณาเลือกไซส์ให้ครบทุกชิ้นก่อนเพิ่มตะกร้า
+          </p>
+        </section>
+
+        <!-- 1. ชุดนักศึกษา -->
+        <section class="config-block" data-od-id="config-student-uniform">
+          <div class="config-head">
+            <h3>1. ชุดนักศึกษา</h3>
+            <span class="req">จำเป็น</span>
+          </div>
+          <span class="field-label" id="label-gender">เพศ / แบบเสื้อ</span>
+          <div class="seg" data-seg-group="gender" data-od-id="seg-gender" role="group" aria-labelledby="label-gender">
+            <button type="button" class="seg-btn" data-seg="male" aria-pressed="true">ชาย</button>
+            <button type="button" class="seg-btn" data-seg="female" aria-pressed="false">หญิง</button>
+          </div>
+          <span class="field-label" id="label-bottom">กางเกง / กระโปรง</span>
+          <div class="seg" data-seg-group="bottom" data-od-id="seg-bottom" role="group" aria-labelledby="label-bottom">
+            <button type="button" class="seg-btn" data-seg="pants" aria-pressed="true">กางเกง</button>
+            <button type="button" class="seg-btn" data-seg="skirt" aria-pressed="false">กระโปรง</button>
+          </div>
+          <span class="field-label" id="label-student-top">ไซส์เสื้อ</span>
+          <div class="size-grid" data-size-group="student-top" data-od-id="size-student-top" role="group" aria-labelledby="label-student-top"></div>
+          <span class="field-label mt-12" id="label-student-bottom">ไซส์กางเกง/กระโปรง</span>
+          <div class="size-grid" data-size-group="student-bottom" data-od-id="size-student-bottom" role="group" aria-labelledby="label-student-bottom"></div>
+        </section>
+
+        <!-- 2. ชุดเฟรชชี่ -->
+        <section class="config-block" data-od-id="config-freshy">
+          <div class="config-head">
+            <h3>2. ชุดเฟรชชี่ (เสื้อ+กางเกง)</h3>
+            <span class="req">จำเป็น</span>
+          </div>
+          <span class="field-label" id="label-freshy-top">ไซส์เสื้อ</span>
+          <div class="size-grid" data-size-group="freshy-top" data-od-id="size-freshy-top" role="group" aria-labelledby="label-freshy-top"></div>
+          <span class="field-label mt-12" id="label-freshy-bottom">ไซส์กางเกง</span>
+          <div class="size-grid" data-size-group="freshy-bottom" data-od-id="size-freshy-bottom" role="group" aria-labelledby="label-freshy-bottom"></div>
+        </section>
+
+        <!-- 3. เสื้อกิจกรรม -->
+        <section class="config-block" data-od-id="config-activity">
+          <div class="config-head">
+            <h3>3. เสื้อกิจกรรม</h3>
+            <span class="req">จำเป็น</span>
+          </div>
+          <span class="field-label" id="label-activity">ไซส์</span>
+          <div class="size-grid" data-size-group="activity" data-od-id="size-activity" role="group" aria-labelledby="label-activity"></div>
+        </section>
+
+        <!-- 4. เครื่องหมาย -->
+        <section class="config-block" data-od-id="config-badge">
+          <div class="config-head">
+            <h3>4. เครื่องหมาย (ไซส์เข็มขัด)</h3>
+            <span class="req">จำเป็น</span>
+          </div>
+          <span class="field-label" id="label-belt">ไซส์เข็มขัด</span>
+          <div class="size-grid" data-size-group="belt" data-od-id="size-belt" role="group" aria-labelledby="label-belt"></div>
+        </section>
+      </div>
+
+      <div class="sticky-cta" data-od-id="combo70-sticky">
+        <div class="left">
+          <div class="caption">รวมทั้งชุด</div>
+          <div class="price-lg sticky-price">รอประกาศราคา</div>
+        </div>
+        <button type="button" class="btn btn-primary btn-lg" id="add-combo" data-od-id="combo70-add-cta">เพิ่มตะกร้า</button>
+      </div>
+
+      <nav class="tabbar" aria-label="เมนูหลัก" data-od-id="combo70-tabbar">
+        <a class="tab" href="home.html"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>หน้าหลัก</a>
+        <a class="tab" href="order-status.html"><svg viewBox="0 0 24 24"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>คำสั่งซื้อ</a>
+        <a class="tab" href="pickup-assist.html"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>รับสินค้า</a>
+        <a class="tab" href="../index.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>ภาพรวม</a>
+      </nav>
+    </div>
+  </div>
+  <script src="../assets/app.js"></script>
+  <script>
+    (function () {
+      var sizes = ["S", "M", "L", "XL", "2XL"];
+      var beltSizes = ["28", "30", "32", "34", "36", "38"];
+      var state = {};
+
+      function renderSizes(el, list, key) {
+        el.innerHTML = list
+          .map(function (s) {
+            return '<button type="button" class="size-btn" data-size="' + s + '" aria-pressed="false">' + s + "</button>";
+          })
+          .join("");
+        el.addEventListener("click", function (e) {
+          var btn = e.target.closest("[data-size]");
+          if (!btn) return;
+          el.querySelectorAll(".size-btn").forEach(function (b) {
+            b.setAttribute("aria-pressed", "false");
+          });
+          btn.setAttribute("aria-pressed", "true");
+          state[key] = btn.getAttribute("data-size");
+          el.classList.remove("is-invalid");
+        });
+      }
+
+      document.querySelectorAll("[data-size-group]").forEach(function (el) {
+        var key = el.getAttribute("data-size-group");
+        renderSizes(el, key === "belt" ? beltSizes : sizes, key);
+      });
+
+      FreshyApp.bindSeg("[data-seg-group]");
+
+      var bottomGroup = document.querySelector('[data-seg-group="bottom"]');
+      document.querySelector('[data-seg-group="gender"]').addEventListener("segchange", function (e) {
+        var skirt = bottomGroup.querySelector('[data-seg="skirt"]');
+        if (e.detail.value === "male") {
+          skirt.disabled = true;
+          skirt.setAttribute("aria-pressed", "false");
+          bottomGroup.querySelector('[data-seg="pants"]').setAttribute("aria-pressed", "true");
+        } else {
+          skirt.disabled = false;
+        }
+      });
+
+      document.getElementById("add-combo").addEventListener("click", function () {
+        var required = ["student-top", "student-bottom", "freshy-top", "freshy-bottom", "activity", "belt"];
+        var missing = required.filter(function (k) {
+          return !state[k];
+        });
+        document.querySelectorAll("[data-size-group]").forEach(function (el) {
+          var key = el.getAttribute("data-size-group");
+          el.classList.toggle("is-invalid", missing.indexOf(key) !== -1);
+        });
+        if (missing.length) {
+          FreshyApp.toast("กรุณาเลือกไซส์ให้ครบทุกชิ้น");
+          var first = document.querySelector("[data-size-group].is-invalid .size-btn");
+          if (first) first.focus();
+          return;
+        }
+        var gender = FreshyApp.selectedSeg(document.querySelector('[data-seg-group="gender"]'));
+        var bottom = FreshyApp.selectedSeg(document.querySelector('[data-seg-group="bottom"]'));
+        FreshyApp.addToCart({
+          id: "combo-70",
+          name: "SRU คอมโบเซ็ต ปี 70",
+          image: "../assets/combo-set-70.png",
+          qty: 1,
+          priceLabel: FreshyApp.moneyLabel(),
+          specs: [
+            "ชุดนักศึกษา: " + (gender === "male" ? "ชาย" : "หญิง") + " / " + (bottom === "skirt" ? "กระโปรง" : "กางเกง"),
+            "ไซส์เสื้อนศ. " + state["student-top"] + " · ล่าง " + state["student-bottom"],
+            "เฟรชชี่ เสื้อ " + state["freshy-top"] + " · กางเกง " + state["freshy-bottom"],
+            "เสื้อกิจกรรม " + state["activity"] + " · เข็มขัด " + state["belt"],
+          ],
+        });
+        setTimeout(function () {
+          location.href = "cart.html";
+        }, 500);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order detail · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="order-detail">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="order-detail-main">
+      <div class="page-head">
+        <div>
+          <p class="meta"><a href="admin-orders.html">Orders</a> / <span id="crumb-id"></span></p>
+          <h1 id="order-title" style="margin-top: 6px;">Order</h1>
+          <p class="sub" id="order-sub"></p>
+        </div>
+        <div class="row" id="order-actions"></div>
+      </div>
+
+      <div class="grid-2-1" id="detail-grid">
+        <div class="stack">
+          <section class="panel" data-od-id="line-items">
+            <div class="panel-head"><h2>Line items</h2></div>
+            <div class="panel-body" style="padding: 0;">
+              <table class="ds-table" id="items-table">
+                <thead><tr><th>Product</th><th>SKU</th><th class="num-col">Qty</th><th class="num-col">Amount</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="panel" data-od-id="payment-ship">
+            <div class="panel-head"><h2>Payment & shipping</h2></div>
+            <div class="panel-body grid-2" id="pay-ship"></div>
+          </section>
+        </div>
+        <section class="panel" data-od-id="timeline">
+          <div class="panel-head"><h2>Timeline</h2></div>
+          <div class="panel-body"><ul class="timeline" id="timeline-list"></ul></div>
+        </section>
+      </div>
+      <p id="missing" class="empty" hidden>Order not found. <a href="admin-orders.html">Back to orders</a></p>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay" data-close></div>
+  <div class="dialog" id="fulfill-dialog" data-od-id="fulfill-dialog" role="dialog" aria-modal="true" aria-labelledby="fulfill-title">
+    <div class="dialog-head"><h2 id="fulfill-title">Mark as fulfilled</h2><button type="button" class="icon-btn" data-close aria-label="Close">✕</button></div>
+    <div class="dialog-body stack">
+      <p class="muted">Confirm fulfillment for this order. Tracking number is optional.</p>
+      <div class="field">
+        <label for="tracking">Tracking number</label>
+        <input class="input" id="tracking" placeholder="e.g. 1Z999AA10123456784" />
+      </div>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+      <button type="button" class="btn btn-primary" id="confirm-fulfill" data-od-id="cta-confirm-fulfill">Confirm fulfillment</button>
+    </div>
+  </div>
+
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    let currentId = null;
+
+    function render() {
+      currentId = AdminUI.qs("id") || "ORD-88421";
+      const o = Meridian.getOrder(currentId);
+      if (!o) {
+        document.getElementById("detail-grid").hidden = true;
+        document.getElementById("missing").hidden = false;
+        return;
+      }
+      document.getElementById("crumb-id").textContent = o.id;
+      document.getElementById("order-title").textContent = o.id;
+      document.getElementById("order-sub").innerHTML = Meridian.formatDate(o.created) + " · " + AdminUI.statusPill(o.status) + ' · <span class="sample-tag">Sample data</span>';
+
+      const canFulfill = o.status === "paid" || o.status === "pending";
+      document.getElementById("order-actions").innerHTML = canFulfill
+        ? '<button type="button" class="btn btn-primary" id="btn-fulfill" data-od-id="cta-mark-fulfilled">Mark as fulfilled</button>'
+        : '<a class="btn btn-secondary" href="admin-orders.html">Back to orders</a>';
+
+      const btn = document.getElementById("btn-fulfill");
+      if (btn) btn.addEventListener("click", function () {
+        document.getElementById("tracking").value = o.tracking || "";
+        AdminUI.openOverlay("overlay");
+        AdminUI.openOverlay("fulfill-dialog");
+      });
+
+      document.querySelector("#items-table tbody").innerHTML = o.items.map(function (i) {
+        return "<tr><td><a class=\"linkish\" href=\"admin-product-edit.html?id=" + i.productId + "\">" + i.title + "</a></td>" +
+          '<td class="meta">' + i.sku + '</td><td class="num-col num">' + i.qty + '</td><td class="num-col num">' + Meridian.money(i.price * i.qty) + "</td></tr>";
+      }).join("");
+
+      document.getElementById("pay-ship").innerHTML =
+        "<div><div class=\"meta\">Payment</div><p style=\"margin-top:6px;\">" + o.payment + "<br><strong class=\"num\">" + Meridian.money(o.total) + "</strong></p></div>" +
+        "<div><div class=\"meta\">Ship to</div><p style=\"margin-top:6px;\">" + o.shipping.name + "<br>" + o.shipping.line1 + "<br>" + o.shipping.city + ", " + o.shipping.region + " " + o.shipping.postal + "</p>" +
+        (o.tracking ? '<p class="meta" style="margin-top:8px;">Tracking · ' + o.tracking + "</p>" : "") + "</div>";
+
+      const tl = o.timeline.slice().reverse();
+      document.getElementById("timeline-list").innerHTML = tl.map(function (ev, idx) {
+        return '<li class="' + (idx === 0 ? "is-latest" : "") + '"><strong>' + ev.text + '</strong><div class="meta" style="margin-top:4px;">' + Meridian.formatDate(ev.at) + "</div></li>";
+      }).join("");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("overlay").addEventListener("click", function () {
+        AdminUI.closeOverlay("overlay");
+        AdminUI.closeOverlay("fulfill-dialog");
+      });
+      document.querySelectorAll("[data-close]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          AdminUI.closeOverlay("overlay");
+          AdminUI.closeOverlay("fulfill-dialog");
+        });
+      });
+      document.getElementById("confirm-fulfill").addEventListener("click", function () {
+        Meridian.fulfillOrder(currentId, document.getElementById("tracking").value.trim());
+        AdminUI.closeOverlay("overlay");
+        AdminUI.closeOverlay("fulfill-dialog");
+        AdminUI.toast("Order " + currentId + " marked fulfilled");
+        render();
+      });
+      render();
+    });
+  </script>
+</body>
+</html>

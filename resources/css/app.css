@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/*
+ * Brand tokens from docs/references/mockup/brand-spec.md
+ * mapped into Tailwind v4 @theme so utilities like bg-brand / text-accent exist.
+ * Source: https://tailwindcss.com/docs/theme
+ */
+@theme {
+    --font-sans: 'Anuphan', 'Sarabun', ui-sans-serif, system-ui, sans-serif;
+    --color-bg: oklch(98% 0.004 250);
+    --color-surface: oklch(100% 0 0);
+    --color-fg: oklch(24% 0.02 255);
+    --color-muted: oklch(48% 0.014 255);
+    --color-border: oklch(88% 0.01 250);
+    --color-accent: oklch(48% 0.13 255);
+    --color-accent-press: oklch(40% 0.13 255);
+    --color-accent-fg: oklch(99% 0.01 255);
+    --color-brand: oklch(48% 0.13 255);
+    --color-brand-press: oklch(40% 0.13 255);
+    --color-brand-fg: oklch(99% 0.01 255);
+    --color-success: oklch(52% 0.14 145);
+    --color-warn: oklch(62% 0.14 75);
+    --color-danger: oklch(42% 0.16 20);
+    --radius-brand: 14px;
+}
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .animate-spin {
+            animation: none;
+        }
+    }
+}

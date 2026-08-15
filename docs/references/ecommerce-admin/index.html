@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meridian Commerce · Admin modules</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body data-page="launcher">
+  <main class="launcher" data-od-id="launcher">
+    <p class="eyebrow">Meridian Commerce · Prototype</p>
+    <h1>Ecommerce admin console</h1>
+    <p class="lead" style="margin-top: 10px;">High-fidelity operations UI for product evaluators. Sample catalog: home goods. All metrics labelled Sample.</p>
+    <div class="row" style="margin-top: 20px; gap: 10px;">
+      <a class="btn btn-primary" href="admin-overview.html" data-od-id="cta-enter-overview">Open overview</a>
+      <button type="button" class="btn btn-secondary" id="reset-data" data-od-id="cta-reset-sample">Reset sample data</button>
+    </div>
+    <div class="launcher-grid" data-od-id="module-grid">
+      <a class="module-card" href="admin-overview.html" data-od-id="mod-overview"><h3>Overview</h3><p>KPIs, attention queue, recent orders, low stock.</p></a>
+      <a class="module-card" href="admin-orders.html" data-od-id="mod-orders"><h3>Orders</h3><p>Filterable list, status chips, detail drawer.</p></a>
+      <a class="module-card" href="admin-order-detail.html?id=ORD-88421" data-od-id="mod-order-detail"><h3>Order detail</h3><p>Fulfillment actions and timeline (F1).</p></a>
+      <a class="module-card" href="admin-products.html" data-od-id="mod-products"><h3>Products</h3><p>Catalog table, search, publish path.</p></a>
+      <a class="module-card" href="admin-product-edit.html?id=PRD-1005" data-od-id="mod-product-edit"><h3>Product editor</h3><p>Draft → validate → publish (F3).</p></a>
+      <a class="module-card" href="admin-customers.html" data-od-id="mod-customers"><h3>Customers</h3><p>Segments and order history peek.</p></a>
+      <a class="module-card" href="admin-inventory.html" data-od-id="mod-inventory"><h3>Inventory</h3><p>SKU levels, adjust stock dialog (F2).</p></a>
+      <a class="module-card" href="admin-discounts.html" data-od-id="mod-discounts"><h3>Discounts</h3><p>Promo codes and create dialog (F4).</p></a>
+      <a class="module-card" href="admin-analytics.html" data-od-id="mod-analytics"><h3>Analytics</h3><p>Sample revenue / orders with period toggle.</p></a>
+      <a class="module-card" href="admin-settings.html" data-od-id="mod-settings"><h3>Settings</h3><p>Store, payments, shipping, notifications.</p></a>
+    </div>
+  </main>
+  <script src="admin-data.js"></script>
+  <script>
+    document.getElementById("reset-data").addEventListener("click", function () {
+      Meridian.reset();
+      alert("Sample data restored.");
+    });
+  </script>
+</body>
+</html>

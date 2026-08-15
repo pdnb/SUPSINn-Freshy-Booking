@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overview · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="overview">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="overview-main">
+      <div class="page-head">
+        <div>
+          <h1 data-od-id="overview-title">Overview</h1>
+          <p class="sub">Today’s store pulse · <span class="sample-tag">Sample data</span></p>
+        </div>
+        <a class="btn btn-secondary" href="admin-orders.html" data-od-id="overview-link-orders">View all orders</a>
+      </div>
+
+      <div class="grid-4" data-od-id="kpi-strip" style="margin-bottom: 20px;"></div>
+
+      <div class="grid-2-1">
+        <section class="panel" data-od-id="recent-orders">
+          <div class="panel-head">
+            <h2>Recent orders</h2>
+            <a class="btn btn-ghost btn-sm" href="admin-orders.html">Open list</a>
+          </div>
+          <div class="panel-body" style="padding: 0;">
+            <table class="ds-table" id="recent-table">
+              <thead>
+                <tr><th>Order</th><th>Customer</th><th>Status</th><th class="num-col">Total</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="stack">
+          <section class="panel" data-od-id="attention-queue">
+            <div class="panel-head"><h2>Needs attention</h2></div>
+            <div class="panel-body" id="attention-list"></div>
+          </section>
+          <section class="panel" data-od-id="low-stock">
+            <div class="panel-head">
+              <h2>Low stock</h2>
+              <a class="btn btn-ghost btn-sm" href="admin-inventory.html?filter=low">Inventory</a>
+            </div>
+            <div class="panel-body" id="low-stock-list"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const kpis = Meridian.state.kpis;
+      document.querySelector("[data-od-id='kpi-strip']").innerHTML = [
+        { label: "Revenue (24h)", value: Meridian.money(kpis.revenueToday), delta: "Sample · labelled" },
+        { label: "Orders (24h)", value: String(kpis.ordersToday), delta: "Sample · labelled" },
+        { label: "Average order", value: Meridian.money(kpis.aov), delta: "Sample · labelled" },
+        { label: "Conversion", value: kpis.conversion.toFixed(1) + "%", delta: "Sample · labelled" },
+      ].map(function (k) {
+        return '<div class="kpi"><div class="label">' + k.label + '</div><div class="value num">' + k.value + '</div><div class="delta">' + k.delta + "</div></div>";
+      }).join("");
+
+      const recent = Meridian.state.orders.slice(0, 6);
+      document.querySelector("#recent-table tbody").innerHTML = recent.map(function (o) {
+        return '<tr class="is-clickable" onclick="location.href=\'admin-order-detail.html?id=' + o.id + '\'">' +
+          '<td><a class="linkish" href="admin-order-detail.html?id=' + o.id + '">' + o.id + "</a></td>" +
+          "<td>" + o.customer + "</td>" +
+          "<td>" + AdminUI.statusPill(o.status) + "</td>" +
+          '<td class="num-col num">' + Meridian.money(o.total) + "</td></tr>";
+      }).join("");
+
+      const q = Meridian.attentionQueue();
+      const attn = [];
+      q.unpaid.slice(0, 2).forEach(function (o) {
+        attn.push({ title: o.id + " awaiting payment", meta: o.customer, href: "admin-order-detail.html?id=" + o.id, pill: "pending" });
+      });
+      q.unfulfilled.slice(0, 3).forEach(function (o) {
+        attn.push({ title: o.id + " ready to fulfill", meta: Meridian.money(o.total), href: "admin-order-detail.html?id=" + o.id, pill: "paid" });
+      });
+      document.getElementById("attention-list").innerHTML = attn.length
+        ? attn.map(function (a) {
+            return '<a class="attn-item" href="' + a.href + '"><div><strong>' + a.title + '</strong><div class="meta" style="margin-top:4px;">' + a.meta + "</div></div>" + AdminUI.statusPill(a.pill) + "</a>";
+          }).join("")
+        : '<p class="empty">Nothing in the queue.</p>';
+
+      const low = Meridian.lowStockProducts();
+      document.getElementById("low-stock-list").innerHTML = low.length
+        ? low.map(function (p) {
+            return '<a class="list-row" href="admin-inventory.html?sku=' + encodeURIComponent(p.sku) + '"><div><strong>' + p.title + '</strong><div class="meta">' + p.sku + "</div></div>" +
+              '<span class="pill pill-low">' + p.inventory + " left</span></a>";
+          }).join("")
+        : '<p class="empty">All SKUs above threshold.</p>';
+    });
+  </script>
+</body>
+</html>

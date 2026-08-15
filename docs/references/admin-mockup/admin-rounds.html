@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>รอบจอง — แอดมิน มรส. ชุดเฟรชชี่</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div class="app" data-od-id="shell">
+    <aside class="sidebar" data-chrome="sidebar" data-od-id="sidebar"></aside>
+    <div class="app-main">
+      <header class="topbar" data-chrome="topbar" data-od-id="topbar"></header>
+      <main class="canvas" id="admin-main" data-od-id="canvas">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">รอบจอง</h1>
+            <p class="page-sub">เปิด-ปิดรอบและผูกสินค้า — ไม่มีกราฟรายได้หรือคอนเวอร์ชัน</p>
+          </div>
+          <button type="button" class="btn btn-primary" data-od-id="cta-create-round" id="cta-create-round">สร้างรอบ</button>
+        </div>
+
+        <section class="panel">
+          <div class="ds-table-wrap">
+            <table class="ds-table" data-od-id="rounds-table">
+              <thead>
+                <tr>
+                  <th>ชื่อรอบ</th>
+                  <th>เริ่ม</th>
+                  <th>สิ้นสุด</th>
+                  <th>สถานะ</th>
+                </tr>
+              </thead>
+              <tbody id="rounds-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="assets/chrome.js"></script>
+  <script>
+    AdminChrome.mount({ active: "rounds" });
+
+    function render() {
+      const state = AdminChrome.state();
+      document.getElementById("rounds-body").innerHTML = state.rounds.map((round) => `
+        <tr>
+          <td><button type="button" class="order-row-btn" data-edit="${round.id}" data-od-id="round-${round.id}">${round.name}</button></td>
+          <td class="mono">${round.startsAt}</td>
+          <td class="mono">${round.endsAt}</td>
+          <td><span class="pill ${round.enabled ? "pill-active" : "pill-disabled"}">${round.enabled ? "เปิดอยู่" : "ปิด"}</span></td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll("[data-edit]").forEach((button) => {
+        button.addEventListener("click", () => openForm(state.rounds.find((round) => round.id === button.dataset.edit)));
+      });
+    }
+
+    function openForm(round) {
+      const isNew = !round;
+      AdminChrome.dialog({
+        title: isNew ? "สร้างรอบ" : "แก้รอบ",
+        bodyHtml: `
+          <label class="field">ชื่อรอบ<input class="input" id="round-name" value="${round ? round.name : ""}" /></label>
+          <div class="grid-2" style="margin-top:8px">
+            <label class="field">เริ่ม<input class="input" id="round-start" type="date" value="${round ? round.startsAt : ""}" /></label>
+            <label class="field">สิ้นสุด<input class="input" id="round-end" type="date" value="${round ? round.endsAt : ""}" /></label>
+          </div>
+          <label class="field" style="margin-top:8px">สถานะ
+            <select class="select" id="round-enabled">
+              <option value="1" ${!round || round.enabled ? "selected" : ""}>เปิดอยู่</option>
+              <option value="0" ${round && !round.enabled ? "selected" : ""}>ปิด</option>
+            </select>
+          </label>
+        `,
+        primaryLabel: "บันทึก",
+        onPrimary(root) {
+          const state = AdminChrome.state();
+          const payload = {
+            id: round ? round.id : "r-" + Date.now(),
+            name: root.querySelector("#round-name").value.trim() || "รอบไม่มีชื่อ",
+            startsAt: root.querySelector("#round-start").value,
+            endsAt: root.querySelector("#round-end").value,
+            enabled: root.querySelector("#round-enabled").value === "1",
+          };
+
+          if (round) {
+            Object.assign(state.rounds.find((row) => row.id === round.id), payload);
+          } else {
+            state.rounds.unshift(payload);
+          }
+
+          AdminChrome.save(state);
+          AdminChrome.toast("บันทึกรอบตัวอย่างแล้ว");
+          render();
+        },
+      });
+    }
+
+    document.getElementById("cta-create-round").addEventListener("click", () => openForm(null));
+    render();
+  </script>
+</body>
+</html>

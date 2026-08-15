@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orders · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="orders">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="orders-main">
+      <div class="page-head">
+        <div>
+          <h1>Orders</h1>
+          <p class="sub">Filter, inspect, and open fulfillment · <span class="sample-tag">Sample data</span></p>
+        </div>
+      </div>
+
+      <div class="toolbar" data-od-id="orders-filters">
+        <div class="filters">
+          <input class="input" id="q" type="search" placeholder="Search order or customer" style="max-width: 240px;" />
+          <select class="select" id="status" style="max-width: 160px;">
+            <option value="">All statuses</option>
+            <option>pending</option>
+            <option>paid</option>
+            <option>fulfilled</option>
+            <option>cancelled</option>
+          </select>
+          <input class="input" id="from" type="date" aria-label="From date" style="max-width: 150px;" />
+          <button type="button" class="btn btn-ghost btn-sm" id="clear">Clear</button>
+        </div>
+      </div>
+
+      <section class="panel" data-od-id="orders-table-panel">
+        <div class="panel-body" style="padding: 0;">
+          <table class="ds-table" id="orders-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th class="num-col">Total</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay" data-close="overlay"></div>
+  <aside class="drawer" id="order-drawer" data-od-id="order-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <div class="drawer-head">
+      <div>
+        <h2 id="drawer-title">Order</h2>
+        <p class="meta" id="drawer-sub"></p>
+      </div>
+      <button type="button" class="icon-btn" data-close="order-drawer" aria-label="Close">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <div class="drawer-foot">
+      <button type="button" class="btn btn-secondary" data-close="order-drawer">Close</button>
+      <a class="btn btn-primary" id="drawer-open-full" href="#">Open full detail</a>
+    </div>
+  </aside>
+
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const status = document.getElementById("status").value;
+      const from = document.getElementById("from").value;
+      let rows = Meridian.state.orders.slice();
+      if (q) rows = rows.filter(function (o) {
+        return o.id.toLowerCase().indexOf(q) >= 0 || o.customer.toLowerCase().indexOf(q) >= 0;
+      });
+      if (status) rows = rows.filter(function (o) { return o.status === status; });
+      if (from) rows = rows.filter(function (o) { return o.created.slice(0, 10) >= from; });
+
+      document.querySelector("#orders-table tbody").innerHTML = rows.map(function (o) {
+        return '<tr class="is-clickable" data-id="' + o.id + '">' +
+          "<td><strong>" + o.id + "</strong></td>" +
+          '<td class="meta">' + Meridian.formatDate(o.created) + "</td>" +
+          "<td>" + o.customer + "</td>" +
+          '<td class="meta">' + o.payment + "</td>" +
+          "<td>" + AdminUI.statusPill(o.status) + "</td>" +
+          '<td class="num-col num">' + Meridian.money(o.total) + "</td></tr>";
+      }).join("") || '<tr><td colspan="6"><div class="empty">No orders match these filters.</div></td></tr>';
+
+      document.querySelectorAll("#orders-table tbody tr[data-id]").forEach(function (tr) {
+        tr.addEventListener("click", function () { openDrawer(tr.getAttribute("data-id")); });
+      });
+    }
+
+    function openDrawer(id) {
+      const o = Meridian.getOrder(id);
+      if (!o) return;
+      document.getElementById("drawer-title").textContent = o.id;
+      document.getElementById("drawer-sub").textContent = Meridian.formatDate(o.created) + " · " + o.customer;
+      document.getElementById("drawer-body").innerHTML =
+        '<div class="stack">' +
+        "<div>" + AdminUI.statusPill(o.status) + "</div>" +
+        "<div><div class=\"meta\">Items</div>" + o.items.map(function (i) {
+          return '<div class="list-row"><span>' + i.title + " × " + i.qty + '</span><span class="num">' + Meridian.money(i.price * i.qty) + "</span></div>";
+        }).join("") + "</div>" +
+        '<div><div class="meta">Ship to</div><p style="margin-top:6px;">' + o.shipping.name + "<br>" + o.shipping.line1 + "<br>" + o.shipping.city + ", " + o.shipping.region + " " + o.shipping.postal + "</p></div>" +
+        "</div>";
+      document.getElementById("drawer-open-full").href = "admin-order-detail.html?id=" + o.id;
+      AdminUI.openOverlay("overlay");
+      AdminUI.openOverlay("order-drawer");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      ["q", "status", "from"].forEach(function (id) {
+        document.getElementById(id).addEventListener("input", render);
+        document.getElementById(id).addEventListener("change", render);
+      });
+      document.getElementById("clear").addEventListener("click", function () {
+        document.getElementById("q").value = "";
+        document.getElementById("status").value = "";
+        document.getElementById("from").value = "";
+        render();
+      });
+      document.getElementById("overlay").addEventListener("click", function () {
+        AdminUI.closeOverlay("overlay");
+        AdminUI.closeOverlay("order-drawer");
+      });
+      render();
+    });
+  </script>
+</body>
+</html>

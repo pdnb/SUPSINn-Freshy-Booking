@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ช่วยรับสินค้า — Optional</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+</head>
+<body>
+  <div class="stage">
+    <div class="phone" data-od-id="assist-phone">
+      <header class="topbar" data-od-id="assist-topbar">
+        <a class="back" href="home.html" aria-label="กลับ"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <h1 data-od-id="assist-title">ช่วยรับสินค้า</h1>
+      </header>
+
+      <div class="app-body" data-od-id="assist-body">
+        <section class="banner mt-12" data-od-id="assist-intro">
+          <p class="kicker">ตัวช่วยวันรับของ</p>
+          <h2 class="lead">เช็กคิวรับชุดก่อนเดินทาง</h2>
+          <p class="caption mb-0">ช่วยลดความสับสนในวันรับของ โดยบอกเอกสารที่ต้องนำ สถานะออเดอร์ และจุดรับที่เลือกไว้</p>
+        </section>
+
+        <section class="summary-card" data-od-id="assist-checklist">
+          <h2 class="section-title tight-top">เช็คลิสต์ก่อนไปรับ</h2>
+          <div class="check-list">
+            <label class="check-card" data-od-id="check-id">
+              <input type="checkbox" id="chk-id" />
+              <span>
+                <strong>บัตรนักศึกษา / หลักฐานตัวตน</strong>
+                <span class="caption">ใช้ยืนยันตัวตนที่จุดรับ</span>
+              </span>
+            </label>
+            <label class="check-card" data-od-id="check-order">
+              <input type="checkbox" id="chk-order" />
+              <span>
+                <strong>เลขที่จองในแอป</strong>
+                <span class="caption" id="assist-order-ref">ยังไม่มีคำสั่งซื้อ — จองก่อนแล้วกลับมาหน้านี้</span>
+              </span>
+            </label>
+            <label class="check-card" data-od-id="check-size">
+              <input type="checkbox" id="chk-size" />
+              <span>
+                <strong>ตรวจไซส์ในออเดอร์อีกครั้ง</strong>
+                <span class="caption">โดยเฉพาะคอมโบปี 70 ที่มีหลายชิ้น</span>
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <div class="section">
+          <h2 class="section-title">เลือกจุดรับวันนี้</h2>
+        </div>
+        <div class="pickup-cards" role="group" aria-label="จุดรับสินค้า" data-od-id="assist-locations">
+          <button type="button" class="pickup-card" data-loc="bookstore" aria-pressed="false" data-od-id="assist-loc-bookstore">
+            <h3>ร้านศูนย์หนังสือฯ</h3>
+            <p class="caption">เหมาะกับมารับนอกวันรายงานตัว · ดูประกาศเวลาเปิดรับของศูนย์หนังสือ</p>
+          </button>
+          <button type="button" class="pickup-card" data-loc="hall" aria-pressed="false" data-od-id="assist-loc-hall">
+            <h3>หอประชุมฯ วันรายงานตัว</h3>
+            <p class="caption">เดินตามป้าย “จุดรับชุดเฟรชชี่” · เตรียมคิวและบัตรนักศึกษา</p>
+          </button>
+        </div>
+
+        <section class="summary-card" id="assist-result" hidden data-od-id="assist-result">
+          <p class="kicker">แผนรับสินค้า</p>
+          <h2 class="section-title tight-bottom" id="assist-plan-title">—</h2>
+          <p class="caption mb-0" id="assist-plan-body"></p>
+          <p class="caption receipt-note">ใบเสร็จออกให้ตอนรับสินค้าเท่านั้น</p>
+        </section>
+
+        <div class="stack-actions">
+          <button type="button" class="btn btn-primary btn-block" id="assist-ready" data-od-id="assist-ready-cta">ฉันพร้อมไปรับแล้ว</button>
+          <a class="btn btn-secondary btn-block" href="order-status.html" data-od-id="assist-to-order">ดูสถานะคำสั่งซื้อ</a>
+        </div>
+      </div>
+
+      <nav class="tabbar" aria-label="เมนูหลัก" data-od-id="assist-tabbar">
+        <a class="tab" href="home.html"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>หน้าหลัก</a>
+        <a class="tab" href="order-status.html"><svg viewBox="0 0 24 24"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>คำสั่งซื้อ</a>
+        <a class="tab" href="pickup-assist.html" aria-current="page"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>รับสินค้า</a>
+        <a class="tab" href="../index.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>ภาพรวม</a>
+      </nav>
+    </div>
+  </div>
+  <script src="../assets/app.js"></script>
+  <script>
+    (function () {
+      var order = FreshyApp.getOrder();
+      var ref = document.getElementById("assist-order-ref");
+      if (order) {
+        ref.textContent = "เลขที่จอง " + order.id + " · " + (order.pickupLabel || "");
+      }
+
+      var selected = null;
+      var plans = {
+        bookstore: {
+          title: "รับที่ร้านศูนย์หนังสือฯ",
+          body: "เช็กประกาศเวลาเปิดรับของศูนย์หนังสือ นำบัตรนักศึกษาและเลขที่จอง รอเรียกคิวที่เคาน์เตอร์รับชุด",
+        },
+        hall: {
+          title: "รับที่หอประชุมฯ วันรายงานตัว",
+          body: "เดินตามป้ายจุดรับชุดเฟรชชี่ แสดงเลขที่จองและบัตรนักศึกษา พนักงานจะจ่ายของและออกใบเสร็จในจุดเดียว",
+        },
+      };
+
+      document.querySelectorAll("[data-loc]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll("[data-loc]").forEach(function (b) {
+            b.setAttribute("aria-pressed", "false");
+          });
+          btn.setAttribute("aria-pressed", "true");
+          selected = btn.getAttribute("data-loc");
+          var plan = plans[selected];
+          var box = document.getElementById("assist-result");
+          box.hidden = false;
+          document.getElementById("assist-plan-title").textContent = plan.title;
+          document.getElementById("assist-plan-body").textContent = plan.body;
+        });
+      });
+
+      document.getElementById("assist-ready").addEventListener("click", function () {
+        if (!selected) {
+          FreshyApp.toast("เลือกจุดรับก่อน");
+          var firstLoc = document.querySelector("[data-loc]");
+          if (firstLoc) firstLoc.focus();
+          return;
+        }
+        var checks = ["chk-id", "chk-order", "chk-size"].every(function (id) {
+          return document.getElementById(id).checked;
+        });
+        if (!checks) {
+          FreshyApp.toast("ติ๊กเช็คลิสต์ให้ครบ");
+          return;
+        }
+        FreshyApp.toast("พร้อมแล้ว — ขอให้รับชุดราบรื่น");
+      });
+    })();
+  </script>
+</body>
+</html>

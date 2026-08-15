@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ออเดอร์ — แอดมิน มรส. ชุดเฟรชชี่</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div class="app" data-od-id="shell">
+    <aside class="sidebar" data-chrome="sidebar" data-od-id="sidebar"></aside>
+    <div class="app-main">
+      <header class="topbar" data-chrome="topbar" data-od-id="topbar"></header>
+      <main class="canvas" id="admin-main" data-od-id="canvas">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">ออเดอร์</h1>
+            <p class="page-sub">ดูสลิป ยอด ผู้จอง แล้วยืนยันหรือปฏิเสธ <span class="sample-tag">[ตัวอย่าง]</span></p>
+          </div>
+          <p class="hotkeys" data-od-id="hotkey-hints">ปุ่มลัดในหน้ารายละเอียด <kbd>j</kbd> <kbd>k</kbd> <kbd>c</kbd> <kbd>r</kbd></p>
+        </div>
+
+        <div class="filters" data-od-id="order-filters">
+          <input class="input" id="filter-search" type="search" placeholder="รหัสออเดอร์หรือรหัสนักศึกษา" aria-label="ค้นหา" data-od-id="filter-search" />
+          <select class="select" id="filter-status" aria-label="สถานะ" data-od-id="filter-status">
+            <option value="pending_review">รอตรวจสลิป</option>
+            <option value="need_reslip">ขอสลิปใหม่</option>
+            <option value="all">ทั้งหมด</option>
+          </select>
+          <select class="select" id="filter-round" aria-label="รอบจอง" data-od-id="filter-round"></select>
+          <input class="input" id="filter-date-from" type="date" aria-label="ตั้งแต่วันที่" data-od-id="filter-date-from" />
+          <input class="input" id="filter-date-to" type="date" aria-label="ถึงวันที่" data-od-id="filter-date-to" />
+          <button type="button" class="btn btn-ghost" id="filter-clear" data-od-id="filter-clear">ล้างตัวกรอง</button>
+        </div>
+
+        <section class="panel">
+          <div class="ds-table-wrap">
+            <table class="ds-table" data-od-id="orders-table">
+              <thead>
+                <tr>
+                  <th>ออเดอร์</th>
+                  <th>วันที่</th>
+                  <th>ผู้จอง</th>
+                  <th>ช่องทาง</th>
+                  <th>ยอด</th>
+                  <th>สถานะ</th>
+                </tr>
+              </thead>
+              <tbody id="orders-body"></tbody>
+            </table>
+          </div>
+          <p class="empty" id="orders-empty" hidden>ไม่มีออเดอร์ในตัวกรองนี้</p>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="assets/chrome.js"></script>
+  <script>
+    AdminChrome.mount({ active: "orders" });
+    const state = AdminChrome.state();
+    const roundSelect = document.getElementById("filter-round");
+    roundSelect.innerHTML = `<option value="">ทุกรอบ</option>` + state.rounds.map((round) =>
+      `<option value="${round.id}">${round.name}</option>`
+    ).join("");
+
+    function render() {
+      const q = document.getElementById("filter-search").value.trim();
+      const status = document.getElementById("filter-status").value;
+      const roundId = document.getElementById("filter-round").value;
+      const dateFrom = document.getElementById("filter-date-from").value;
+      const dateTo = document.getElementById("filter-date-to").value;
+      const rows = state.orders.filter((order) => {
+        const matchQ = q === "" || order.id.includes(q) || order.studentId.includes(q) || order.name.includes(q);
+        const matchStatus = status === "all" || order.status === status;
+        const matchRound = roundId === "" || order.roundId === roundId;
+        const day = (order.paidAt || "").slice(0, 10);
+        const matchFrom = dateFrom === "" || day >= dateFrom;
+        const matchTo = dateTo === "" || day <= dateTo;
+
+        return matchQ && matchStatus && matchRound && matchFrom && matchTo;
+      });
+
+      document.getElementById("orders-empty").hidden = rows.length > 0;
+      document.getElementById("orders-body").innerHTML = rows.map((order) => `
+        <tr>
+          <td><a class="mono" href="admin-order-detail.html?id=${order.id}" data-od-id="order-link-${order.id}">${order.id}</a></td>
+          <td class="mono">${order.paidAt ?? "—"}</td>
+          <td>${order.name}<br><span class="meta">${order.studentId}</span></td>
+          <td>${AdminChrome.channel(order.fulfillment)}</td>
+          <td class="mono">${AdminChrome.money(order.amount)}</td>
+          <td>${AdminChrome.pill(order.status)}</td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("filter-search").addEventListener("input", render);
+    document.getElementById("filter-status").addEventListener("change", render);
+    document.getElementById("filter-round").addEventListener("change", render);
+    document.getElementById("filter-date-from").addEventListener("change", render);
+    document.getElementById("filter-date-to").addEventListener("change", render);
+    document.getElementById("filter-clear").addEventListener("click", () => {
+      document.getElementById("filter-search").value = "";
+      document.getElementById("filter-status").value = "pending_review";
+      document.getElementById("filter-round").value = "";
+      document.getElementById("filter-date-from").value = "";
+      document.getElementById("filter-date-to").value = "";
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

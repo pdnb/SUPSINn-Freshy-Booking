@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inventory · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="inventory">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="inventory-main">
+      <div class="page-head">
+        <div>
+          <h1>Inventory</h1>
+          <p class="sub">SKU levels and restock adjustments · <span class="sample-tag">Sample data</span></p>
+        </div>
+      </div>
+
+      <div class="toolbar" data-od-id="inventory-filters">
+        <div class="filters">
+          <input class="input" id="q" type="search" placeholder="Search SKU or title" style="max-width: 240px;" />
+          <select class="select" id="stock" style="max-width: 160px;">
+            <option value="">All stock</option>
+            <option value="low">Low stock</option>
+            <option value="ok">Healthy</option>
+          </select>
+        </div>
+      </div>
+
+      <section class="panel" data-od-id="inventory-table-panel">
+        <div class="panel-body" style="padding: 0;">
+          <table class="ds-table" id="inventory-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Product</th>
+                <th class="num-col">On hand</th>
+                <th class="num-col">Threshold</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay" data-close></div>
+  <div class="dialog" id="adjust-dialog" data-od-id="adjust-dialog" role="dialog" aria-modal="true" aria-labelledby="adjust-title">
+    <div class="dialog-head"><h2 id="adjust-title">Adjust stock</h2><button type="button" class="icon-btn" data-close aria-label="Close">✕</button></div>
+    <div class="dialog-body stack">
+      <p class="muted" id="adjust-product"></p>
+      <div class="field">
+        <label for="delta">Quantity change (+/−)</label>
+        <input class="input" id="delta" type="number" step="1" value="10" />
+      </div>
+      <div class="field">
+        <label for="reason">Reason</label>
+        <select class="select" id="reason">
+          <option>Restock from supplier</option>
+          <option>Cycle count correction</option>
+          <option>Damaged / write-off</option>
+          <option>Return to shelf</option>
+        </select>
+      </div>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+      <button type="button" class="btn btn-primary" id="confirm-adjust" data-od-id="cta-confirm-adjust">Apply adjustment</button>
+    </div>
+  </div>
+
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    let adjustId = null;
+
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const stock = document.getElementById("stock").value;
+      let rows = Meridian.state.products.slice();
+      if (q) rows = rows.filter(function (p) {
+        return p.sku.toLowerCase().indexOf(q) >= 0 || p.title.toLowerCase().indexOf(q) >= 0;
+      });
+      if (stock === "low") rows = rows.filter(function (p) { return p.inventory <= p.threshold; });
+      if (stock === "ok") rows = rows.filter(function (p) { return p.inventory > p.threshold; });
+
+      document.querySelector("#inventory-table tbody").innerHTML = rows.map(function (p) {
+        const low = p.inventory <= p.threshold;
+        return "<tr>" +
+          '<td class="meta">' + p.sku + "</td>" +
+          "<td><strong>" + p.title + "</strong></td>" +
+          '<td class="num-col num">' + p.inventory + "</td>" +
+          '<td class="num-col num">' + p.threshold + "</td>" +
+          "<td>" + (low ? AdminUI.statusPill("low") : '<span class="pill pill-success">ok</span>') + "</td>" +
+          '<td><button type="button" class="btn btn-secondary btn-sm" data-adjust="' + p.id + '">Adjust</button></td></tr>';
+      }).join("");
+
+      document.querySelectorAll("[data-adjust]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          adjustId = btn.getAttribute("data-adjust");
+          const p = Meridian.getProduct(adjustId);
+          document.getElementById("adjust-product").textContent = p.title + " · " + p.sku + " · currently " + p.inventory;
+          document.getElementById("delta").value = "10";
+          AdminUI.openOverlay("overlay");
+          AdminUI.openOverlay("adjust-dialog");
+        });
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const filter = AdminUI.qs("filter");
+      if (filter === "low") document.getElementById("stock").value = "low";
+      const sku = AdminUI.qs("sku");
+      if (sku) document.getElementById("q").value = sku;
+
+      document.getElementById("q").addEventListener("input", render);
+      document.getElementById("stock").addEventListener("change", render);
+      document.getElementById("overlay").addEventListener("click", function () {
+        AdminUI.closeOverlay("overlay");
+        AdminUI.closeOverlay("adjust-dialog");
+      });
+      document.querySelectorAll("[data-close]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          AdminUI.closeOverlay("overlay");
+          AdminUI.closeOverlay("adjust-dialog");
+        });
+      });
+      document.getElementById("confirm-adjust").addEventListener("click", function () {
+        const delta = Number(document.getElementById("delta").value);
+        const reason = document.getElementById("reason").value;
+        const p = Meridian.adjustStock(adjustId, delta, reason);
+        AdminUI.closeOverlay("overlay");
+        AdminUI.closeOverlay("adjust-dialog");
+        AdminUI.toast(p.title + " → " + p.inventory + " on hand");
+        render();
+      });
+      render();
+    });
+  </script>
+</body>
+</html>

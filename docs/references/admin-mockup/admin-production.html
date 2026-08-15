@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>สรุปยอดผลิต — แอดมิน มรส. ชุดเฟรชชี่</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div class="app" data-od-id="shell">
+    <aside class="sidebar" data-chrome="sidebar" data-od-id="sidebar"></aside>
+    <div class="app-main">
+      <header class="topbar" data-chrome="topbar" data-od-id="topbar"></header>
+      <main class="canvas" id="admin-main" data-od-id="canvas">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">สรุปยอดผลิต</h1>
+            <p class="page-sub">นับจำนวนต่อสินค้าจากออเดอร์ที่ยืนยันแล้ว <span class="sample-tag">[ตัวอย่าง]</span></p>
+          </div>
+        </div>
+
+        <div class="filters" data-od-id="production-filters">
+          <select class="select" id="filter-round" aria-label="รอบจอง" data-od-id="production-round"></select>
+          <select class="select" id="filter-product" aria-label="สินค้า" data-od-id="production-product">
+            <option value="">ทุกสินค้า</option>
+          </select>
+        </div>
+
+        <section class="panel">
+          <div class="ds-table-wrap">
+            <table class="ds-table" data-od-id="production-table">
+              <thead>
+                <tr>
+                  <th>สินค้า</th>
+                  <th>ไซส์</th>
+                  <th>จำนวนที่ต้องผลิต</th>
+                </tr>
+              </thead>
+              <tbody id="production-body"></tbody>
+            </table>
+          </div>
+          <p class="empty" id="production-empty" hidden>ยังไม่มียอดในตัวกรองนี้</p>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="assets/chrome.js"></script>
+  <script>
+    AdminChrome.mount({ active: "production" });
+    const state = AdminChrome.state();
+    document.getElementById("filter-round").innerHTML = state.rounds.map((round) =>
+      `<option value="${round.id}">${round.name}</option>`
+    ).join("");
+    document.getElementById("filter-product").innerHTML += state.products
+      .filter((product) => product.active)
+      .map((product) => `<option value="${product.id}">${product.name}</option>`)
+      .join("");
+
+    function render() {
+      const productId = document.getElementById("filter-product").value;
+      const rows = state.production.filter((row) => productId === "" || row.productId === productId);
+      document.getElementById("production-empty").hidden = rows.length > 0;
+      document.getElementById("production-body").innerHTML = rows.map((row) => `
+        <tr>
+          <td>${row.name}</td>
+          <td class="mono">${row.size}</td>
+          <td class="mono">${row.qty} <span class="sample-tag">[ตัวอย่าง]</span></td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("filter-product").addEventListener("change", render);
+    render();
+  </script>
+</body>
+</html>

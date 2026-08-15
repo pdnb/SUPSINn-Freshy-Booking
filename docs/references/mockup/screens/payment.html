@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ชำระเงิน PromptPay</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+</head>
+<body>
+  <div class="stage">
+    <div class="phone" data-od-id="payment-phone">
+      <header class="topbar" data-od-id="payment-topbar">
+        <a class="back" href="checkout.html" aria-label="กลับ"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <h1 data-od-id="payment-title">ชำระเงิน</h1>
+      </header>
+
+      <div class="app-body has-sticky-cta" data-od-id="payment-body">
+        <div class="steps" role="list" aria-label="ขั้นตอนการจอง" data-od-id="payment-steps">
+          <div class="step done" role="listitem"><span>ตะกร้า</span></div>
+          <div class="step done" role="listitem"><span>ข้อมูล</span></div>
+          <div class="step current" role="listitem" aria-current="step"><span>ชำระเงิน</span></div>
+          <div class="step" role="listitem"><span>เสร็จสิ้น</span></div>
+        </div>
+
+        <section class="summary-card" data-od-id="payment-summary">
+          <div class="summary-row"><span>ยอดสินค้า</span><span>รอประกาศราคา</span></div>
+          <div class="summary-row" id="ship-row" hidden><span>ค่าจัดส่งไปรษณีย์</span><span>รอคำนวณ</span></div>
+          <div class="summary-row total"><span>ยอดที่ต้องชำระ</span><span>รอประกาศราคา</span></div>
+          <p class="caption mt-10 mb-0">ชำระผ่าน PromptPay แล้วแนบสลิปเพื่อยืนยันการจองในขั้นตอนเดียวกัน</p>
+        </section>
+
+        <div class="qr-wrap" data-od-id="payment-qr">
+          <p class="kicker">PromptPay QR</p>
+          <p class="qr-title">สแกนเพื่อชำระเงิน</p>
+          <img src="../assets/promptpay-qr.png" alt="ตัวอย่าง QR PromptPay (จำลอง)" />
+          <p class="caption">QR นี้เป็นภาพจำลองสำหรับโปรโตไทป์ — เลขบัญชีจริงจะเชื่อมจากระบบเมื่อเปิดใช้</p>
+        </div>
+
+        <p class="alert alert-warn" id="slip-hint" data-od-id="payment-slip-hint">ต้องแนบสลิปก่อนกดยืนยันการจอง</p>
+
+        <label class="upload-zone" id="slip-zone" data-od-id="payment-slip">
+          <input type="file" id="slip" accept="image/*,.pdf" aria-describedby="slip-hint" />
+          <span class="upload-title">แนบสลิปการโอน</span>
+          <span class="caption">รองรับรูปภาพหรือ PDF · จำเป็นก่อนยืนยันจอง</span>
+          <span class="upload-preview" id="slip-name">แนบไฟล์แล้ว</span>
+        </label>
+      </div>
+
+      <div class="sticky-cta" data-od-id="payment-sticky">
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="confirm-pay" disabled aria-disabled="true" data-od-id="payment-confirm-cta">ยืนยันการจอง</button>
+      </div>
+
+      <nav class="tabbar" aria-label="เมนูหลัก">
+        <a class="tab" href="home.html"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>หน้าหลัก</a>
+        <a class="tab" href="order-status.html"><svg viewBox="0 0 24 24"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>คำสั่งซื้อ</a>
+        <a class="tab" href="pickup-assist.html"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>รับสินค้า</a>
+        <a class="tab" href="../index.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>ภาพรวม</a>
+      </nav>
+    </div>
+  </div>
+  <script src="../assets/app.js"></script>
+  <script>
+    (function () {
+      var checkout = FreshyApp.getCheckout();
+      var cart = FreshyApp.getCart();
+      if (!checkout || !cart.length) {
+        location.replace("checkout.html");
+        return;
+      }
+      if (checkout.fulfillment === "post") {
+        document.getElementById("ship-row").hidden = false;
+      }
+
+      var slip = document.getElementById("slip");
+      var zone = document.getElementById("slip-zone");
+      var btn = document.getElementById("confirm-pay");
+      var nameEl = document.getElementById("slip-name");
+      var hasSlip = false;
+
+      slip.addEventListener("change", function () {
+        hasSlip = !!(slip.files && slip.files[0]);
+        zone.classList.toggle("has-file", hasSlip);
+        zone.classList.toggle("is-invalid", false);
+        btn.disabled = !hasSlip;
+        btn.setAttribute("aria-disabled", hasSlip ? "false" : "true");
+        if (hasSlip) nameEl.textContent = "แนบแล้ว: " + slip.files[0].name;
+      });
+
+      btn.addEventListener("click", function () {
+        if (!hasSlip) {
+          zone.classList.add("is-invalid");
+          FreshyApp.toast("กรุณาแนบสลิป");
+          slip.focus();
+          return;
+        }
+        var labels = {
+          bookstore: "ร้านศูนย์หนังสือฯ",
+          hall: "หอประชุมฯ วันรายงานตัว",
+          post: "จัดส่งทางไปรษณีย์",
+        };
+        var orderId = "FR" + String(Date.now()).slice(-8);
+        FreshyApp.setOrder({
+          id: orderId,
+          createdAt: new Date().toISOString(),
+          status: "pending_verify",
+          checkout: checkout,
+          items: cart,
+          slipName: slip.files[0].name,
+          pickupLabel: labels[checkout.fulfillment] || checkout.fulfillment,
+          receiptNote: "ใบเสร็จจะได้รับตอนรับสินค้า",
+        });
+        FreshyApp.setCart([]);
+        location.href = "order-status.html";
+      });
+    })();
+  </script>
+</body>
+</html>

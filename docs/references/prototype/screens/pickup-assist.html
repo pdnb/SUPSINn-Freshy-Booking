@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ช่วยรับสินค้า — Optional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../assets/theme.js"></script>
+</head>
+<body class="m-0 min-h-dvh bg-bg font-sans text-[15px] leading-relaxed text-fg antialiased">
+  <div class="relative mx-auto flex min-h-dvh w-full max-w-lg md:max-w-3xl flex-col" data-od-id="assist-phone">
+      <header class="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border bg-surface px-2" data-od-id="assist-topbar">
+        <a class="inline-flex h-11 w-11 items-center justify-center rounded-full text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" href="home.html" aria-label="กลับ">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <h1 class="flex-1 pr-11 text-center text-base font-semibold" data-od-id="assist-title">ช่วยรับสินค้า</h1>
+      </header>
+
+      <div class="flex-1 overflow-y-auto pb-[calc(58px+env(safe-area-inset-bottom,0px)+12px)]" data-od-id="assist-body">
+        <section class="m-3.5 rounded-2xl border border-border bg-surface p-4" data-od-id="assist-intro">
+          <p class="mb-1 text-xs font-medium text-accent">ตัวช่วยวันรับของ</p>
+          <h2 class="mb-2 text-lg font-semibold">เช็กคิวรับชุดก่อนเดินทาง</h2>
+          <p class="text-sm text-muted">ช่วยลดความสับสนในวันรับของ โดยบอกเอกสารที่ต้องนำ สถานะออเดอร์ และจุดรับที่เลือกไว้</p>
+        </section>
+
+        <section class="mx-3.5 mb-4 rounded-2xl border border-border bg-surface p-4" data-od-id="assist-checklist">
+          <h2 class="mb-3 text-base font-semibold">เช็คลิสต์ก่อนไปรับ</h2>
+          <div class="space-y-2">
+            <label class="flex cursor-pointer gap-3 rounded-xl border border-border bg-bg p-3" data-od-id="check-id">
+              <input type="checkbox" id="chk-id" class="mt-1 accent-[oklch(48%_0.13_255)]" />
+              <span>
+                <strong class="block text-sm">บัตรนักศึกษา / หลักฐานตัวตน</strong>
+                <span class="text-xs text-muted">ใช้ยืนยันตัวตนที่จุดรับ</span>
+              </span>
+            </label>
+            <label class="flex cursor-pointer gap-3 rounded-xl border border-border bg-bg p-3" data-od-id="check-order">
+              <input type="checkbox" id="chk-order" class="mt-1 accent-[oklch(48%_0.13_255)]" />
+              <span>
+                <strong class="block text-sm">เลขที่จองในแอป</strong>
+                <span class="text-xs text-muted" id="assist-order-ref">เลขที่จอง FR28473910 · ร้านศูนย์หนังสือฯ</span>
+              </span>
+            </label>
+            <label class="flex cursor-pointer gap-3 rounded-xl border border-border bg-bg p-3" data-od-id="check-size">
+              <input type="checkbox" id="chk-size" class="mt-1 accent-[oklch(48%_0.13_255)]" />
+              <span>
+                <strong class="block text-sm">ตรวจไซส์ในออเดอร์อีกครั้ง</strong>
+                <span class="text-xs text-muted">โดยเฉพาะคอมโบปี 70 ที่มีหลายชิ้น</span>
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <div class="px-3.5">
+          <h2 class="mb-3 text-base font-semibold">เลือกจุดรับวันนี้</h2>
+        </div>
+        <div class="space-y-3 px-3.5" role="group" aria-label="จุดรับสินค้า" data-od-id="assist-locations">
+          <button type="button" class="w-full rounded-2xl border border-border bg-surface p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-loc="bookstore" aria-pressed="false" data-od-id="assist-loc-bookstore">
+            <h3 class="mb-1 font-semibold">ร้านศูนย์หนังสือฯ</h3>
+            <p class="text-sm text-muted">เหมาะกับมารับนอกวันรายงานตัว · ดูประกาศเวลาเปิดรับของศูนย์หนังสือ</p>
+          </button>
+          <button type="button" class="w-full rounded-2xl border border-border bg-surface p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-loc="hall" aria-pressed="false" data-od-id="assist-loc-hall">
+            <h3 class="mb-1 font-semibold">หอประชุมฯ วันรายงานตัว</h3>
+            <p class="text-sm text-muted">เดินตามป้าย “จุดรับชุดเฟรชชี่” · เตรียมคิวและบัตรนักศึกษา</p>
+          </button>
+        </div>
+
+        <section class="mx-3.5 mt-4 hidden rounded-2xl border border-border bg-surface p-4" id="assist-result" data-od-id="assist-result">
+          <p class="mb-1 text-xs font-medium text-accent">แผนรับสินค้า</p>
+          <h2 class="mb-2 text-base font-semibold" id="assist-plan-title">—</h2>
+          <p class="mb-2 text-sm text-muted" id="assist-plan-body"></p>
+          <p class="text-xs text-muted">ใบเสร็จออกให้ตอนรับสินค้าเท่านั้น</p>
+        </section>
+
+        <div class="space-y-2 p-3.5 pb-6">
+          <button type="button" class="flex min-h-12 w-full items-center justify-center rounded-xl bg-accent text-sm font-semibold text-accent-fg hover:bg-accent-press focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" id="assist-ready" data-od-id="assist-ready-cta">ฉันพร้อมไปรับแล้ว</button>
+          <a class="flex min-h-12 w-full items-center justify-center rounded-xl border border-border bg-surface text-sm font-semibold text-fg hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" href="order-status.html" data-od-id="assist-to-order">ดูสถานะคำสั่งซื้อ</a>
+          <p id="assist-toast" class="hidden text-center text-sm text-success" role="status"></p>
+        </div>
+      </div>
+
+      <nav class="fixed bottom-0 left-0 right-0 z-30 mx-auto flex h-tabbar w-full max-w-lg md:max-w-3xl border-t border-border bg-surface pb-[env(safe-area-inset-bottom,0px)]" aria-label="เมนูหลัก" data-od-id="assist-tabbar">
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="home.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>หน้าหลัก</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="order-status.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>คำสั่งซื้อ</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-accent" href="pickup-assist.html" aria-current="page"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>รับสินค้า</a>
+        <a class="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted" href="../index.html"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>ภาพรวม</a>
+      </nav>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var selected = null;
+      var plans = {
+        bookstore: {
+          title: "รับที่ร้านศูนย์หนังสือฯ",
+          body: "เช็กประกาศเวลาเปิดรับของศูนย์หนังสือ นำบัตรนักศึกษาและเลขที่จอง รอเรียกคิวที่เคาน์เตอร์รับชุด",
+        },
+        hall: {
+          title: "รับที่หอประชุมฯ วันรายงานตัว",
+          body: "เดินตามป้ายจุดรับชุดเฟรชชี่ แสดงเลขที่จองและบัตรนักศึกษา พนักงานจะจ่ายของและออกใบเสร็จในจุดเดียว",
+        },
+      };
+      var idleClass = "w-full rounded-2xl border border-border bg-surface p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+      var activeClass = "w-full rounded-2xl border border-accent bg-accent/5 p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+      document.querySelectorAll("[data-loc]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll("[data-loc]").forEach(function (b) {
+            b.setAttribute("aria-pressed", "false");
+            b.className = idleClass;
+          });
+          btn.setAttribute("aria-pressed", "true");
+          btn.className = activeClass;
+          selected = btn.getAttribute("data-loc");
+          var plan = plans[selected];
+          var box = document.getElementById("assist-result");
+          box.classList.remove("hidden");
+          document.getElementById("assist-plan-title").textContent = plan.title;
+          document.getElementById("assist-plan-body").textContent = plan.body;
+        });
+      });
+
+      document.getElementById("assist-ready").addEventListener("click", function () {
+        var toast = document.getElementById("assist-toast");
+        if (!selected) {
+          toast.textContent = "เลือกจุดรับก่อน";
+          toast.classList.remove("hidden", "text-success");
+          toast.classList.add("text-danger");
+          return;
+        }
+        var checks = ["chk-id", "chk-order", "chk-size"].every(function (id) {
+          return document.getElementById(id).checked;
+        });
+        if (!checks) {
+          toast.textContent = "ติ๊กเช็คลิสต์ให้ครบ";
+          toast.classList.remove("hidden", "text-success");
+          toast.classList.add("text-danger");
+          return;
+        }
+        toast.textContent = "พร้อมแล้ว — ขอให้รับชุดราบรื่น";
+        toast.classList.remove("hidden", "text-danger");
+        toast.classList.add("text-success");
+      });
+    })();
+  </script>
+</body>
+</html>

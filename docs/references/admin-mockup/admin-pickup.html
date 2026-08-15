@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>รับของ — แอดมิน มรส. ชุดเฟรชชี่</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div class="app" data-od-id="shell">
+    <aside class="sidebar" data-chrome="sidebar" data-od-id="sidebar"></aside>
+    <div class="app-main">
+      <header class="topbar" data-chrome="topbar" data-od-id="topbar"></header>
+      <main class="canvas" id="admin-main" data-od-id="canvas">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">รับของหน้างาน</h1>
+            <p class="page-sub">ค้นด้วยรหัสออเดอร์ รหัสนักศึกษา ชื่อ หรือเบอร์โทร</p>
+          </div>
+        </div>
+
+        <input class="input" id="pickup-search" type="search" placeholder="รหัสออเดอร์หรือรหัสนักศึกษา" aria-label="ค้นหาออเดอร์" style="max-width:420px;width:100%" data-od-id="pickup-search" />
+
+        <div class="split" style="margin-top:16px">
+          <section class="panel" data-od-id="pickup-results">
+            <div class="panel-head">ผลการค้นหา</div>
+            <div id="pickup-list"></div>
+          </section>
+          <section class="panel" data-od-id="pickup-peek">
+            <div class="panel-head">รายละเอียด</div>
+            <div class="panel-body" id="pickup-detail">
+              <p class="empty">พิมพ์เพื่อค้นหา</p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="assets/chrome.js"></script>
+  <script>
+    AdminChrome.mount({ active: "pickup" });
+    let selectedId = null;
+
+    function matches(q) {
+      if (q === "") {
+        return [];
+      }
+
+      return AdminChrome.state().orders.filter((order) =>
+        order.id.includes(q) || order.studentId.includes(q) || order.name.includes(q) || order.phone.includes(q)
+      );
+    }
+
+    function render() {
+      const q = document.getElementById("pickup-search").value.trim();
+      const found = matches(q);
+      const list = document.getElementById("pickup-list");
+
+      if (q === "") {
+        list.innerHTML = `<p class="empty">พิมพ์รหัสออเดอร์หรือรหัสนักศึกษาเพื่อค้นหา</p>`;
+        document.getElementById("pickup-detail").innerHTML = `<p class="empty">พิมพ์เพื่อค้นหา</p>`;
+        return;
+      }
+
+      if (found.length === 0) {
+        list.innerHTML = `<p class="empty">ไม่พบออเดอร์จากคำค้นนี้</p>`;
+        document.getElementById("pickup-detail").innerHTML = `<p class="empty">ไม่พบออเดอร์จากคำค้นนี้</p>`;
+        return;
+      }
+
+      if (found.length === 1) {
+        selectedId = found[0].id;
+      }
+
+      list.innerHTML = found.map((order) => `
+        <button type="button" class="order-row-btn" data-select="${order.id}" data-od-id="pickup-row-${order.id}">
+          <span><span class="mono">${order.id}</span><br>${order.name}</span>
+          ${AdminChrome.pill(order.status)}
+        </button>
+      `).join("");
+
+      list.querySelectorAll("[data-select]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedId = button.dataset.select;
+          renderDetail();
+        });
+      });
+      renderDetail();
+    }
+
+    function renderDetail() {
+      const order = AdminChrome.state().orders.find((row) => row.id === selectedId);
+      const body = document.getElementById("pickup-detail");
+
+      if (!order) {
+        body.innerHTML = `<p class="empty">เลือกผลลัพธ์ทางซ้าย</p>`;
+        return;
+      }
+
+      const canPick = order.status === "ready_for_pickup" || order.status === "confirmed";
+      body.innerHTML = `
+        <p><span class="mono">${order.id}</span> · ${order.name}<br>${order.studentId} · ${order.phone}</p>
+        <p>${AdminChrome.channel(order.fulfillment)}</p>
+        <p>${order.items.map((item) => item.name + " · " + item.choices).join("<br>")}</p>
+        <p>${AdminChrome.pill(order.status)}</p>
+        ${canPick ? `<button type="button" class="btn btn-primary" data-od-id="cta-mark-picked">มาร์ครับแล้ว</button>` : `<p class="page-sub">สถานะนี้ยังไม่รับของหน้างาน</p>`}
+      `;
+
+      const button = body.querySelector("[data-od-id='cta-mark-picked']");
+      if (button) {
+        button.addEventListener("click", () => {
+          AdminChrome.dialog({
+            title: "มาร์ครับแล้ว",
+            bodyHtml: `<p>ออกใบเสร็จให้ ${order.name} สำหรับ ${order.id}?</p>`,
+            primaryLabel: "รับของ",
+            onPrimary() {
+              AdminChrome.updateOrder(order.id, { status: "completed" }, "รับของหน้างาน — ออกใบเสร็จ");
+              AdminChrome.toast("มาร์ครับแล้ว");
+              render();
+            },
+          });
+        });
+      }
+    }
+
+    document.getElementById("pickup-search").addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

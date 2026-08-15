@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>สถานะคำสั่งซื้อ</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+</head>
+<body>
+  <div class="stage">
+    <div class="phone" data-od-id="order-phone">
+      <header class="topbar" data-od-id="order-topbar">
+        <a class="back" href="home.html" aria-label="กลับ"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <h1 data-od-id="order-title">คำสั่งซื้อ</h1>
+      </header>
+
+      <div class="app-body" data-od-id="order-body">
+        <div id="no-order" class="empty" hidden data-od-id="order-empty">
+          <div class="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          </div>
+          <p class="kicker">ยังไม่มีการจอง</p>
+          <h2>ยังไม่มีคำสั่งซื้อ</h2>
+          <p class="caption">เมื่อจองและแนบสลิปแล้ว สถานะจะแสดงที่นี่</p>
+          <p class="mt-16"><a class="btn btn-secondary" href="home.html">ไปหน้าหลัก</a></p>
+        </div>
+
+        <div id="order-view" hidden>
+          <div class="steps" data-od-id="order-steps">
+            <div class="step done"><span>จองแล้ว</span></div>
+            <div class="step current"><span>ตรวจสลิป</span></div>
+            <div class="step"><span>พร้อมรับ</span></div>
+            <div class="step"><span>รับแล้ว</span></div>
+          </div>
+
+          <section class="status-hero" data-od-id="order-status-hero">
+            <p class="kicker" id="order-id">เลขที่จอง</p>
+            <h2 id="order-status-label">รอตรวจสอบสลิป</h2>
+            <p class="caption" id="order-receipt-note">ใบเสร็จจะได้รับตอนรับสินค้า</p>
+          </section>
+
+          <section class="summary-card" data-od-id="order-buyer">
+            <div class="summary-row"><span>ผู้จอง</span><span id="buyer-name">—</span></div>
+            <div class="summary-row"><span>รหัสนักศึกษา</span><span id="buyer-id">—</span></div>
+            <div class="summary-row"><span>คณะ</span><span id="buyer-faculty">—</span></div>
+            <div class="summary-row"><span>เบอร์โทร</span><span id="buyer-phone">—</span></div>
+            <div class="summary-row"><span>วิธีรับ</span><span id="buyer-fulfill">—</span></div>
+            <div class="summary-row"><span>สลิป</span><span id="buyer-slip">—</span></div>
+          </section>
+
+          <div class="section">
+            <h2 class="section-title">รายการที่จอง</h2>
+          </div>
+          <div class="list tight-top" id="order-items" data-od-id="order-items"></div>
+
+          <div class="section">
+            <h2 class="section-title">จุดรับสินค้า</h2>
+          </div>
+          <div class="pickup-cards" data-od-id="order-pickup-points">
+            <article class="pickup-card" data-od-id="pickup-bookstore">
+              <h3>ร้านศูนย์หนังสือฯ</h3>
+              <p class="caption">รับตามรอบที่ศูนย์หนังสือประกาศ · นำหลักฐานการจองและบัตรนักศึกษา</p>
+            </article>
+            <article class="pickup-card" data-od-id="pickup-hall">
+              <h3>หอประชุมฯ วันรายงานตัว</h3>
+              <p class="caption">จุดรับชุดในวันรายงานตัวนักศึกษาใหม่ · ใบเสร็จออกตอนรับของ</p>
+            </article>
+          </div>
+
+          <div class="pad-b-20">
+            <a class="btn btn-secondary btn-block" href="pickup-assist.html" data-od-id="order-to-assist">ดูคู่มือช่วยรับสินค้า</a>
+          </div>
+        </div>
+      </div>
+
+      <nav class="tabbar" aria-label="เมนูหลัก" data-od-id="order-tabbar">
+        <a class="tab" href="home.html"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>หน้าหลัก</a>
+        <a class="tab" href="order-status.html" aria-current="page"><svg viewBox="0 0 24 24"><path d="M7 8V7a5 5 0 0 1 10 0v1M5.5 8h13l-.8 11.2A2 2 0 0 1 15.7 21H8.3a2 2 0 0 1-2-1.8L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>คำสั่งซื้อ</a>
+        <a class="tab" href="pickup-assist.html"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>รับสินค้า</a>
+        <a class="tab" href="../index.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>ภาพรวม</a>
+      </nav>
+    </div>
+  </div>
+  <script src="../assets/app.js"></script>
+  <script>
+    (function () {
+      var order = FreshyApp.getOrder();
+      if (!order) {
+        document.getElementById("no-order").hidden = false;
+        return;
+      }
+      document.getElementById("order-view").hidden = false;
+      document.getElementById("order-id").textContent = "เลขที่จอง " + order.id;
+      document.getElementById("order-status-label").textContent = "รอตรวจสอบสลิป";
+      document.getElementById("order-receipt-note").textContent = order.receiptNote || "ใบเสร็จจะได้รับตอนรับสินค้า";
+      var c = order.checkout || {};
+      document.getElementById("buyer-name").textContent = c.fullName || "—";
+      document.getElementById("buyer-id").textContent = c.studentId || "—";
+      document.getElementById("buyer-faculty").textContent = c.faculty || "—";
+      document.getElementById("buyer-phone").textContent = c.phone || "—";
+      document.getElementById("buyer-fulfill").textContent = order.pickupLabel || "—";
+      document.getElementById("buyer-slip").textContent = order.slipName || "—";
+
+      document.getElementById("order-items").innerHTML = (order.items || [])
+        .map(function (item) {
+          return (
+            '<article class="line-item"><img src="' +
+            item.image +
+            '" alt="" /><div><h3>' +
+            item.name +
+            '</h3><ul class="line-specs">' +
+            (item.specs || [])
+              .map(function (s) {
+                return "<li>" + s + "</li>";
+              })
+              .join("") +
+            "</ul></div></article>"
+          );
+        })
+        .join("");
+    })();
+  </script>
+</body>
+</html>

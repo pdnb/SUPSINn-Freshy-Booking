@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>แก้สินค้า — แอดมิน มรส. ชุดเฟรชชี่</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div class="app" data-od-id="shell">
+    <aside class="sidebar" data-chrome="sidebar" data-od-id="sidebar"></aside>
+    <div class="app-main">
+      <header class="topbar" data-chrome="topbar" data-od-id="topbar"></header>
+      <main class="canvas" id="admin-main" data-od-id="canvas"></main>
+    </div>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="assets/chrome.js"></script>
+  <script>
+    AdminChrome.mount({ active: "products" });
+    const state = AdminChrome.state();
+    const id = AdminChrome.queryParam("id");
+    const product = state.products.find((row) => row.id === id) || {
+      id: "p-new",
+      name: "",
+      price: "",
+      type: "simple",
+      active: false,
+      description: "",
+      sizes: ["S", "M", "L", "XL", "2XL"],
+      components: [],
+    };
+
+    document.getElementById("admin-main").innerHTML = `
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">${id ? "แก้สินค้า" : "เพิ่มสินค้า"}</h1>
+          <p class="page-sub">ชื่อและราคาจำเป็น — ไม่มี SKU หรือราคาต่อไซส์</p>
+        </div>
+        <a class="btn btn-ghost" href="admin-products.html">กลับรายการ</a>
+      </div>
+      <form class="panel" data-od-id="product-form" id="product-form">
+        <div class="panel-body grid-2">
+          <label class="field">ชื่อสินค้า *
+            <input class="input" id="field-name" name="name" required value="${product.name}" data-od-id="field-name" />
+            <span class="err" id="err-name" hidden>ต้องกรอกชื่อสินค้า</span>
+          </label>
+          <label class="field">ราคา (บาท) *
+            <input class="input" id="field-price" name="price" type="number" min="0" required value="${product.price}" data-od-id="field-price" />
+            <span class="err" id="err-price" hidden>ต้องกรอกราคา</span>
+          </label>
+          <label class="field">ชนิด
+            <select class="select" id="field-type" data-od-id="field-type">
+              <option value="simple" ${product.type === "simple" ? "selected" : ""}>ชิ้นเดียว</option>
+              <option value="bundle" ${product.type === "bundle" ? "selected" : ""}>ชุดคอมโบ</option>
+            </select>
+          </label>
+          <label class="field">สถานะ
+            <select class="select" id="field-active">
+              <option value="1" ${product.active ? "selected" : ""}>เผยแพร่</option>
+              <option value="0" ${!product.active ? "selected" : ""}>ฉบับร่าง</option>
+            </select>
+          </label>
+          <label class="field" style="grid-column:1/-1">คำอธิบาย
+            <textarea class="input" style="min-height:88px;padding:10px" data-od-id="field-description">${product.description || ""}</textarea>
+          </label>
+          <div class="field">
+            <span>รูปสินค้า</span>
+            <div class="media-slot" data-od-id="media-slot">ช่องรูป — อัปโหลดในแอปจริง</div>
+          </div>
+          <div class="field" id="options-block"></div>
+        </div>
+        <div class="panel-head" style="border-top:1px solid var(--border);border-bottom:0">
+          <span>บันทึกแล้วกลับรายการ</span>
+          <button type="submit" class="btn btn-primary" id="cta-publish" data-od-id="cta-publish" disabled>เผยแพร่</button>
+        </div>
+      </form>
+    `;
+
+    function renderOptions() {
+      const type = document.getElementById("field-type").value;
+      const block = document.getElementById("options-block");
+
+      if (type === "bundle") {
+        const parts = product.components.length ? product.components : ["ชุดนักศึกษา", "ชุดเฟรชชี่", "เสื้อกิจกรรม", "เครื่องหมาย"];
+        block.innerHTML = `<span>ชิ้นในชุด (เลือกไซส์ตอนขาย ไม่คิดราคาแยก)</span><ul>${parts.map((part) => `<li>${part}</li>`).join("")}</ul>`;
+        return;
+      }
+
+      const sizes = product.sizes && product.sizes.length ? product.sizes : ["S", "M", "L", "XL", "2XL"];
+      block.innerHTML = `<span>ไซส์</span><p>${sizes.map((size) => `<span class="pill">${size}</span> `).join("")}</p>`;
+    }
+
+    function validate() {
+      const name = document.getElementById("field-name").value.trim();
+      const price = document.getElementById("field-price").value.trim();
+      document.getElementById("err-name").hidden = name !== "";
+      document.getElementById("err-price").hidden = price !== "";
+      document.getElementById("cta-publish").disabled = name === "" || price === "";
+    }
+
+    document.getElementById("field-type").addEventListener("change", renderOptions);
+    document.getElementById("field-name").addEventListener("input", validate);
+    document.getElementById("field-price").addEventListener("input", validate);
+    document.getElementById("product-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      validate();
+      if (document.getElementById("cta-publish").disabled) {
+        return;
+      }
+
+      AdminChrome.toast("บันทึกตัวอย่างแล้ว — ไม่เขียนฐานข้อมูล");
+      window.location.href = "admin-products.html";
+    });
+    renderOptions();
+    validate();
+  </script>
+</body>
+</html>

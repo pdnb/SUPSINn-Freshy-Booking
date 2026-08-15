@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product editor · Meridian Commerce</title>
+  <link rel="stylesheet" href="admin-common.css" />
+</head>
+<body class="admin-app" data-page="product-edit">
+  <aside class="sidebar" data-od-id="sidebar"></aside>
+  <div class="admin-frame">
+    <header class="topbar" data-od-id="topbar"></header>
+    <main class="content" data-od-id="product-edit-main">
+      <div class="page-head">
+        <div>
+          <p class="meta"><a href="admin-products.html">Products</a> / Editor</p>
+          <h1 id="page-title" style="margin-top: 6px;">Edit product</h1>
+          <p class="sub">Required: title and price · <span class="sample-tag">Sample data</span></p>
+        </div>
+        <div class="row">
+          <button type="button" class="btn btn-secondary" id="save-draft" data-od-id="cta-save-draft">Save draft</button>
+          <button type="button" class="btn btn-primary" id="publish" data-od-id="cta-publish">Publish</button>
+        </div>
+      </div>
+
+      <form class="grid-2-1" id="product-form" novalidate>
+        <div class="stack">
+          <section class="panel" data-od-id="product-basics">
+            <div class="panel-head"><h2>Basics</h2></div>
+            <div class="panel-body stack">
+              <div class="field">
+                <label for="title">Title *</label>
+                <input class="input" id="title" name="title" required />
+                <span class="error" id="title-error" hidden>Title is required.</span>
+              </div>
+              <div class="field">
+                <label for="description">Description</label>
+                <textarea class="textarea" id="description" placeholder="Short product description for the storefront"></textarea>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="sku">SKU</label>
+                  <input class="input" id="sku" />
+                </div>
+                <div class="field">
+                  <label for="category">Category</label>
+                  <select class="select" id="category">
+                    <option>Bedding</option>
+                    <option>Kitchen</option>
+                    <option>Furniture</option>
+                    <option>Textiles</option>
+                    <option>Lighting</option>
+                    <option>Tabletop</option>
+                    <option>General</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" data-od-id="product-pricing">
+            <div class="panel-head"><h2>Pricing & inventory</h2></div>
+            <div class="panel-body stack">
+              <div class="field-row">
+                <div class="field">
+                  <label for="price">Price (USD) *</label>
+                  <input class="input" id="price" type="number" min="0" step="0.01" required />
+                  <span class="error" id="price-error" hidden>Enter a valid price.</span>
+                </div>
+                <div class="field">
+                  <label for="compare">Compare-at</label>
+                  <input class="input" id="compare" type="number" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="inventory">On hand</label>
+                  <input class="input" id="inventory" type="number" min="0" step="1" />
+                </div>
+                <div class="field">
+                  <label for="threshold">Low-stock threshold</label>
+                  <input class="input" id="threshold" type="number" min="0" step="1" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="variants">Variants (comma-separated)</label>
+                <input class="input" id="variants" placeholder="S, M, L" />
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel" data-od-id="product-media">
+          <div class="panel-head"><h2>Media</h2><span id="status-pill"></span></div>
+          <div class="panel-body stack">
+            <div class="ph-img wide" aria-label="Product media placeholder">Product media · placeholder</div>
+            <p class="meta">Media upload is stubbed in this prototype.</p>
+          </div>
+        </section>
+      </form>
+    </main>
+  </div>
+  <script src="admin-data.js"></script>
+  <script src="admin-app.js"></script>
+  <script>
+    let productId = null;
+
+    function readFields() {
+      return {
+        title: document.getElementById("title").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        sku: document.getElementById("sku").value.trim(),
+        category: document.getElementById("category").value,
+        price: Number(document.getElementById("price").value),
+        compareAt: document.getElementById("compare").value === "" ? null : Number(document.getElementById("compare").value),
+        inventory: Number(document.getElementById("inventory").value || 0),
+        threshold: Number(document.getElementById("threshold").value || 0),
+        variants: document.getElementById("variants").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+      };
+    }
+
+    function validate() {
+      const f = readFields();
+      let ok = true;
+      const titleErr = document.getElementById("title-error");
+      const priceErr = document.getElementById("price-error");
+      const titleInput = document.getElementById("title");
+      const priceInput = document.getElementById("price");
+      if (!f.title) {
+        titleErr.hidden = false; titleInput.classList.add("is-invalid"); ok = false;
+      } else {
+        titleErr.hidden = true; titleInput.classList.remove("is-invalid");
+      }
+      if (!(f.price > 0)) {
+        priceErr.hidden = false; priceInput.classList.add("is-invalid"); ok = false;
+      } else {
+        priceErr.hidden = true; priceInput.classList.remove("is-invalid");
+      }
+      document.getElementById("publish").disabled = !ok;
+      return ok;
+    }
+
+    function fill(p) {
+      document.getElementById("title").value = p.title || "";
+      document.getElementById("description").value = p.description || "";
+      document.getElementById("sku").value = p.sku || "";
+      document.getElementById("category").value = p.category || "General";
+      document.getElementById("price").value = p.price != null ? p.price : "";
+      document.getElementById("compare").value = p.compareAt != null ? p.compareAt : "";
+      document.getElementById("inventory").value = p.inventory != null ? p.inventory : 0;
+      document.getElementById("threshold").value = p.threshold != null ? p.threshold : 5;
+      document.getElementById("variants").value = (p.variants || []).join(", ");
+      document.getElementById("status-pill").innerHTML = AdminUI.statusPill(p.status || "draft");
+      document.getElementById("page-title").textContent = p.title ? p.title : "New product";
+      validate();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const id = AdminUI.qs("id");
+      if (!id || id === "new") {
+        productId = "PRD-" + (1100 + Meridian.state.products.length);
+        fill({ status: "draft", inventory: 0, threshold: 5, variants: [], category: "General" });
+      } else {
+        productId = id;
+        const p = Meridian.getProduct(id);
+        if (!p) {
+          fill({ status: "draft", inventory: 0, threshold: 5, variants: [], category: "General" });
+        } else {
+          fill(p);
+        }
+      }
+
+      ["title", "price"].forEach(function (id) {
+        document.getElementById(id).addEventListener("input", validate);
+      });
+
+      document.getElementById("save-draft").addEventListener("click", function () {
+        const fields = readFields();
+        fields.status = "draft";
+        Meridian.saveProductDraft(productId, fields);
+        productId = Meridian.state.products[0].id === productId ? productId : (Meridian.getProduct(productId) || Meridian.state.products[0]).id;
+        AdminUI.toast("Draft saved");
+        fill(Meridian.getProduct(productId));
+      });
+
+      document.getElementById("publish").addEventListener("click", function () {
+        if (!validate()) {
+          AdminUI.toast("Fix required fields before publishing");
+          return;
+        }
+        const published = Meridian.publishProduct(productId, readFields());
+        AdminUI.toast("Published " + published.title);
+        location.href = "admin-products.html";
+      });
+    });
+  </script>
+</body>
+</html>
