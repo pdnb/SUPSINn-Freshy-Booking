@@ -31,5 +31,11 @@ class AppServiceProvider extends ServiceProvider
                 ? Limit::none()
                 : Limit::perMinute(30)->by($request->ip());
         });
+
+        RateLimiter::for('line-session', function (Request $request) {
+            return app()->runningUnitTests()
+                ? Limit::none()
+                : Limit::perMinute(30)->by($request->ip());
+        });
     }
 }

@@ -65,6 +65,8 @@ test('admin login page shows lock icon beside title', function () {
     $html = $this->get('/admin/login')
         ->assertOk()
         ->assertSee('เข้าสู่ระบบแอดมิน', false)
+        ->assertSee('มรส. ชุดเฟรชชี่', false)
+        ->assertSee('ข้ามไปแบบฟอร์มเข้าสู่ระบบ', false)
         ->getContent();
 
     expect($html)->toContain('<svg');

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\OrderSlipController;
 use App\Http\Controllers\Admin\ProductionExportController;
 use App\Http\Controllers\GuestOrderSlipController;
+use App\Http\Controllers\LineSessionController;
 use App\Http\Middleware\HardenOrderTracking;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,9 @@ Route::get('/orders/{order}/slip', GuestOrderSlipController::class)
 Route::livewire('/orders/{order}/{token}', 'pages::storefront.order-confirmation')
     ->middleware(['throttle:order-tracking', HardenOrderTracking::class])
     ->name('orders.confirmation');
+Route::post('/line/session', LineSessionController::class)
+    ->middleware('throttle:line-session')
+    ->name('line.session');
 
 Route::middleware('guest')->group(function () {
     Route::livewire('/admin/login', 'pages::admin.login')->name('login');

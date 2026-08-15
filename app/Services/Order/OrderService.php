@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\Booking\BookingRoundService;
 use App\Services\Cart\CartService;
 use App\Services\Checkout\CheckoutService;
+use App\Services\Line\LineIdentityService;
 use App\Services\Payment\SlipVerificationService;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\UploadedFile;
@@ -26,6 +27,7 @@ class OrderService
         private CheckoutService $checkout,
         private SlipVerificationService $slips,
         private BookingRoundService $booking,
+        private LineIdentityService $line,
         private Session $session,
     ) {}
 
@@ -94,6 +96,7 @@ class OrderService
             $order = Order::query()->create([
                 'number' => $this->uniqueNumber(),
                 'tracking_token' => Str::random(40),
+                'line_user_id' => $this->line->userId(),
                 'student_id' => $draft['student_id'],
                 'full_name' => $draft['full_name'],
                 'faculty' => $draft['faculty'],

@@ -14,7 +14,9 @@ test('guests cannot visit the admin dashboard', function () {
 test('guests can view the admin login page', function () {
     $this->get('/admin/login')
         ->assertOk()
-        ->assertSee('เข้าสู่ระบบ', false);
+        ->assertSee('เข้าสู่ระบบ', false)
+        ->assertSee('มรส. ชุดเฟรชชี่', false)
+        ->assertSee('กลับหน้าร้าน', false);
 });
 
 test('the storefront stays public', function () {

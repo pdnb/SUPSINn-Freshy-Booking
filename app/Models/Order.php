@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 #[Fillable([
     'number',
     'tracking_token',
+    'line_user_id',
     'student_id',
     'full_name',
     'faculty',

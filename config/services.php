@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'line' => [
+        'liff_id' => env('LINE_LIFF_ID'),
+        'channel_id' => env('LINE_CHANNEL_ID'),
+    ],
+
 ];
