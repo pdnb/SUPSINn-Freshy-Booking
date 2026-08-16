@@ -35,8 +35,8 @@ test('a valid tracking link shows the guest order status', function () {
         'token' => $order->tracking_token,
     ]))
         ->assertOk()
-        ->assertSee('เลขที่จอง', false)
-        ->assertSee('คัดลอกเลขที่จอง FRTRACK01', false)
+        ->assertSee('รหัสออเดอร์', false)
+        ->assertSee('คัดลอกรหัสออเดอร์ FRTRACK01', false)
         ->assertSee('FRTRACK01', false)
         ->assertSee('รอเจ้าหน้าที่ตรวจสลิป', false)
         ->assertSee('สมชาย ติดตาม', false)

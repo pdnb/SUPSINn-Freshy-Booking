@@ -101,14 +101,14 @@ new #[Title('คำสั่งซื้อ')] class extends Component
 
         <section class="mt-4 rounded-brand border border-border bg-surface p-4">
             <p class="flex items-center justify-between gap-3 text-xs font-medium text-accent">
-                <span>เลขที่จอง</span>
+                <span>รหัสออเดอร์</span>
                 <button
                     type="button"
                     class="-mr-1 inline-flex min-h-11 items-center gap-1 rounded-brand px-1 hover:bg-bg"
                     x-data="{ copied: false }"
                     x-on:click="navigator.clipboard.writeText(@js($order->number)).then(() => { copied = true; setTimeout(() => copied = false, 1600) })"
-                    aria-label="คัดลอกเลขที่จอง {{ $order->number }}"
-                    x-bind:aria-label="copied ? 'คัดลอกเลขที่จองแล้ว' : @js('คัดลอกเลขที่จอง '.$order->number)"
+                    aria-label="คัดลอกรหัสออเดอร์ {{ $order->number }}"
+                    x-bind:aria-label="copied ? 'คัดลอกรหัสออเดอร์แล้ว' : @js('คัดลอกรหัสออเดอร์ '.$order->number)"
                 >
                     <span x-text="copied ? 'คัดลอกแล้ว' : @js($order->number)">{{ $order->number }}</span>
                     <x-icon name="clipboard-document" size="sm" />
