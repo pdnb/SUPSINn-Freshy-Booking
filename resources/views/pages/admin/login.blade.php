@@ -143,7 +143,6 @@ class extends Component
                         <span wire:loading.remove wire:target="authenticate">เข้าสู่ระบบ</span>
                         <span wire:loading wire:target="authenticate" class="inline-flex items-center gap-2">
                             <x-icon name="arrow-path" size="sm" class="animate-spin" />
-                            กำลังเข้าสู่ระบบ…
                         </span>
                     </button>
                 </form>

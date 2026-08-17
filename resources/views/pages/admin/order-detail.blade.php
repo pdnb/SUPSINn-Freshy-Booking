@@ -135,6 +135,10 @@ class extends Component
                             <dd>{{ $order->faculty }}</dd>
                         </div>
                         <div>
+                            <dt>สาขาวิชา</dt>
+                            <dd>{{ $order->major }}</dd>
+                        </div>
+                        <div>
                             <dt>โทร</dt>
                             <dd class="mono">{{ $order->phone }}</dd>
                         </div>

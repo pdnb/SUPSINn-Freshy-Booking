@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'student_id',
     'full_name',
     'faculty',
+    'major',
     'phone',
     'fulfillment',
     'address',

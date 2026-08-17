@@ -4,6 +4,7 @@ use App\Models\AdsBanner;
 use App\Models\ShippingRate;
 use App\Services\Ads\AdsBannerService;
 use App\Services\Shipping\ShippingRateService;
+use App\Services\Storefront\StorefrontLogoService;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -39,6 +40,10 @@ class extends Component
     public bool $showBannerDeleteConfirm = false;
 
     public ?int $bannerPendingDeleteId = null;
+
+    public ?TemporaryUploadedFile $logo_image = null;
+
+    public bool $showLogoClearConfirm = false;
 
     public function editRate(int $id, ShippingRateService $rates): void
     {
@@ -153,11 +158,41 @@ class extends Component
         $banners->move(AdsBanner::query()->findOrFail($id), $direction);
     }
 
-    public function render(ShippingRateService $rates, AdsBannerService $banners)
+    public function saveLogo(StorefrontLogoService $logo): void
+    {
+        try {
+            $logo->update($this->logo_image);
+            $this->logo_image = null;
+            session()->flash('status', 'บันทึกโลโก้แล้ว');
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+        }
+    }
+
+    public function openClearLogo(): void
+    {
+        $this->showLogoClearConfirm = true;
+        $this->tab = 'logo';
+    }
+
+    public function closeClearLogo(): void
+    {
+        $this->showLogoClearConfirm = false;
+    }
+
+    public function confirmClearLogo(StorefrontLogoService $logo): void
+    {
+        $logo->clear();
+        $this->closeClearLogo();
+        session()->flash('status', 'ลบโลโก้แล้ว — แสดงชื่อร้านแทน');
+    }
+
+    public function render(ShippingRateService $rates, AdsBannerService $banners, StorefrontLogoService $logo)
     {
         return $this->view([
             'rates' => $rates->list(),
             'banners' => $banners->list(),
+            'logoUrl' => $logo->url(),
         ]);
     }
 

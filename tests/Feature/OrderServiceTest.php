@@ -42,6 +42,7 @@ function readyToPay(): Product
         'student_id' => '67011234567',
         'full_name' => 'สมชาย ใจดี',
         'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+        'major' => 'วิทยาการคอมพิวเตอร์',
         'phone' => '0812345678',
         'fulfillment' => FulfillmentMethod::Bookstore->value,
     ]);
@@ -101,6 +102,7 @@ test('the same slip checksum cannot complete a second order', function () {
         'student_id' => '67011234567',
         'full_name' => 'สมชาย ใจดี',
         'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+        'major' => 'วิทยาการคอมพิวเตอร์',
         'phone' => '0812345678',
         'fulfillment' => FulfillmentMethod::Bookstore->value,
     ]);

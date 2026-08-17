@@ -4,10 +4,22 @@
 >
     ข้ามไปเนื้อหา
 </a>
+@php
+    $logoUrl = app(\App\Services\Storefront\StorefrontLogoService::class)->url();
+    $brandName = 'SRU Freshy Booking';
+@endphp
 <header class="bg-brand text-brand-fg">
     <div class="mx-auto flex min-h-[58px] max-w-lg items-center justify-between gap-3 px-4">
         <a href="{{ route('home') }}" class="min-h-11 inline-flex items-center text-base font-semibold hover:opacity-90">
-            มรส. ชุดเฟรชชี่
+            @if ($logoUrl)
+                <img
+                    src="{{ $logoUrl }}"
+                    alt="{{ $brandName }}"
+                    class="h-8 w-auto max-w-[180px] object-contain"
+                >
+            @else
+                {{ $brandName }}
+            @endif
         </a>
         <a
             href="{{ route('cart') }}"

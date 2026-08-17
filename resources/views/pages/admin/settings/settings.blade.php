@@ -2,13 +2,14 @@
     <div class="page-head">
         <div>
             <h1>ตั้งค่า</h1>
-            <p class="sub">เรทค่าส่งตามช่วงจำนวน และแบนเนอร์หน้าแรก</p>
+            <p class="sub">เรทค่าส่งตามช่วงจำนวน แบนเนอร์หน้าแรก และโลโก้หน้าร้าน</p>
         </div>
     </div>
 
     <div class="tabs" role="tablist">
         <button type="button" class="tab {{ $tab === 'shipping' ? 'is-active' : '' }}" wire:click="$set('tab', 'shipping')">ค่าส่ง</button>
         <button type="button" class="tab {{ $tab === 'banners' ? 'is-active' : '' }}" wire:click="$set('tab', 'banners')">แบนเนอร์</button>
+        <button type="button" class="tab {{ $tab === 'logo' ? 'is-active' : '' }}" wire:click="$set('tab', 'logo')">โลโก้</button>
     </div>
 
     @if ($tab === 'shipping')
@@ -61,7 +62,7 @@
                 </div>
             </form>
         </div>
-    @else
+    @elseif ($tab === 'banners')
         <div class="grid-2">
             <section class="panel">
                 <div class="panel-head">แบนเนอร์</div>
@@ -117,6 +118,39 @@
                 </div>
             </form>
         </div>
+    @else
+        <div class="grid-2">
+            <section class="panel">
+                <div class="panel-head">โลโก้ปัจจุบัน</div>
+                <div class="panel-body stack">
+                    @if ($logoUrl)
+                        <img class="media-thumb lg" src="{{ $logoUrl }}" alt="มรส. ชุดเฟรชชี่">
+                        <button type="button" class="btn btn-danger btn-sm" wire:click="openClearLogo">ลบโลโก้</button>
+                    @else
+                        <p class="empty">ไม่มีโลโก้ — header แสดงชื่อร้าน «มรส. ชุดเฟรชชี่»</p>
+                    @endif
+                </div>
+            </section>
+            <form class="panel" wire:submit="saveLogo">
+                <div class="panel-head">อัปโหลดโลโก้</div>
+                <div class="panel-body stack">
+                    <div class="field">
+                        <span class="field-caption">รูป</span>
+                        @if ($logo_image?->isPreviewable())
+                            <img class="media-thumb lg" src="{{ $logo_image->temporaryUrl() }}" alt="">
+                        @endif
+                        <x-admin.dropzone
+                            id="logo-image"
+                            model="logo_image"
+                            :multiple="false"
+                            title="ลากโลโก้มาวางที่นี่"
+                        />
+                        @error('image') <span class="error">{{ $message }}</span> @enderror
+                    </div>
+                    <button type="submit" class="btn btn-primary">บันทึกโลโก้</button>
+                </div>
+            </form>
+        </div>
     @endif
 
     <div class="overlay {{ $showBannerDeleteConfirm ? 'is-open' : '' }}" wire:click="closeDeleteBanner"></div>
@@ -133,6 +167,23 @@
         <div class="dialog-foot">
             <button type="button" class="btn btn-secondary" wire:click="closeDeleteBanner">ไม่ใช่</button>
             <button type="button" class="btn btn-danger" wire:click="confirmDeleteBanner">ยืนยันลบ</button>
+        </div>
+    </div>
+
+    <div class="overlay {{ $showLogoClearConfirm ? 'is-open' : '' }}" wire:click="closeClearLogo"></div>
+    <div class="dialog {{ $showLogoClearConfirm ? 'is-open' : '' }}" role="dialog" aria-modal="true" aria-labelledby="clear-logo-title">
+        <div class="dialog-head">
+            <h2 id="clear-logo-title">ลบโลโก้</h2>
+            <button type="button" class="icon-btn" wire:click="closeClearLogo" aria-label="ปิด">
+                <x-icon name="x-mark" size="sm" />
+            </button>
+        </div>
+        <div class="dialog-body">
+            <p>ต้องการลบโลโก้หรือไม่? header จะกลับไปแสดงชื่อร้านแทน</p>
+        </div>
+        <div class="dialog-foot">
+            <button type="button" class="btn btn-secondary" wire:click="closeClearLogo">ไม่ใช่</button>
+            <button type="button" class="btn btn-danger" wire:click="confirmClearLogo">ยืนยันลบ</button>
         </div>
     </div>
 </div>

@@ -136,6 +136,10 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                     <dd class="text-right">{{ $order->faculty }}</dd>
                 </div>
                 <div class="flex justify-between gap-3 border-b border-border py-2">
+                    <dt class="text-muted">สาขาวิชา</dt>
+                    <dd class="text-right">{{ $order->major }}</dd>
+                </div>
+                <div class="flex justify-between gap-3 border-b border-border py-2">
                     <dt class="text-muted">เบอร์โทร</dt>
                     <dd class="text-right">{{ $order->phone }}</dd>
                 </div>

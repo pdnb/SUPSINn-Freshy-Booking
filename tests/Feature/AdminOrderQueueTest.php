@@ -175,6 +175,7 @@ test('order detail summary shows full guest and money breakdown', function () {
         'full_name' => 'สมชาย ใจดี',
         'student_id' => '67019999999',
         'faculty' => 'คณะวิทยาการจัดการ',
+        'major' => 'การตลาด',
         'phone' => '0899999999',
         'fulfillment' => FulfillmentMethod::Post,
         'address' => "บ้านเลขที่ 1\nต.ขุนทะเล",
@@ -200,6 +201,7 @@ test('order detail summary shows full guest and money breakdown', function () {
         ->assertSee('สมชาย ใจดี', false)
         ->assertSee('67019999999', false)
         ->assertSee('คณะวิทยาการจัดการ', false)
+        ->assertSee('การตลาด', false)
         ->assertSee('0899999999', false)
         ->assertSee('จัดส่งทางไปรษณีย์', false)
         ->assertSee('บ้านเลขที่ 1', false)

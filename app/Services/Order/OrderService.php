@@ -100,6 +100,7 @@ class OrderService
                 'student_id' => $draft['student_id'],
                 'full_name' => $draft['full_name'],
                 'faculty' => $draft['faculty'],
+                'major' => $draft['major'],
                 'phone' => $draft['phone'],
                 'fulfillment' => $draft['fulfillment'],
                 'address' => $draft['address'] ?? null,

@@ -21,6 +21,7 @@ class OrderFactory extends Factory
             'student_id' => '67011234567',
             'full_name' => fake()->name(),
             'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+            'major' => 'วิทยาการคอมพิวเตอร์',
             'phone' => '0812345678',
             'fulfillment' => FulfillmentMethod::Bookstore,
             'address' => null,

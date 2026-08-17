@@ -96,6 +96,7 @@ test('placing an order copies the line user id from the session', function () {
         'student_id' => '67011234567',
         'full_name' => 'สมชาย ใจดี',
         'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+        'major' => 'วิทยาการคอมพิวเตอร์',
         'phone' => '0812345678',
         'fulfillment' => FulfillmentMethod::Bookstore->value,
     ]);
@@ -122,6 +123,7 @@ test('placing an order without a line session leaves line_user_id null', functio
         'student_id' => '67011234567',
         'full_name' => 'สมชาย ใจดี',
         'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+        'major' => 'วิทยาการคอมพิวเตอร์',
         'phone' => '0812345678',
         'fulfillment' => FulfillmentMethod::Bookstore->value,
     ]);

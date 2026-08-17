@@ -182,7 +182,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                 <h2 class="text-base font-semibold">ขั้นตอนสั้น ๆ</h2>
                 <ol class="mt-3 space-y-2 text-sm">
                     <li>1. เลือกสินค้าและไซส์</li>
-                    <li>2. กรอกรหัสนักศึกษา · ชื่อ · คณะ · เบอร์โทร</li>
+                    <li>2. กรอกรหัสนักศึกษา · ชื่อ · คณะ · สาขาวิชา · เบอร์โทร</li>
                     <li>3. เลือกรับเองหรือไปรษณีย์</li>
                     <li>4. สแกน PromptPay และแนบสลิป</li>
                 </ol>

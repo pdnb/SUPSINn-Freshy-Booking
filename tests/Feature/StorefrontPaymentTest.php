@@ -28,6 +28,7 @@ function payPageReady(): void
         'student_id' => '67011234567',
         'full_name' => 'สมชาย ใจดี',
         'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+        'major' => 'วิทยาการคอมพิวเตอร์',
         'phone' => '0812345678',
         'fulfillment' => FulfillmentMethod::Bookstore->value,
     ]);

@@ -16,6 +16,8 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 
     public string $faculty = '';
 
+    public string $major = '';
+
     public string $phone = '';
 
     public string $fulfillment = 'bookstore';
@@ -49,6 +51,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
         $this->student_id = (string) ($draft['student_id'] ?? '');
         $this->full_name = (string) ($draft['full_name'] ?? '');
         $this->faculty = (string) ($draft['faculty'] ?? '');
+        $this->major = (string) ($draft['major'] ?? '');
         $this->phone = (string) ($draft['phone'] ?? '');
         $this->fulfillment = (string) ($draft['fulfillment'] ?? FulfillmentMethod::Bookstore->value);
         $this->address_line = (string) ($draft['address_line'] ?? '');
@@ -65,6 +68,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
             'student_id' => $this->student_id,
             'full_name' => $this->full_name,
             'faculty' => $this->faculty,
+            'major' => $this->major,
             'phone' => $this->phone,
             'fulfillment' => $this->fulfillment,
             'address_line' => $this->address_line !== '' ? $this->address_line : null,
@@ -152,6 +156,12 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                         @endforeach
                     </select>
                     @error('faculty') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="major" class="block text-sm font-medium">สาขาวิชา</label>
+                    <input id="major" type="text" autocomplete="organization-title" wire:model="major" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="เช่น วิทยาการคอมพิวเตอร์">
+                    @error('major') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
