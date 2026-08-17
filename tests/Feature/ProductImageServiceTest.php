@@ -6,6 +6,7 @@ use App\Services\Catalog\ProductImageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 
@@ -29,6 +30,17 @@ test('add images stores files on the public disk and continues sort order', func
     foreach ($images as $image) {
         Storage::disk('public')->assertExists($image->path);
     }
+});
+
+test('add images rejects files that are not jpg jpeg png or webp', function () {
+    Storage::fake('public');
+    $product = Product::factory()->create();
+
+    expect(fn () => app(ProductImageService::class)->addImages($product, [
+        UploadedFile::fake()->create('notes.pdf', 100, 'application/pdf'),
+    ]))->toThrow(ValidationException::class);
+
+    expect($product->images()->count())->toBe(0);
 });
 
 test('delete image removes the row and the file from disk', function () {

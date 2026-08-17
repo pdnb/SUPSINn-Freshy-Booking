@@ -13,21 +13,32 @@ class ProductImageService
 {
     /**
      * @param  list<UploadedFile>  $files
+     * @return list<UploadedFile>
      */
-    public function addImages(Product $product, array $files): void
+    public function validated(array $files): array
     {
+        /** @var array{images?: list<UploadedFile>} $payload */
         $payload = Validator::make(['images' => $files], [
             'images' => ['array'],
-            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ], [
             'images.*.image' => 'ไฟล์ที่อัปโหลดต้องเป็นรูปภาพ',
             'images.*.mimes' => 'รองรับเฉพาะไฟล์ jpg, jpeg, png, webp',
-            'images.*.max' => 'รูปต้องมีขนาดไม่เกิน 4MB',
+            'images.*.max' => 'รูปต้องมีขนาดไม่เกิน 5 MB',
         ])->validate();
 
+        return array_values($payload['images'] ?? []);
+    }
+
+    /**
+     * @param  list<UploadedFile>  $files
+     */
+    public function addImages(Product $product, array $files): void
+    {
+        $files = $this->validated($files);
         $sortOrder = (int) $product->images()->max('sort_order');
 
-        foreach ($payload['images'] ?? [] as $file) {
+        foreach ($files as $file) {
             $product->images()->create([
                 'path' => $file->store('product-images', 'public'),
                 'sort_order' => ++$sortOrder,

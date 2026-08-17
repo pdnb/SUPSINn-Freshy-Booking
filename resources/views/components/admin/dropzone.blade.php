@@ -33,12 +33,13 @@
         @if ($multiple) multiple @endif
         accept="{{ $accept }}"
     >
-    <div class="dropzone-body" wire:loading.remove wire:target="{{ $model }}">
-        <x-icon name="photo" size="md" />
-        <strong>{{ $title }}</strong>
-        <span class="muted">{{ $hint }}</span>
-    </div>
-    <div class="dropzone-body" wire:loading.flex wire:target="{{ $model }}">
-        <span class="muted">กำลังอัปโหลด...</span>
+    <div class="dropzone-body">
+        <div wire:loading.remove wire:target="{{ $model }}">
+            <strong>{{ $title }}</strong>
+            <span class="muted">{{ $hint }}</span>
+        </div>
+        <div wire:loading.block wire:target="{{ $model }}">
+            <span class="muted">กำลังอัปโหลด...</span>
+        </div>
     </div>
 </label>

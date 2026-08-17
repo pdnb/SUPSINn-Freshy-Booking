@@ -14,7 +14,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 new #[Layout('layouts.admin')]
-#[Title('แก้สินค้า')]
+#[Title('แก้ไขสินค้า')]
 class extends Component
 {
     use WithFileUploads;
@@ -301,6 +301,8 @@ class extends Component
     private function persist(CatalogService $catalog, ProductImageService $images, string $message): void
     {
         try {
+            $pendingUploads = $this->uploads !== [] ? $images->validated($this->uploads) : [];
+
             $payload = [
                 'name' => $this->name,
                 'description' => $this->description !== '' ? $this->description : null,
@@ -319,8 +321,8 @@ class extends Component
                 ? $catalog->create($payload)
                 : $catalog->update(Product::query()->findOrFail($this->productId), $payload);
 
-            if ($this->uploads !== []) {
-                $images->addImages($product, $this->uploads);
+            if ($pendingUploads !== []) {
+                $images->addImages($product, $pendingUploads);
                 $this->uploads = [];
             }
 

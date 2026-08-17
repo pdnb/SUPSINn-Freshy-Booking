@@ -7,6 +7,8 @@ use App\Models\Product;
 use App\Models\ShippingRate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -74,6 +76,24 @@ test('staff can create a product from the admin editor', function () {
 
     expect($product)->not->toBeNull()
         ->and($product->is_active)->toBeTrue();
+});
+
+test('product editor shows image validation messages and does not create the product', function () {
+    Storage::fake('public');
+    $staff = User::factory()->create();
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.product-edit')
+        ->set('name', 'เข็มมีรูปไม่ถูกต้อง')
+        ->set('price', '50')
+        ->set('type', 'simple')
+        ->set('optionGroups', [])
+        ->set('uploads', [UploadedFile::fake()->create('notes.pdf', 100, 'application/pdf')])
+        ->call('publish')
+        ->assertHasErrors('images.0')
+        ->assertSee('ไฟล์ที่อัปโหลดต้องเป็นรูปภาพ', false);
+
+    expect(Product::query()->where('name', 'เข็มมีรูปไม่ถูกต้อง')->exists())->toBeFalse();
 });
 
 test('staff can save a product as draft from the admin editor', function () {

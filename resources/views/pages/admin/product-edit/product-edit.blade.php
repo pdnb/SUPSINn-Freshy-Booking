@@ -176,9 +176,13 @@
                     </div>
                 @endif
 
-                <x-admin.dropzone id="product-uploads" model="uploads" />
-                @error('uploads') <span class="error">{{ $message }}</span> @enderror
-                @error('uploads.*') <span class="error">{{ $message }}</span> @enderror
+                <div class="field">
+                    <x-admin.dropzone id="product-uploads" model="uploads" />
+                    @error('images') <span class="error">{{ $message }}</span> @enderror
+                    @error('images.*') <span class="error">{{ $message }}</span> @enderror
+                    @error('uploads') <span class="error">{{ $message }}</span> @enderror
+                    @error('uploads.*') <span class="error">{{ $message }}</span> @enderror
+                </div>
                 <p class="meta">สต็อกมีของจัดการที่หน้าสต็อก — ไม่ใส่ในแคตตาล็อก</p>
             </div>
         </section>
