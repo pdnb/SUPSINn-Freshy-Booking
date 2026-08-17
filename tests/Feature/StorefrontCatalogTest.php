@@ -51,6 +51,18 @@ test('the home page explains that booking is closed when no round is open', func
         ->assertDontSee('เพิ่มตะกร้า', false);
 });
 
+test('the home page shows the short booking steps when a round is open', function () {
+    openBookingRound([storefrontShirt()]);
+
+    Livewire::test('pages::storefront.home')
+        ->assertSee('ขั้นตอนสั้น ๆ', false)
+        ->assertSee('เลือกสินค้าและไซส์', false)
+        ->assertSee('กรอกรายละเอียดนักศึกษา', false)
+        ->assertSee('เลือกรับเองหรือไปรษณีย์', false)
+        ->assertSee('สแกนชำระเงินและแนบสลิป', false)
+        ->assertSee('aria-labelledby="home-steps-heading"', false);
+});
+
 test('the home page lists only products in an open booking round', function () {
     $onSale = storefrontShirt();
     $notInRound = app(CatalogService::class)->create([

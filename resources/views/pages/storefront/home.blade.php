@@ -178,13 +178,66 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                 @endif
             </section>
 
-            <section class="mt-8 rounded-brand border border-border bg-surface p-5">
-                <h2 class="text-base font-semibold">ขั้นตอนสั้น ๆ</h2>
-                <ol class="mt-3 space-y-2 text-sm">
-                    <li>1. เลือกสินค้าและไซส์</li>
-                    <li>2. กรอกรหัสนักศึกษา · ชื่อ · คณะ · สาขาวิชา · เบอร์โทร</li>
-                    <li>3. เลือกรับเองหรือไปรษณีย์</li>
-                    <li>4. สแกน PromptPay และแนบสลิป</li>
+            <section class="mt-8 rounded-brand border border-border bg-surface p-5" aria-labelledby="home-steps-heading">
+                <h2 id="home-steps-heading" class="text-base font-semibold">ขั้นตอนการจอง</h2>
+                <p class="mt-1 text-sm text-muted">จองครบใน 4 ขั้น ไม่ต้องสมัครบัญชี</p>
+
+                <ol class="mt-5">
+                    <li class="relative flex gap-3 pb-5">
+                        <div class="flex w-9 shrink-0 flex-col items-center" aria-hidden="true">
+                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-fg">1</span>
+                            <span class="mt-2 w-px flex-1 bg-border"></span>
+                        </div>
+                        <div class="min-w-0 flex-1 pt-1">
+                            <div class="flex items-start gap-2">
+                                <div>
+                                    <p class="font-medium leading-snug">เลือกสินค้าและไซส์</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-muted">เลือกชุดหรือสินค้าแยก แล้วใส่ตะกร้า</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="relative flex gap-3 pb-5">
+                        <div class="flex w-9 shrink-0 flex-col items-center" aria-hidden="true">
+                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-fg">2</span>
+                            <span class="mt-2 w-px flex-1 bg-border"></span>
+                        </div>
+                        <div class="min-w-0 flex-1 pt-1">
+                            <div class="flex items-start gap-2">
+                                <div>
+                                    <p class="font-medium leading-snug">กรอกรายละเอียดนักศึกษา</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-muted">ชื่อ รหัส และข้อมูลติดต่อสำหรับรับของ</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="relative flex gap-3 pb-5">
+                        <div class="flex w-9 shrink-0 flex-col items-center" aria-hidden="true">
+                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-fg">3</span>
+                            <span class="mt-2 w-px flex-1 bg-border"></span>
+                        </div>
+                        <div class="min-w-0 flex-1 pt-1">
+                            <div class="flex items-start gap-2">
+                                <div>
+                                    <p class="font-medium leading-snug">เลือกรับเองหรือไปรษณีย์</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-muted">รับที่ศูนย์หนังสือฯ / หอประชุมฯ หรือจัดส่ง</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="relative flex gap-3">
+                        <div class="flex w-9 shrink-0 flex-col items-center" aria-hidden="true">
+                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-fg">4</span>
+                        </div>
+                        <div class="min-w-0 flex-1 pt-1">
+                            <div class="flex items-start gap-2">
+                                <div>
+                                    <p class="font-medium leading-snug">สแกนชำระเงินและแนบสลิป</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-muted">ชำระตามยอด แล้วอัปโหลดสลิปเพื่อยืนยัน</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
                 </ol>
             </section>
         @endif
