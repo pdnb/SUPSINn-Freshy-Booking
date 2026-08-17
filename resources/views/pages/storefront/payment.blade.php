@@ -93,7 +93,7 @@ new #[Title('ชำระเงิน')] class extends Component
                 </div>
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดที่ต้องชำระตอนนี้</span>
-                    <span>฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</span>
+                    <span class="text-accent">฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</span>
                 </div>
                 @if (($draft['payment_mode'] ?? 'full') === \App\Enums\PaymentMode::Deposit->value)
                     <div class="mt-2 flex justify-between gap-3 text-sm text-muted">
@@ -109,8 +109,11 @@ new #[Title('ชำระเงิน')] class extends Component
             </section>
 
             <section class="mt-4 rounded-brand border border-border bg-surface p-5 text-center">
-                <p class="text-sm text-muted">PromptPay QR</p>
-                <p class="mt-1 font-semibold">สแกนเพื่อชำระเงิน</p>
+                <img
+                    src="{{ asset('images/Thai_QR_Logo.svg') }}"
+                    alt="Thai QR Payment"
+                    class="mx-auto h-8 w-auto"
+                >
                 @if ($promptpayQrDataUri)
                     <img
                         src="{{ $promptpayQrDataUri }}"
@@ -122,7 +125,7 @@ new #[Title('ชำระเงิน')] class extends Component
                 @endif
                 <p class="mt-3 text-sm">{{ $promptpayName }}</p>
                 <p class="font-medium tracking-wide">{{ $promptpayId }}</p>
-                <p class="mt-2 text-sm text-muted">ยอด ฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</p>
+                <p class="mt-2 text-sm text-accent">฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</p>
             </section>
 
             <p class="mt-4 text-sm text-muted" id="slip-hint">ต้องแนบสลิปก่อนกดยืนยันการจอง</p>
