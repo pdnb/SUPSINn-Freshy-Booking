@@ -1,9 +1,11 @@
 <?php
 
 use App\Enums\FulfillmentMethod;
+use App\Enums\PaymentMode;
 use App\Models\Product;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\CatalogService;
+use App\Services\Checkout\DepositSettingService;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -82,4 +84,19 @@ test('checkout postage adds shipping to the payable total', function () {
         ->assertSee('400.00')
         ->call('save')
         ->assertRedirect(route('pay'));
+});
+
+test('checkout offers deposit for pickup when the cart exceeds the deposit amount', function () {
+    $shirt = pageShirt();
+    openBookingRound([$shirt]);
+    app(CartService::class)->add($shirt, ['options' => ['size' => 'M']], 3);
+    app(DepositSettingService::class)->update('500');
+
+    Livewire::test('pages::storefront.checkout')
+        ->set('fulfillment', FulfillmentMethod::Bookstore->value)
+        ->assertSee('การชำระเงิน')
+        ->assertSee('มัดจำ')
+        ->set('payment_mode', PaymentMode::Deposit->value)
+        ->assertSee('500.00')
+        ->assertSee('550.00');
 });

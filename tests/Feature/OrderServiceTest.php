@@ -2,12 +2,14 @@
 
 use App\Enums\FulfillmentMethod;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMode;
 use App\Models\Order;
 use App\Models\PaymentSlip;
 use App\Models\Product;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\CatalogService;
 use App\Services\Checkout\CheckoutService;
+use App\Services\Checkout\DepositSettingService;
 use App\Services\Order\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -59,6 +61,9 @@ test('a passing slip creates a pending review order without locking stock', func
     expect($order->status)->toBe(OrderStatus::PendingReview)
         ->and($order->slip)->not->toBeNull()
         ->and($order->items)->toHaveCount(1)
+        ->and($order->payment_mode)->toBe(PaymentMode::Full)
+        ->and($order->amount_due_now)->toBe('350.00')
+        ->and($order->amount_remaining)->toBe('0.00')
         ->and($shirt->fresh()->is_active)->toBeTrue()
         ->and(app(CartService::class)->items())->toHaveCount(0)
         ->and(session('order.tracking'))->toMatchArray([
@@ -67,6 +72,31 @@ test('a passing slip creates a pending review order without locking stock', func
         ]);
 
     Storage::disk('local')->assertExists($order->slip->path);
+});
+
+test('placing with deposit stores due and remaining amounts', function () {
+    Storage::fake('local');
+    $shirt = paymentShirt();
+    openBookingRound([$shirt]);
+    app(CartService::class)->add($shirt, ['options' => ['size' => 'M']], 3);
+    app(DepositSettingService::class)->update('500');
+    app(CheckoutService::class)->save([
+        'student_id' => '67011234567',
+        'full_name' => 'สมชาย ใจดี',
+        'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+        'major' => 'วิทยาการคอมพิวเตอร์',
+        'phone' => '0812345678',
+        'fulfillment' => FulfillmentMethod::Bookstore->value,
+        'payment_mode' => PaymentMode::Deposit->value,
+    ]);
+
+    $order = orders()->place(UploadedFile::fake()->image('deposit-slip.jpg'));
+
+    expect($order->payment_mode)->toBe(PaymentMode::Deposit)
+        ->and($order->total)->toBe('1050.00')
+        ->and($order->amount_due_now)->toBe('500.00')
+        ->and($order->amount_remaining)->toBe('550.00')
+        ->and($order->balance_collected_at)->toBeNull();
 });
 
 test('a failing slip is rejected and no order is created', function () {

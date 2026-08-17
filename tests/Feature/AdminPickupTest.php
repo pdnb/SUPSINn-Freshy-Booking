@@ -63,6 +63,27 @@ test('staff can mark a ready order as picked up', function () {
         ->and($order->fresh()->receipt_issued_at)->not->toBeNull();
 });
 
+test('staff must collect the remaining deposit balance before pickup completion', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->deposit()->create([
+        'status' => OrderStatus::ReadyForPickup,
+        'number' => 'FRDEP001',
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.pickup')
+        ->set('search', 'FRDEP001')
+        ->call('select', $order->id)
+        ->assertSee('บันทึกเก็บส่วนที่เหลือ', false)
+        ->assertDontSeeHtml('wire:click="markPickedUp"')
+        ->call('collectBalance')
+        ->assertSee('รับของแล้ว', false)
+        ->call('markPickedUp');
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Completed)
+        ->and($order->fresh()->balance_collected_at)->not->toBeNull();
+});
+
 test('staff can mark a confirmed bookstore order ready for pickup', function () {
     $staff = User::factory()->create();
     $order = Order::factory()->create([

@@ -3,6 +3,7 @@
 namespace App\Services\Checkout;
 
 use App\Enums\FulfillmentMethod;
+use App\Enums\PaymentMode;
 use App\Services\Cart\CartService;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Contracts\Session\Session;
@@ -15,6 +16,7 @@ class CheckoutService
     public function __construct(
         private CartService $cart,
         private ShippingRateService $shipping,
+        private DepositSettingService $deposit,
         private Session $session,
     ) {}
 
@@ -39,7 +41,7 @@ class CheckoutService
     /**
      * @return array<string, mixed>
      */
-    public function quote(?string $fulfillment = null, ?int $shippingRateId = null): array
+    public function quote(?string $fulfillment = null, ?int $shippingRateId = null, ?string $paymentMode = null): array
     {
         $this->cart->assertAvailable();
 
@@ -68,14 +70,36 @@ class CheckoutService
             $rateName = $rate->name;
         }
 
+        $total = number_format((float) $subtotal + (float) $shipping, 2, '.', '');
+        $payable = $this->resolvePayable($method, $total, $paymentMode);
+
         return [
             'subtotal' => $subtotal,
             'shipping' => $shipping,
-            'total' => number_format((float) $subtotal + (float) $shipping, 2, '.', ''),
+            'total' => $total,
             'fulfillment' => $method->value,
             'shipping_rate_id' => $rateId,
             'shipping_rate_name' => $rateName,
+            ...$payable,
         ];
+    }
+
+    public function depositAmount(): string
+    {
+        return $this->deposit->amount();
+    }
+
+    public function depositEligible(string $fulfillment, string $total): bool
+    {
+        $method = FulfillmentMethod::tryFrom($fulfillment);
+
+        if ($method === null || $method->chargesShipping()) {
+            return false;
+        }
+
+        $deposit = (float) $this->deposit->amount();
+
+        return $deposit > 0 && (float) $total > $deposit;
     }
 
     /**
@@ -88,6 +112,7 @@ class CheckoutService
         $quote = $this->quote(
             $payload['fulfillment'],
             isset($payload['shipping_rate_id']) ? (int) $payload['shipping_rate_id'] : null,
+            $payload['payment_mode'] ?? PaymentMode::Full->value,
         );
 
         $draft = [
@@ -131,6 +156,32 @@ class CheckoutService
     }
 
     /**
+     * @return array{payment_mode: string, amount_due_now: string, amount_remaining: string}
+     */
+    private function resolvePayable(FulfillmentMethod $method, string $total, ?string $paymentMode): array
+    {
+        $mode = PaymentMode::tryFrom($paymentMode ?? PaymentMode::Full->value) ?? PaymentMode::Full;
+        $wantsDeposit = $mode === PaymentMode::Deposit
+            && $this->depositEligible($method->value, $total);
+
+        if ($wantsDeposit) {
+            $deposit = $this->deposit->amount();
+
+            return [
+                'payment_mode' => PaymentMode::Deposit->value,
+                'amount_due_now' => $deposit,
+                'amount_remaining' => number_format((float) $total - (float) $deposit, 2, '.', ''),
+            ];
+        }
+
+        return [
+            'payment_mode' => PaymentMode::Full->value,
+            'amount_due_now' => $total,
+            'amount_remaining' => '0.00',
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
@@ -145,6 +196,7 @@ class CheckoutService
             'major' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'regex:/^0\d{8,9}$/'],
             'fulfillment' => ['required', Rule::enum(FulfillmentMethod::class)],
+            'payment_mode' => ['nullable', Rule::enum(PaymentMode::class)],
             'address_line' => [$isPost ? 'required' : 'nullable', 'string', 'max:500'],
             'subdistrict' => [$isPost ? 'required' : 'nullable', 'string', 'max:120'],
             'district' => [$isPost ? 'required' : 'nullable', 'string', 'max:120'],
@@ -177,6 +229,8 @@ class CheckoutService
             $validated['province'] = null;
             $validated['postcode'] = null;
         }
+
+        $validated['payment_mode'] = $validated['payment_mode'] ?? PaymentMode::Full->value;
 
         return $validated;
     }

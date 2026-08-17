@@ -3,6 +3,7 @@
 use App\Models\AdsBanner;
 use App\Models\ShippingRate;
 use App\Services\Ads\AdsBannerService;
+use App\Services\Checkout\DepositSettingService;
 use App\Services\Shipping\ShippingRateService;
 use App\Services\Storefront\StorefrontLogoService;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +19,7 @@ class extends Component
 {
     use WithFileUploads;
 
-    public string $tab = 'shipping';
+    public string $tab = 'banners';
 
     public ?int $rateId = null;
 
@@ -44,6 +45,13 @@ class extends Component
     public ?TemporaryUploadedFile $logo_image = null;
 
     public bool $showLogoClearConfirm = false;
+
+    public string $deposit_amount = '0.00';
+
+    public function mount(DepositSettingService $deposit): void
+    {
+        $this->deposit_amount = $deposit->amount();
+    }
 
     public function editRate(int $id, ShippingRateService $rates): void
     {
@@ -185,6 +193,17 @@ class extends Component
         $logo->clear();
         $this->closeClearLogo();
         session()->flash('status', 'ลบโลโก้แล้ว — แสดงชื่อร้านแทน');
+    }
+
+    public function saveDeposit(DepositSettingService $deposit): void
+    {
+        try {
+            $deposit->update($this->deposit_amount);
+            $this->deposit_amount = $deposit->amount();
+            session()->flash('status', 'บันทึกจำนวนมัดจำแล้ว');
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+        }
     }
 
     public function render(ShippingRateService $rates, AdsBannerService $banners, StorefrontLogoService $logo)

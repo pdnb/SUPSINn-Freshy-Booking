@@ -1,10 +1,12 @@
 <?php
 
 use App\Enums\FulfillmentMethod;
+use App\Enums\PaymentMode;
 use App\Models\Product;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\CatalogService;
 use App\Services\Checkout\CheckoutService;
+use App\Services\Checkout\DepositSettingService;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -202,3 +204,45 @@ test('checkout is rejected when the booking round is no longer open', function (
 
     checkout()->save(validBuyer());
 })->throws(ValidationException::class);
+
+test('pickup deposit quote uses the fixed deposit amount', function () {
+    $shirt = fillCheckoutCart();
+    app(CartService::class)->add($shirt, ['options' => ['size' => 'L']], 2);
+    app(DepositSettingService::class)->update('500');
+
+    $quote = checkout()->quote(FulfillmentMethod::Bookstore->value, null, PaymentMode::Deposit->value);
+
+    expect($quote['total'])->toBe('1050.00')
+        ->and($quote['payment_mode'])->toBe(PaymentMode::Deposit->value)
+        ->and($quote['amount_due_now'])->toBe('500.00')
+        ->and($quote['amount_remaining'])->toBe('550.00');
+});
+
+test('post fulfillment forces full payment even when deposit is requested', function () {
+    fillCheckoutCart();
+    app(ShippingRateService::class)->create([
+        'name' => 'ทั่วประเทศ',
+        'amount' => '50',
+        'is_active' => true,
+    ]);
+    app(DepositSettingService::class)->update('100');
+
+    $quote = checkout()->quote(FulfillmentMethod::Post->value, null, PaymentMode::Deposit->value);
+
+    expect($quote['payment_mode'])->toBe(PaymentMode::Full->value)
+        ->and($quote['amount_due_now'])->toBe('400.00')
+        ->and($quote['amount_remaining'])->toBe('0.00');
+});
+
+test('deposit is not offered when the order total is not greater than the deposit', function () {
+    fillCheckoutCart();
+    app(DepositSettingService::class)->update('500');
+
+    $quote = checkout()->quote(FulfillmentMethod::Bookstore->value, null, PaymentMode::Deposit->value);
+
+    expect($quote['total'])->toBe('350.00')
+        ->and($quote['payment_mode'])->toBe(PaymentMode::Full->value)
+        ->and($quote['amount_due_now'])->toBe('350.00')
+        ->and($quote['amount_remaining'])->toBe('0.00')
+        ->and(checkout()->depositEligible(FulfillmentMethod::Bookstore->value, '350.00'))->toBeFalse();
+});

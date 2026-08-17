@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\FulfillmentMethod;
+use App\Enums\PaymentMode;
 use App\Services\Cart\CartService;
 use App\Services\Checkout\CheckoutService;
 use App\Services\Shipping\ShippingRateService;
@@ -21,6 +22,8 @@ new #[Title('ข้อมูลการจอง')] class extends Component
     public string $phone = '';
 
     public string $fulfillment = 'bookstore';
+
+    public string $payment_mode = 'full';
 
     public string $address_line = '';
 
@@ -54,12 +57,20 @@ new #[Title('ข้อมูลการจอง')] class extends Component
         $this->major = (string) ($draft['major'] ?? '');
         $this->phone = (string) ($draft['phone'] ?? '');
         $this->fulfillment = (string) ($draft['fulfillment'] ?? FulfillmentMethod::Bookstore->value);
+        $this->payment_mode = (string) ($draft['payment_mode'] ?? PaymentMode::Full->value);
         $this->address_line = (string) ($draft['address_line'] ?? '');
         $this->subdistrict = (string) ($draft['subdistrict'] ?? '');
         $this->district = (string) ($draft['district'] ?? '');
         $this->province = (string) ($draft['province'] ?? '');
         $this->postcode = (string) ($draft['postcode'] ?? '');
         $this->shipping_rate_id = isset($draft['shipping_rate_id']) ? (string) $draft['shipping_rate_id'] : '';
+    }
+
+    public function updatedFulfillment(): void
+    {
+        if ($this->fulfillment === FulfillmentMethod::Post->value) {
+            $this->payment_mode = PaymentMode::Full->value;
+        }
     }
 
     public function save(CheckoutService $checkout): void
@@ -71,6 +82,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
             'major' => $this->major,
             'phone' => $this->phone,
             'fulfillment' => $this->fulfillment,
+            'payment_mode' => $this->payment_mode,
             'address_line' => $this->address_line !== '' ? $this->address_line : null,
             'subdistrict' => $this->subdistrict !== '' ? $this->subdistrict : null,
             'district' => $this->district !== '' ? $this->district : null,
@@ -88,6 +100,9 @@ new #[Title('ข้อมูลการจอง')] class extends Component
             'subtotal' => $cart->subtotal(),
             'shipping' => '0.00',
             'total' => $cart->subtotal(),
+            'payment_mode' => PaymentMode::Full->value,
+            'amount_due_now' => $cart->subtotal(),
+            'amount_remaining' => '0.00',
         ];
 
         try {
@@ -95,10 +110,20 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 $quote = $checkout->quote(
                     $this->fulfillment,
                     $this->shipping_rate_id !== '' ? (int) $this->shipping_rate_id : null,
+                    $this->payment_mode,
                 );
             }
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->getMessageBag());
+        }
+
+        $depositEligible = $checkout->depositEligible($this->fulfillment, (string) $quote['total']);
+
+        if (! $depositEligible && $this->payment_mode === PaymentMode::Deposit->value) {
+            $this->payment_mode = PaymentMode::Full->value;
+            $quote['payment_mode'] = PaymentMode::Full->value;
+            $quote['amount_due_now'] = $quote['total'];
+            $quote['amount_remaining'] = '0.00';
         }
 
         return $this->view([
@@ -107,6 +132,8 @@ new #[Title('ข้อมูลการจอง')] class extends Component
             'rates' => $shipping->active(),
             'quote' => $quote,
             'isPost' => $this->fulfillment === FulfillmentMethod::Post->value,
+            'depositEligible' => $depositEligible,
+            'depositAmount' => $checkout->depositAmount(),
             'cartCount' => $cart->count(),
         ]);
     }
@@ -226,6 +253,30 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 @endif
             </section>
 
+            @if ($depositEligible)
+                <section class="space-y-4 rounded-brand border border-border bg-surface p-4">
+                    <h2 class="text-base font-semibold">การชำระเงิน</h2>
+                    <p class="text-sm text-muted">เลือกจ่ายเต็มตอนนี้ หรือมัดจำแล้วชำระส่วนที่เหลือตอนรับสินค้า</p>
+                    <div class="space-y-2" role="radiogroup" aria-label="การชำระเงิน">
+                        <label class="flex min-h-11 items-start gap-3 rounded-brand border border-border p-3">
+                            <input type="radio" wire:model.live="payment_mode" value="{{ \App\Enums\PaymentMode::Full->value }}" class="mt-1">
+                            <span>
+                                <span class="block font-medium">จ่ายเต็ม</span>
+                                <span class="block text-sm text-muted">฿{{ number_format((float) $quote['total'], 2) }}</span>
+                            </span>
+                        </label>
+                        <label class="flex min-h-11 items-start gap-3 rounded-brand border border-border p-3">
+                            <input type="radio" wire:model.live="payment_mode" value="{{ \App\Enums\PaymentMode::Deposit->value }}" class="mt-1">
+                            <span>
+                                <span class="block font-medium">มัดจำ ฿{{ number_format((float) $depositAmount, 2) }}</span>
+                                <span class="block text-sm text-muted">เหลือ ฿{{ number_format((float) $quote['total'] - (float) $depositAmount, 2) }} ตอนรับสินค้า</span>
+                            </span>
+                        </label>
+                    </div>
+                    @error('payment_mode') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
+                </section>
+            @endif
+
             <section class="rounded-brand border border-border bg-surface p-4">
                 <div class="flex justify-between gap-3 text-sm">
                     <span>ราคาสินค้า</span>
@@ -235,9 +286,19 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                     <span>ค่าจัดส่ง</span>
                     <span>฿{{ number_format((float) $quote['shipping'], 2) }}</span>
                 </div>
+                @if (($quote['payment_mode'] ?? 'full') === \App\Enums\PaymentMode::Deposit->value)
+                    <div class="mt-2 flex justify-between gap-3 text-sm">
+                        <span>ยอดรวม</span>
+                        <span>฿{{ number_format((float) $quote['total'], 2) }}</span>
+                    </div>
+                    <div class="mt-2 flex justify-between gap-3 text-sm text-muted">
+                        <span>คงเหลือตอนรับ</span>
+                        <span>฿{{ number_format((float) $quote['amount_remaining'], 2) }}</span>
+                    </div>
+                @endif
                 <div class="mt-3 flex justify-between gap-3 font-medium">
-                    <span>ยอดที่ต้องชำระ</span>
-                    <span>฿{{ number_format((float) $quote['total'], 2) }}</span>
+                    <span>ยอดที่ต้องชำระตอนนี้</span>
+                    <span>฿{{ number_format((float) ($quote['amount_due_now'] ?? $quote['total']), 2) }}</span>
                 </div>
             </section>
 

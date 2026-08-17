@@ -13,5 +13,10 @@ class SettingSeeder extends Seeder
             ['key' => 'storefront_logo_path'],
             ['value' => config('booking.default_storefront_logo')],
         );
+
+        Setting::query()->updateOrCreate(
+            ['key' => 'deposit_amount'],
+            ['value' => '0.00'],
+        );
     }
 }

@@ -87,9 +87,19 @@ new #[Title('ชำระเงิน')] class extends Component
                     <span>฿{{ number_format((float) $draft['shipping'], 2) }}</span>
                 </div>
                 <div class="mt-3 flex justify-between gap-3 font-medium">
-                    <span>ยอดที่ต้องชำระ</span>
-                    <span>฿{{ number_format((float) $draft['total'], 2) }}</span>
+                    <span>ยอดที่ต้องชำระตอนนี้</span>
+                    <span>฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</span>
                 </div>
+                @if (($draft['payment_mode'] ?? 'full') === \App\Enums\PaymentMode::Deposit->value)
+                    <div class="mt-2 flex justify-between gap-3 text-sm text-muted">
+                        <span>ยอดรวม</span>
+                        <span>฿{{ number_format((float) $draft['total'], 2) }}</span>
+                    </div>
+                    <div class="mt-2 flex justify-between gap-3 text-sm text-muted">
+                        <span>คงเหลือตอนรับ</span>
+                        <span>฿{{ number_format((float) ($draft['amount_remaining'] ?? 0), 2) }}</span>
+                    </div>
+                @endif
                 <p class="mt-3 text-sm text-muted">ชำระผ่าน PromptPay แล้วแนบสลิปเพื่อยืนยันการจองในขั้นตอนเดียวกัน</p>
             </section>
 
@@ -101,7 +111,7 @@ new #[Title('ชำระเงิน')] class extends Component
                 </div>
                 <p class="mt-3 text-sm">{{ $promptpayName }}</p>
                 <p class="font-medium tracking-wide">{{ $promptpayId }}</p>
-                <p class="mt-2 text-sm text-muted">ยอด ฿{{ number_format((float) $draft['total'], 2) }}</p>
+                <p class="mt-2 text-sm text-muted">ยอด ฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</p>
             </section>
 
             <p class="mt-4 text-sm text-muted" id="slip-hint">ต้องแนบสลิปก่อนกดยืนยันการจอง</p>

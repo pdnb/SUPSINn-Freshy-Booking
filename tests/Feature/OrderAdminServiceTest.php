@@ -151,6 +151,23 @@ test('marking pickup issues a receipt and completes the order', function () {
         ->and($updated->receipt_issued_at)->not->toBeNull();
 });
 
+test('deposit orders cannot be completed until the remaining balance is collected', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->deposit()->create(['status' => OrderStatus::ReadyForPickup]);
+
+    expect($order->hasOutstandingBalance())->toBeTrue()
+        ->and(fn () => adminOrders()->markPickedUp($order, $staff))
+        ->toThrow(ValidationException::class);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::ReadyForPickup);
+
+    adminOrders()->collectBalance($order, $staff);
+    $updated = adminOrders()->markPickedUp($order->fresh(), $staff);
+
+    expect($updated->status)->toBe(OrderStatus::Completed)
+        ->and($updated->balance_collected_at)->not->toBeNull();
+});
+
 test('a receipt cannot be issued before the order is ready to fulfill', function () {
     $order = Order::factory()->create(['status' => OrderStatus::PendingReview]);
 

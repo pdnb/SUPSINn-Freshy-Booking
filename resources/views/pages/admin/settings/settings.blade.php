@@ -2,13 +2,14 @@
     <div class="page-head">
         <div>
             <h1>ตั้งค่า</h1>
-            <p class="sub">เรทค่าส่งตามช่วงจำนวน แบนเนอร์หน้าแรก และโลโก้หน้าร้าน</p>
+            <p class="sub">เรทค่าส่งตามช่วงจำนวน แบนเนอร์หน้าแรก โลโก้หน้าร้าน และมัดจำ</p>
         </div>
     </div>
 
     <div class="tabs" role="tablist">
-        <button type="button" class="tab {{ $tab === 'shipping' ? 'is-active' : '' }}" wire:click="$set('tab', 'shipping')">ค่าส่ง</button>
         <button type="button" class="tab {{ $tab === 'banners' ? 'is-active' : '' }}" wire:click="$set('tab', 'banners')">แบนเนอร์</button>
+        <button type="button" class="tab {{ $tab === 'shipping' ? 'is-active' : '' }}" wire:click="$set('tab', 'shipping')">ค่าส่ง</button>
+        <button type="button" class="tab {{ $tab === 'deposit' ? 'is-active' : '' }}" wire:click="$set('tab', 'deposit')">มัดจำ</button>
         <button type="button" class="tab {{ $tab === 'logo' ? 'is-active' : '' }}" wire:click="$set('tab', 'logo')">โลโก้</button>
     </div>
 
@@ -118,7 +119,7 @@
                 </div>
             </form>
         </div>
-    @else
+    @elseif ($tab === 'logo')
         <div class="grid-2">
             <section class="panel">
                 <div class="panel-head">โลโก้ปัจจุบัน</div>
@@ -151,6 +152,19 @@
                 </div>
             </form>
         </div>
+    @elseif ($tab === 'deposit')
+        <form class="panel" wire:submit="saveDeposit" style="max-width:420px">
+            <div class="panel-head">จำนวนมัดจำ</div>
+            <div class="panel-body stack">
+                <p class="muted">ตั้งเป็นบาทคงที่สำหรับออเดอร์รับเอง (ร้าน / หอประชุม) เมื่อยอดรวมสูงกว่ามัดจำ ลูกค้าเลือกจ่ายมัดจำหรือจ่ายเต็มได้ — ใส่ 0 เพื่อปิดตัวเลือกมัดจำ</p>
+                <label class="field">
+                    บาท
+                    <input class="input" type="number" min="0" step="0.01" wire:model="deposit_amount">
+                    @error('amount') <span class="error">{{ $message }}</span> @enderror
+                </label>
+                <button type="submit" class="btn btn-primary">บันทึกมัดจำ</button>
+            </div>
+        </form>
     @endif
 
     <div class="overlay {{ $showBannerDeleteConfirm ? 'is-open' : '' }}" wire:click="closeDeleteBanner"></div>

@@ -3,6 +3,7 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Services\Order\OrderService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -44,6 +45,16 @@ class extends Component
     {
         $this->showCancelConfirm = false;
         $this->transitionTo($orders, OrderStatus::Cancelled, 'ยกเลิกออเดอร์แล้ว');
+    }
+
+    public function collectBalance(OrderService $orders): void
+    {
+        try {
+            $this->order = $orders->collectBalance($this->order, Auth::user());
+            session()->flash('status', 'บันทึกเก็บส่วนที่เหลือแล้ว');
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+        }
     }
 
     public function render(OrderService $orders)
@@ -196,7 +207,31 @@ class extends Component
                             <dt>ยอดสุทธิ</dt>
                             <dd class="mono">{{ number_format((float) $order->total, 0) }} บาท</dd>
                         </div>
+                        <div>
+                            <dt>โหมดชำระ</dt>
+                            <dd>{{ $order->payment_mode->label() }}</dd>
+                        </div>
+                        <div>
+                            <dt>จ่ายตอนสั่ง</dt>
+                            <dd class="mono">{{ number_format((float) $order->amount_due_now, 0) }} บาท</dd>
+                        </div>
+                        @if ((float) $order->amount_remaining > 0)
+                            <div>
+                                <dt>คงเหลือตอนรับ</dt>
+                                <dd class="mono">{{ number_format((float) $order->amount_remaining, 0) }} บาท</dd>
+                            </div>
+                            <div>
+                                <dt>สถานะเก็บเงิน</dt>
+                                <dd>{{ $order->balance_collected_at ? 'เก็บครบแล้ว' : 'ยังไม่เก็บ' }}</dd>
+                            </div>
+                        @endif
                     </dl>
+                    @if ($order->hasOutstandingBalance())
+                        <div class="row">
+                            <button type="button" class="btn btn-secondary" wire:click="collectBalance">บันทึกเก็บส่วนที่เหลือ</button>
+                        </div>
+                        @error('balance') <span class="error">{{ $message }}</span> @enderror
+                    @endif
                     @if ($canReview)
                         <div class="row">
                             <button type="button" class="btn btn-primary" wire:click="confirm">ยืนยันสลิป</button>

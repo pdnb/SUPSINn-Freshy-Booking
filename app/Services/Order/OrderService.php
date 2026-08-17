@@ -4,6 +4,7 @@ namespace App\Services\Order;
 
 use App\Enums\FulfillmentMethod;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMode;
 use App\Enums\SlipVerificationResult;
 use App\Models\Order;
 use App\Models\User;
@@ -109,6 +110,10 @@ class OrderService
                 'subtotal' => $draft['subtotal'],
                 'shipping_amount' => $draft['shipping'],
                 'total' => $draft['total'],
+                'payment_mode' => $draft['payment_mode'] ?? PaymentMode::Full->value,
+                'amount_due_now' => $draft['amount_due_now'] ?? $draft['total'],
+                'amount_remaining' => $draft['amount_remaining'] ?? '0.00',
+                'balance_collected_at' => null,
                 'status' => OrderStatus::PendingReview,
                 'booking_round_id' => $this->booking->openRounds()->first()?->id,
             ]);
@@ -215,8 +220,12 @@ class OrderService
             OrderStatus::Confirmed => $order->fulfillment->chargesShipping()
                 ? [OrderStatus::Shipped, OrderStatus::Cancelled]
                 : [OrderStatus::ReadyForPickup, OrderStatus::Cancelled],
-            OrderStatus::ReadyForPickup => [OrderStatus::Completed, OrderStatus::Cancelled],
-            OrderStatus::Shipped => [OrderStatus::Completed, OrderStatus::Cancelled],
+            OrderStatus::ReadyForPickup => $order->hasOutstandingBalance()
+                ? [OrderStatus::Cancelled]
+                : [OrderStatus::Completed, OrderStatus::Cancelled],
+            OrderStatus::Shipped => $order->hasOutstandingBalance()
+                ? [OrderStatus::Cancelled]
+                : [OrderStatus::Completed, OrderStatus::Cancelled],
             OrderStatus::Completed, OrderStatus::Cancelled => [],
         };
     }
@@ -235,6 +244,12 @@ class OrderService
         if (! in_array($to, $this->allowedTransitions($order), true)) {
             throw ValidationException::withMessages([
                 'status' => 'เปลี่ยนเป็นสถานะนี้ไม่ได้',
+            ]);
+        }
+
+        if ($to === OrderStatus::Completed && $order->hasOutstandingBalance()) {
+            throw ValidationException::withMessages([
+                'status' => 'ต้องบันทึกเก็บส่วนที่เหลือก่อนปิดออเดอร์',
             ]);
         }
 
@@ -284,11 +299,30 @@ class OrderService
         ])->first(fn (Order $order): bool => $order->id !== $current->id);
     }
 
+    public function collectBalance(Order $order, User $actor): Order
+    {
+        if (! $order->hasOutstandingBalance()) {
+            throw ValidationException::withMessages([
+                'balance' => 'ไม่มียอดคงเหลือที่ต้องเก็บ',
+            ]);
+        }
+
+        $order->update(['balance_collected_at' => now()]);
+
+        return $order->fresh(['items', 'slip', 'bookingRound', 'statusChanges.user']);
+    }
+
     public function markPickedUp(Order $order, User $actor): Order
     {
         if ($order->status !== OrderStatus::ReadyForPickup) {
             throw ValidationException::withMessages([
                 'status' => 'รับของได้เมื่อสถานะพร้อมรับของเท่านั้น',
+            ]);
+        }
+
+        if ($order->hasOutstandingBalance()) {
+            throw ValidationException::withMessages([
+                'status' => 'ต้องบันทึกเก็บส่วนที่เหลือก่อนปิดออเดอร์',
             ]);
         }
 

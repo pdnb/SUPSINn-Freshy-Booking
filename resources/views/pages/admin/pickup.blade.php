@@ -2,6 +2,7 @@
 use App\Models\Order;
 use App\Services\Order\OrderService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -27,6 +28,24 @@ class extends Component
         $this->selectedId = $id;
     }
 
+    public function collectBalance(OrderService $orders): void
+    {
+        $order = $this->selected();
+
+        if ($order === null) {
+            return;
+        }
+
+        try {
+            $orders->collectBalance($order, Auth::user());
+            session()->flash('status', 'บันทึกเก็บส่วนที่เหลือแล้ว');
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+        }
+
+        $this->selectedId = $order->id;
+    }
+
     public function markPickedUp(OrderService $orders): void
     {
         $order = $this->selected();
@@ -35,8 +54,13 @@ class extends Component
             return;
         }
 
-        $orders->markPickedUp($order, Auth::user());
-        session()->flash('status', 'รับของแล้ว และออกใบเสร็จแล้ว');
+        try {
+            $orders->markPickedUp($order, Auth::user());
+            session()->flash('status', 'รับของแล้ว และออกใบเสร็จแล้ว');
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+        }
+
         $this->selectedId = $order->id;
     }
 
@@ -117,7 +141,19 @@ class extends Component
                             <li>{{ $item->name }} × {{ $item->qty }}</li>
                         @endforeach
                     </ul>
-                    @if ($selected->status === \App\Enums\OrderStatus::ReadyForPickup)
+                    <p>ยอดสุทธิ <span class="mono">{{ number_format((float) $selected->total, 0) }}</span> บาท · จ่ายตอนสั่ง <span class="mono">{{ number_format((float) $selected->amount_due_now, 0) }}</span> บาท</p>
+                    @if ((float) $selected->amount_remaining > 0)
+                        <p>
+                            คงเหลือ <span class="mono">{{ number_format((float) $selected->amount_remaining, 0) }}</span> บาท
+                            · {{ $selected->balance_collected_at ? 'เก็บครบแล้ว' : 'ยังไม่เก็บ' }}
+                        </p>
+                    @endif
+                    @error('status') <span class="error">{{ $message }}</span> @enderror
+                    @error('balance') <span class="error">{{ $message }}</span> @enderror
+                    @if ($selected->hasOutstandingBalance())
+                        <button type="button" class="btn btn-secondary" wire:click="collectBalance">บันทึกเก็บส่วนที่เหลือ</button>
+                    @endif
+                    @if ($selected->status === \App\Enums\OrderStatus::ReadyForPickup && ! $selected->hasOutstandingBalance())
                         <button type="button" class="btn btn-primary" wire:click="markPickedUp">รับของแล้ว</button>
                     @endif
                 @else

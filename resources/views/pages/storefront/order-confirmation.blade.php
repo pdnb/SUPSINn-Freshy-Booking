@@ -251,6 +251,16 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                     <dt>รวม</dt>
                     <dd>{{ number_format((float) $order->total, 2) }} บาท</dd>
                 </div>
+                @if ($order->payment_mode === \App\Enums\PaymentMode::Deposit)
+                    <div class="flex justify-between gap-3">
+                        <dt class="text-muted">จ่ายตอนสั่ง (มัดจำ)</dt>
+                        <dd>{{ number_format((float) $order->amount_due_now, 2) }} บาท</dd>
+                    </div>
+                    <div class="flex justify-between gap-3">
+                        <dt class="text-muted">คงเหลือตอนรับ</dt>
+                        <dd>{{ number_format((float) $order->amount_remaining, 2) }} บาท</dd>
+                    </div>
+                @endif
             </dl>
         </section>
 
