@@ -165,7 +165,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 
         <ol class="mt-4 grid grid-cols-4 gap-1 text-center text-xs text-muted" aria-label="ขั้นตอนการจอง">
             <li class="rounded-brand bg-surface px-1 py-2">ตะกร้า</li>
-            <li class="rounded-brand bg-accent px-1 py-2 font-medium text-accent-fg" aria-current="step">ข้อมูล</li>
+            <li class="rounded-brand bg-accent px-1 py-2 font-medium text-brand-fg" aria-current="step">ข้อมูล</li>
             <li class="rounded-brand bg-surface px-1 py-2">ชำระเงิน</li>
             <li class="rounded-brand bg-surface px-1 py-2">เสร็จสิ้น</li>
         </ol>
@@ -309,7 +309,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 @endif
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดที่ต้องชำระตอนนี้</span>
-                    <span class="text-accent">฿{{ number_format((float) ($quote['amount_due_now'] ?? $quote['total']), 2) }}</span>
+                    <span class="text-brand">฿{{ number_format((float) ($quote['amount_due_now'] ?? $quote['total']), 2) }}</span>
                 </div>
             </section>
         </form>
@@ -322,7 +322,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 wire:click="save"
                 wire:loading.attr="disabled"
                 wire:target="save"
-                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-60"
+                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-60"
             >
                 <span wire:loading.remove wire:target="save">ไปชำระเงิน</span>
                 <span wire:loading wire:target="save" class="inline-flex items-center gap-2">

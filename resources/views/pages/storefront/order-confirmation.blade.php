@@ -88,8 +88,8 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                 <li
                     @class([
                         'rounded-brand px-1 py-2 font-medium',
-                        'bg-accent text-accent-fg' => $step['state'] === 'current',
-                        'bg-accent/15 text-accent' => $step['state'] === 'done',
+                        'bg-accent text-brand-fg' => $step['state'] === 'current',
+                        'bg-accent/15 text-brand' => $step['state'] === 'done',
                         'bg-border/50 text-muted' => $step['state'] === 'upcoming',
                     ])
                     @if ($step['state'] === 'current') aria-current="step" @endif
@@ -100,7 +100,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
         </ol>
 
         <section class="mt-4 rounded-brand border border-border bg-surface p-4">
-            <p class="flex items-center justify-between gap-3 text-xs font-medium text-accent">
+            <p class="flex items-center justify-between gap-3 text-xs font-medium text-brand">
                 <span>รหัสออเดอร์</span>
                 <button
                     type="button"
@@ -160,7 +160,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                             <div x-data="{ open: false }">
                                 <button
                                     type="button"
-                                    class="-my-1 inline-flex min-h-11 max-w-full items-center justify-end break-all text-right text-accent hover:underline"
+                                    class="-my-1 inline-flex min-h-11 max-w-full items-center justify-end break-all text-right text-brand hover:underline"
                                     x-on:click="open = true; $nextTick(() => $refs.preview.showModal())"
                                     aria-haspopup="dialog"
                                     aria-controls="slip-preview"

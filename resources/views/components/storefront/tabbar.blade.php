@@ -5,7 +5,7 @@
             wire:navigate
             @class([
                 'inline-flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs',
-                'text-accent font-medium' => request()->routeIs('home'),
+                'text-brand font-medium' => request()->routeIs('home'),
                 'text-muted hover:text-fg' => ! request()->routeIs('home'),
             ])
             @if (request()->routeIs('home')) aria-current="page" @endif
@@ -18,7 +18,7 @@
             wire:navigate
             @class([
                 'inline-flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs',
-                'text-accent font-medium' => request()->routeIs('orders.index', 'orders.confirmation'),
+                'text-brand font-medium' => request()->routeIs('orders.index', 'orders.confirmation'),
                 'text-muted hover:text-fg' => ! request()->routeIs('orders.index', 'orders.confirmation'),
             ])
             @if (request()->routeIs('orders.index', 'orders.confirmation')) aria-current="page" @endif
@@ -31,7 +31,7 @@
             wire:navigate
             @class([
                 'inline-flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs',
-                'text-accent font-medium' => request()->routeIs('cart'),
+                'text-brand font-medium' => request()->routeIs('cart'),
                 'text-muted hover:text-fg' => ! request()->routeIs('cart'),
             ])
             @if (request()->routeIs('cart')) aria-current="page" @endif

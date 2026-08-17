@@ -154,7 +154,7 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                 {{ $product->type === \App\Enums\ProductType::Bundle ? 'คอมโบ · ไม่ขายแยก' : 'ซื้อแยกได้' }}
             </span>
             <h2 class="mt-2 text-xl font-semibold">{{ $product->name }}</h2>
-            <p class="mt-1 text-lg font-medium text-accent">฿{{ number_format((float) $product->price, 2) }}</p>
+            <p class="mt-1 text-lg font-medium text-brand">฿{{ number_format((float) $product->price, 2) }}</p>
             @if ($product->description)
                 <p class="mt-3 text-sm text-muted">{{ $product->description }}</p>
             @elseif ($product->type === \App\Enums\ProductType::Bundle)
@@ -178,7 +178,7 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                                 aria-pressed="{{ ($options[$group->key] ?? null) === $value->value ? 'true' : 'false' }}"
                                 @class([
                                     'inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60',
-                                    'border-accent bg-accent text-accent-fg' => ($options[$group->key] ?? null) === $value->value,
+                                    'border-accent bg-accent text-brand-fg' => ($options[$group->key] ?? null) === $value->value,
                                     'border-border bg-surface hover:border-accent' => ($options[$group->key] ?? null) !== $value->value,
                                 ])
                             >
@@ -209,7 +209,7 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                                         aria-pressed="{{ ($componentOptions[$component->id][$group->key] ?? null) === $value->value ? 'true' : 'false' }}"
                                         @class([
                                             'inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60',
-                                            'border-accent bg-accent text-accent-fg' => ($componentOptions[$component->id][$group->key] ?? null) === $value->value,
+                                            'border-accent bg-accent text-brand-fg' => ($componentOptions[$component->id][$group->key] ?? null) === $value->value,
                                             'border-border bg-surface hover:border-accent' => ($componentOptions[$component->id][$group->key] ?? null) !== $value->value,
                                         ])
                                     >
@@ -228,14 +228,14 @@ new #[Title('รายละเอียดสินค้า')] class extends C
         <div class="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
             <div>
                 <p class="text-xs text-muted">{{ $product->type === \App\Enums\ProductType::Bundle ? 'รวมทั้งชุด' : 'ราคา' }}</p>
-                <p class="font-semibold text-accent">฿{{ number_format((float) $product->price, 2) }}</p>
+                <p class="font-semibold text-brand">฿{{ number_format((float) $product->price, 2) }}</p>
             </div>
             <button
                 type="button"
                 wire:click="addToCart"
                 wire:loading.attr="disabled"
                 wire:target="addToCart"
-                class="inline-flex min-h-11 items-center gap-2 rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-60"
+                class="inline-flex min-h-11 items-center gap-2 rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-60"
             >
                 <span wire:loading.remove wire:target="addToCart">ใส่ตะกร้า</span>
                 <span wire:loading wire:target="addToCart" class="inline-flex items-center gap-2">

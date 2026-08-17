@@ -77,7 +77,7 @@ new #[Title('ชำระเงิน')] class extends Component
         <ol class="mt-4 grid grid-cols-4 gap-1 text-center text-xs text-muted" aria-label="ขั้นตอนการจอง">
             <li class="rounded-brand bg-surface px-1 py-2">ตะกร้า</li>
             <li class="rounded-brand bg-surface px-1 py-2">ข้อมูล</li>
-            <li class="rounded-brand bg-accent px-1 py-2 font-medium text-accent-fg" aria-current="step">ชำระเงิน</li>
+            <li class="rounded-brand bg-accent px-1 py-2 font-medium text-brand-fg" aria-current="step">ชำระเงิน</li>
             <li class="rounded-brand bg-surface px-1 py-2">เสร็จสิ้น</li>
         </ol>
 
@@ -93,7 +93,7 @@ new #[Title('ชำระเงิน')] class extends Component
                 </div>
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดที่ต้องชำระตอนนี้</span>
-                    <span class="text-accent">฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</span>
+                    <span class="text-brand">฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</span>
                 </div>
                 @if (($draft['payment_mode'] ?? 'full') === \App\Enums\PaymentMode::Deposit->value)
                     <div class="mt-2 flex justify-between gap-3 text-sm text-muted">
@@ -125,7 +125,7 @@ new #[Title('ชำระเงิน')] class extends Component
                 @endif
                 <p class="mt-3 text-sm">{{ $promptpayName }}</p>
                 <p class="font-medium tracking-wide">{{ $promptpayId }}</p>
-                <p class="mt-2 text-sm text-accent">฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</p>
+                <p class="mt-2 text-sm text-brand">฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</p>
             </section>
 
             <p class="mt-4 text-sm text-muted" id="slip-hint">ต้องแนบสลิปก่อนกดยืนยันการจอง</p>
@@ -150,7 +150,7 @@ new #[Title('ชำระเงิน')] class extends Component
                 wire:loading.attr="disabled"
                 wire:target="confirm"
                 @disabled(! $slip)
-                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-50"
+                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <span wire:loading.remove wire:target="confirm">ยืนยันการจอง</span>
                 <span wire:loading wire:target="confirm" class="inline-flex items-center gap-2">

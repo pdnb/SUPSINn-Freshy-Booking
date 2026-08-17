@@ -54,7 +54,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
             @if ($lineOrders->isEmpty())
                 <section class="mt-8 text-center" role="status">
                     <x-icon name="shopping-bag" size="xl" class="mx-auto text-muted" />
-                    <p class="mt-4 text-sm font-medium text-accent">ยังไม่มีการจอง</p>
+                    <p class="mt-4 text-sm font-medium text-brand">ยังไม่มีการจอง</p>
                     <h2 class="mt-2 text-xl font-semibold">ยังไม่มีคำสั่งซื้อ</h2>
                     <p class="mt-2 text-sm text-muted">เมื่อจองผ่าน LINE และแนบสลิปแล้ว สถานะจะแสดงที่นี่</p>
                     <a href="{{ route('home') }}" wire:navigate class="mt-5 inline-flex min-h-11 items-center rounded-brand border border-border bg-surface px-4 font-medium hover:bg-bg">ไปหน้าหลัก</a>
@@ -75,7 +75,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                                     </div>
                                     <p class="text-right text-sm font-medium">{{ number_format((float) $order->total, 2) }} บาท</p>
                                 </div>
-                                <p class="mt-3 text-sm text-accent">{{ $order->status->label() }}</p>
+                                <p class="mt-3 text-sm text-brand">{{ $order->status->label() }}</p>
                             </a>
                         </li>
                     @endforeach
@@ -84,7 +84,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
         @else
             <section class="mt-8 text-center" role="status">
                 <x-icon name="shopping-bag" size="xl" class="mx-auto text-muted" />
-                <p class="mt-4 text-sm font-medium text-accent">ยังไม่มีการจอง</p>
+                <p class="mt-4 text-sm font-medium text-brand">ยังไม่มีการจอง</p>
                 <h2 class="mt-2 text-xl font-semibold">ยังไม่มีคำสั่งซื้อ</h2>
                 <p class="mt-2 text-sm text-muted">เมื่อจองและแนบสลิปแล้ว สถานะจะแสดงที่นี่</p>
                 <a href="{{ route('home') }}" wire:navigate class="mt-5 inline-flex min-h-11 items-center rounded-brand border border-border bg-surface px-4 font-medium hover:bg-bg">ไปหน้าหลัก</a>

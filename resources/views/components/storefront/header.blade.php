@@ -8,7 +8,7 @@
     $logoUrl = app(\App\Services\Storefront\StorefrontLogoService::class)->url();
     $brandName = 'SRU Freshy Booking';
 @endphp
-<header class="bg-brand text-brand-fg">
+<header class="bg-brand-fg">
     <div class="mx-auto flex min-h-[58px] max-w-lg items-center justify-between gap-3 px-4">
         <a href="{{ route('home') }}" wire:navigate class="min-h-11 inline-flex items-center text-base font-semibold hover:opacity-90">
             @if ($logoUrl)
@@ -24,12 +24,12 @@
         <a
             href="{{ route('cart') }}"
             wire:navigate
-            class="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-brand-press"
+            class="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand text-brand"
             aria-label="ตะกร้า{{ $cartCount > 0 ? ' มี '.$cartCount.' รายการ' : '' }}"
         >
             <x-icon name="shopping-cart" size="md" />
             @if ($cartCount > 0)
-                <span class="absolute right-0 top-1 min-w-5 rounded-full bg-accent-fg px-1 text-center text-xs font-medium text-accent">{{ $cartCount }}</span>
+                <span class="absolute right-0 top-1 min-w-5 rounded-full bg-brand px-1 text-center text-xs font-medium text-brand-fg">{{ $cartCount }}</span>
             @endif
         </a>
     </div>

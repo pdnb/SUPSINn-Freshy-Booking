@@ -75,7 +75,7 @@ new #[Title('ตะกร้า')] class extends Component
             <div class="mt-6 flex flex-col items-center text-center">
                 <x-icon name="shopping-cart" size="xl" class="text-muted" />
                 <p class="mt-4 text-sm text-muted">ยังไม่มีสินค้าในตะกร้า</p>
-                <a href="{{ route('home') }}" wire:navigate class="mt-4 inline-flex min-h-11 items-center rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press">ไปเลือกสินค้า</a>
+                <a href="{{ route('home') }}" wire:navigate class="mt-4 inline-flex min-h-11 items-center rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press">ไปเลือกสินค้า</a>
             </div>
         @else
             <ul class="mt-4 space-y-3">
@@ -135,7 +135,7 @@ new #[Title('ตะกร้า')] class extends Component
                 </div>
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดรวมสินค้า</span>
-                    <span class="text-accent">฿{{ number_format((float) $subtotal, 2) }}</span>
+                    <span class="text-brand">฿{{ number_format((float) $subtotal, 2) }}</span>
                 </div>
             </section>
         @endif
@@ -144,7 +144,7 @@ new #[Title('ตะกร้า')] class extends Component
     @if ($items->isNotEmpty())
         <div class="fixed inset-x-0 bottom-14 z-10 border-t border-border bg-surface">
             <div class="mx-auto max-w-lg px-4 py-3">
-                <a href="{{ route('checkout') }}" wire:navigate class="inline-flex min-h-11 w-full items-center justify-center rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press">ดำเนินการจอง</a>
+                <a href="{{ route('checkout') }}" wire:navigate class="inline-flex min-h-11 w-full items-center justify-center rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press">ดำเนินการจอง</a>
             </div>
         </div>
     @endif

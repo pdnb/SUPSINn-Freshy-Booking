@@ -169,7 +169,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                                             {{ $product->type === \App\Enums\ProductType::Bundle ? 'ซื้อทั้งชุด' : 'ซื้อแยกได้' }}
                                         </span>
                                         <span class="font-medium">{{ $product->name }}</span>
-                                        <span class="mt-auto text-sm text-accent">฿{{ number_format((float) $product->price, 2) }}</span>
+                                        <span class="mt-auto text-sm text-brand">฿{{ number_format((float) $product->price, 2) }}</span>
                                     </div>
                                 </a>
                             </li>
@@ -185,7 +185,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                 <ol class="mt-5">
                     <li class="relative flex gap-3 pb-5">
                         <div class="flex w-9 shrink-0 flex-col items-center" aria-hidden="true">
-                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-fg">1</span>
+                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-brand-fg">1</span>
                             <span class="mt-2 w-px flex-1 bg-border"></span>
                         </div>
                         <div class="min-w-0 flex-1 pt-1">
@@ -199,7 +199,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                     </li>
                     <li class="relative flex gap-3 pb-5">
                         <div class="flex w-9 shrink-0 flex-col items-center" aria-hidden="true">
-                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-fg">2</span>
+                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-brand-fg">2</span>
                             <span class="mt-2 w-px flex-1 bg-border"></span>
                         </div>
                         <div class="min-w-0 flex-1 pt-1">
@@ -213,7 +213,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                     </li>
                     <li class="relative flex gap-3 pb-5">
                         <div class="flex w-9 shrink-0 flex-col items-center" aria-hidden="true">
-                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-fg">3</span>
+                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-brand-fg">3</span>
                             <span class="mt-2 w-px flex-1 bg-border"></span>
                         </div>
                         <div class="min-w-0 flex-1 pt-1">
@@ -227,7 +227,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                     </li>
                     <li class="relative flex gap-3">
                         <div class="flex w-9 shrink-0 flex-col items-center" aria-hidden="true">
-                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-fg">4</span>
+                            <span class="inline-flex size-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-brand-fg">4</span>
                         </div>
                         <div class="min-w-0 flex-1 pt-1">
                             <div class="flex items-start gap-2">

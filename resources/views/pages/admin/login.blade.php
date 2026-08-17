@@ -93,7 +93,7 @@ class extends Component
         <main class="relative flex items-center justify-center px-4 py-10 sm:px-8 lg:px-12">
             <div class="admin-login__panel w-full max-w-md">
                 <div class="flex items-start gap-3">
-                    <span class="mt-1 inline-flex size-10 shrink-0 items-center justify-center rounded-brand bg-accent/10 text-accent" aria-hidden="true">
+                    <span class="mt-1 inline-flex size-10 shrink-0 items-center justify-center rounded-brand bg-accent/10 text-brand" aria-hidden="true">
                         <x-icon name="lock-closed" size="md" />
                     </span>
                     <div>
@@ -136,7 +136,7 @@ class extends Component
 
                     <button
                         type="submit"
-                        class="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-brand bg-accent px-4 text-sm font-medium text-accent-fg transition-colors duration-200 hover:bg-accent-press active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                        class="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-brand bg-accent px-4 text-sm font-medium text-brand-fg transition-colors duration-200 hover:bg-accent-press active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                         wire:loading.attr="disabled"
                         wire:target="authenticate"
                     >
@@ -148,7 +148,7 @@ class extends Component
                 </form>
 
                 <p class="mt-8 text-sm text-muted">
-                    <a href="{{ route('home') }}" wire:navigate class="font-medium text-accent underline-offset-4 transition-colors duration-200 hover:underline">
+                    <a href="{{ route('home') }}" wire:navigate class="font-medium text-brand underline-offset-4 transition-colors duration-200 hover:underline">
                         กลับหน้าร้าน
                     </a>
                 </p>
