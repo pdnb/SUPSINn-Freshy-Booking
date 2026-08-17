@@ -148,8 +148,8 @@ class CheckoutService
     {
         return trim(implode(' ', array_filter([
             $parts['address_line'] ?? null,
-            isset($parts['subdistrict']) ? 'ตำบล/แขวง '.$parts['subdistrict'] : null,
-            isset($parts['district']) ? 'อำเภอ/เขต '.$parts['district'] : null,
+            isset($parts['subdistrict']) ? 'ตำบล '.$parts['subdistrict'] : null,
+            isset($parts['district']) ? 'อำเภอ '.$parts['district'] : null,
             isset($parts['province']) ? 'จังหวัด '.$parts['province'] : null,
             $parts['postcode'] ?? null,
         ], fn (?string $value): bool => $value !== null && $value !== '')));
@@ -212,8 +212,8 @@ class CheckoutService
             'phone.required' => 'กรุณากรอกเบอร์โทรศัพท์',
             'phone.regex' => 'เบอร์โทรศัพท์ไม่ถูกต้อง',
             'address_line.required' => 'กรุณากรอกบ้านเลขที่ ถนน หมู่บ้าน/อาคาร',
-            'subdistrict.required' => 'กรุณากรอกตำบล / แขวง',
-            'district.required' => 'กรุณากรอกอำเภอ / เขต',
+            'subdistrict.required' => 'กรุณากรอกตำบล',
+            'district.required' => 'กรุณากรอกอำเภอ',
             'province.required' => 'กรุณากรอกจังหวัด',
             'postcode.required' => 'กรุณากรอกรหัสไปรษณีย์',
             'postcode.regex' => 'รหัสไปรษณีย์ต้องเป็นตัวเลข 5 หลัก',

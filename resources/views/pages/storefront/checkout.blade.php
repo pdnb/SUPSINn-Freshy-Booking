@@ -169,7 +169,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 </div>
 
                 <div>
-                    <label for="full_name" class="block text-sm font-medium">ชื่อ–นามสกุล</label>
+                    <label for="full_name" class="block text-sm font-medium">ชื่อ-นามสกุล</label>
                     <input id="full_name" type="text" autocomplete="name" wire:model="full_name" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent">
                     @error('full_name') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
                 </div>
@@ -200,7 +200,6 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 
             <section class="space-y-4 rounded-brand border border-border bg-surface p-4">
                 <h2 class="text-base font-semibold">วิธีรับสินค้า</h2>
-                <p class="text-sm text-muted">รับใบเสร็จตอนรับสินค้า</p>
 
                 <div class="space-y-2" role="radiogroup" aria-label="วิธีรับสินค้า">
                     @foreach ($methods as $method)
@@ -226,12 +225,12 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label for="subdistrict" class="block text-sm font-medium">ตำบล / แขวง</label>
+                                <label for="subdistrict" class="block text-sm font-medium">ตำบล</label>
                                 <input id="subdistrict" type="text" autocomplete="address-level3" wire:model="subdistrict" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="ตำบล/แขวง">
                                 @error('subdistrict') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label for="district" class="block text-sm font-medium">อำเภอ / เขต</label>
+                                <label for="district" class="block text-sm font-medium">อำเภอ</label>
                                 <input id="district" type="text" autocomplete="address-level2" wire:model="district" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="อำเภอ/เขต">
                                 @error('district') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
                             </div>
@@ -298,7 +297,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 @endif
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดที่ต้องชำระตอนนี้</span>
-                    <span>฿{{ number_format((float) ($quote['amount_due_now'] ?? $quote['total']), 2) }}</span>
+                    <span class="text-accent">฿{{ number_format((float) ($quote['amount_due_now'] ?? $quote['total']), 2) }}</span>
                 </div>
             </section>
 

@@ -11,7 +11,7 @@ enum FulfillmentMethod: string
     public function label(): string
     {
         return match ($this) {
-            self::Bookstore => 'รับที่ร้านศูนย์หนังสือฯ',
+            self::Bookstore => 'รับที่ศูนย์หนังสือและเอกสารตำรา',
             self::Hall => 'รับที่หอประชุมฯ วันรายงานตัว',
             self::Post => 'จัดส่งทางไปรษณีย์',
         };
@@ -20,7 +20,7 @@ enum FulfillmentMethod: string
     public function caption(): string
     {
         return match ($this) {
-            self::Bookstore => 'เปิดรับตามประกาศของศูนย์หนังสือ มรส.',
+            self::Bookstore => 'เปิดรับตามประกาศของสำนักจัดการทรัพย์สิน',
             self::Hall => 'จุดรับชุดในวันรายงานตัวนักศึกษาใหม่',
             self::Post => 'มีค่าจัดส่งเพิ่ม — ระบบคำนวณให้อัตโนมัติ',
         };
