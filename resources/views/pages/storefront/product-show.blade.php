@@ -127,9 +127,11 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                                 type="button"
                                 wire:key="option-{{ $group->id }}-{{ $value->id }}"
                                 wire:click="selectOption('{{ $group->key }}', '{{ $value->value }}')"
+                                wire:loading.attr="disabled"
+                                wire:target="selectOption('{{ $group->key }}', '{{ $value->value }}')"
                                 aria-pressed="{{ ($options[$group->key] ?? null) === $value->value ? 'true' : 'false' }}"
                                 @class([
-                                    'inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border px-3 text-sm',
+                                    'inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60',
                                     'border-accent bg-accent text-accent-fg' => ($options[$group->key] ?? null) === $value->value,
                                     'border-border bg-surface hover:border-accent' => ($options[$group->key] ?? null) !== $value->value,
                                 ])
@@ -157,9 +159,11 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                                         type="button"
                                         wire:key="component-option-{{ $group->id }}-{{ $value->id }}"
                                         wire:click="selectComponentOption({{ $component->id }}, '{{ $group->key }}', '{{ $value->value }}')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="selectComponentOption({{ $component->id }}, '{{ $group->key }}', '{{ $value->value }}')"
                                         aria-pressed="{{ ($componentOptions[$component->id][$group->key] ?? null) === $value->value ? 'true' : 'false' }}"
                                         @class([
-                                            'inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border px-3 text-sm',
+                                            'inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60',
                                             'border-accent bg-accent text-accent-fg' => ($componentOptions[$component->id][$group->key] ?? null) === $value->value,
                                             'border-border bg-surface hover:border-accent' => ($componentOptions[$component->id][$group->key] ?? null) !== $value->value,
                                         ])
@@ -187,9 +191,14 @@ new #[Title('รายละเอียดสินค้า')] class extends C
             <button
                 type="button"
                 wire:click="addToCart"
-                class="inline-flex min-h-11 items-center rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press"
+                wire:loading.attr="disabled"
+                wire:target="addToCart"
+                class="inline-flex min-h-11 items-center gap-2 rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-60"
             >
-                ใส่ตะกร้า
+                <span wire:loading.remove wire:target="addToCart">ใส่ตะกร้า</span>
+                <span wire:loading wire:target="addToCart" class="inline-flex items-center gap-2">
+                    <x-icon name="arrow-path" size="sm" class="animate-spin" />
+                </span>
             </button>
         </div>
     </div>

@@ -134,6 +134,9 @@ test('a guest can add a simple product from the product page', function () {
     openBookingRound([$shirt]);
 
     Livewire::test('pages::storefront.product-show', ['product' => $shirt])
+        ->assertSeeHtml("wire:target=\"selectOption('size', 'M')\"")
+        ->assertSeeHtml('wire:target="addToCart"')
+        ->assertSeeHtml('wire:loading.attr="disabled"')
         ->call('selectOption', 'size', 'M')
         ->call('addToCart')
         ->assertRedirect(route('cart'));
@@ -149,6 +152,7 @@ test('a bundle cannot be added until every component is configured', function ()
     openBookingRound([$combo]);
 
     Livewire::test('pages::storefront.product-show', ['product' => $combo])
+        ->assertSeeHtml("wire:target=\"selectComponentOption({$combo->components[0]->id}, 'size', 'M')\"")
         ->call('selectComponentOption', $combo->components[0]->id, 'size', 'M')
         ->call('addToCart')
         ->assertHasErrors('components');

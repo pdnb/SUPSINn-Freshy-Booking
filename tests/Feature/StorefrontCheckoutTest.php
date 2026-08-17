@@ -30,6 +30,10 @@ test('staff guests can change quantity and open checkout from the cart', functio
     $item = app(CartService::class)->add($shirt, ['options' => ['size' => 'M']]);
 
     Livewire::test('pages::storefront.cart')
+        ->assertSeeHtml('wire:loading.attr="disabled"')
+        ->assertSeeHtml("wire:target=\"increment('{$item['id']}')\"")
+        ->assertSeeHtml("wire:target=\"decrement('{$item['id']}')\"")
+        ->assertSeeHtml("wire:target=\"remove('{$item['id']}')\"")
         ->call('increment', $item['id'])
         ->call('increment', $item['id'])
         ->assertSee('1,050.00')
@@ -54,6 +58,9 @@ test('checkout pickup shows zero shipping and saves a draft', function () {
         ->set('phone', '0812345678')
         ->set('fulfillment', FulfillmentMethod::Bookstore->value)
         ->assertSee('0.00')
+        ->assertSeeHtml('wire:click="save"')
+        ->assertSeeHtml('wire:target="save"')
+        ->assertSeeHtml('wire:loading.attr="disabled"')
         ->call('save')
         ->assertRedirect(route('pay'));
 });

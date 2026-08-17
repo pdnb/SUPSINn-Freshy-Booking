@@ -44,7 +44,10 @@ test('the payment page shows the amount and promptpay details', function () {
         ->assertSee('PromptPay')
         ->assertSee('images/Thai_QR_Logo.svg', false)
         ->assertSee('data:image/svg+xml', false)
-        ->assertSee('ยืนยันการจอง');
+        ->assertSee('ยืนยันการจอง')
+        ->assertSeeHtml('wire:click="confirm"')
+        ->assertSeeHtml('wire:target="confirm"')
+        ->assertSeeHtml('wire:loading.attr="disabled"');
 });
 
 test('a guest can confirm a booking with a passing slip', function () {

@@ -147,10 +147,15 @@ new #[Title('ชำระเงิน')] class extends Component
             <button
                 type="button"
                 wire:click="confirm"
+                wire:loading.attr="disabled"
+                wire:target="confirm"
                 @disabled(! $slip)
-                class="inline-flex min-h-11 w-full items-center justify-center rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press disabled:opacity-50"
+                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-50"
             >
-                ยืนยันการจอง
+                <span wire:loading.remove wire:target="confirm">ยืนยันการจอง</span>
+                <span wire:loading wire:target="confirm" class="inline-flex items-center gap-2">
+                    <x-icon name="arrow-path" size="sm" class="animate-spin" />
+                </span>
             </button>
         </div>
     </div>

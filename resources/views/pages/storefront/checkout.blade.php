@@ -158,7 +158,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
             <li class="rounded-brand bg-surface px-1 py-2">เสร็จสิ้น</li>
         </ol>
 
-        <form class="mt-6 space-y-6" wire:submit="save">
+        <form class="mt-6 space-y-6">
             <section class="space-y-4 rounded-brand border border-border bg-surface p-4">
                 <h2 class="text-base font-semibold">ข้อมูลนักศึกษา</h2>
 
@@ -307,8 +307,17 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 
     <div class="fixed inset-x-0 bottom-14 z-10 border-t border-border bg-surface">
         <div class="mx-auto max-w-lg px-4 py-3">
-            <button type="submit" form="" wire:click="save" class="inline-flex min-h-11 w-full items-center justify-center rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press">
-                ไปชำระเงิน
+            <button
+                type="button"
+                wire:click="save"
+                wire:loading.attr="disabled"
+                wire:target="save"
+                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-brand bg-accent px-4 font-medium text-accent-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-60"
+            >
+                <span wire:loading.remove wire:target="save">ไปชำระเงิน</span>
+                <span wire:loading wire:target="save" class="inline-flex items-center gap-2">
+                    <x-icon name="arrow-path" size="sm" class="animate-spin" />
+                </span>
             </button>
         </div>
     </div>

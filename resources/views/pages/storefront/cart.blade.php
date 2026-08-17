@@ -84,11 +84,31 @@ new #[Title('ตะกร้า')] class extends Component
                         @endif
                         <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
                             <div class="flex items-center gap-2" role="group" aria-label="จำนวน {{ $item['name'] }}">
-                                <button type="button" wire:click="decrement('{{ $item['id'] }}')" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border border-border hover:border-accent" aria-label="ลดจำนวน">−</button>
+                                <button
+                                    type="button"
+                                    wire:click="decrement('{{ $item['id'] }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="decrement('{{ $item['id'] }}')"
+                                    class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border border-border hover:border-accent disabled:cursor-not-allowed disabled:opacity-60"
+                                    aria-label="ลดจำนวน"
+                                >−</button>
                                 <span class="min-w-8 text-center">{{ $item['qty'] }}</span>
-                                <button type="button" wire:click="increment('{{ $item['id'] }}')" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border border-border hover:border-accent" aria-label="เพิ่มจำนวน">+</button>
+                                <button
+                                    type="button"
+                                    wire:click="increment('{{ $item['id'] }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="increment('{{ $item['id'] }}')"
+                                    class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border border-border hover:border-accent disabled:cursor-not-allowed disabled:opacity-60"
+                                    aria-label="เพิ่มจำนวน"
+                                >+</button>
                             </div>
-                            <button type="button" wire:click="remove('{{ $item['id'] }}')" class="inline-flex min-h-11 items-center text-sm text-muted hover:text-fg">ลบรายการ</button>
+                            <button
+                                type="button"
+                                wire:click="remove('{{ $item['id'] }}')"
+                                wire:loading.attr="disabled"
+                                wire:target="remove('{{ $item['id'] }}')"
+                                class="inline-flex min-h-11 items-center text-sm text-muted hover:text-fg disabled:cursor-not-allowed disabled:opacity-60"
+                            >ลบรายการ</button>
                         </div>
                     </li>
                 @endforeach
