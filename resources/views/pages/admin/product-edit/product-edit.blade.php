@@ -188,20 +188,13 @@
         </section>
     </form>
 
-    <div class="overlay {{ $showDeleteConfirm ? 'is-open' : '' }}" wire:click="closeDeleteConfirm"></div>
-    <div class="dialog {{ $showDeleteConfirm ? 'is-open' : '' }}" role="dialog" aria-modal="true" aria-labelledby="product-delete-title">
-        <div class="dialog-head">
-            <h2 id="product-delete-title">{{ $deleteConfirmTitle }}</h2>
-            <button type="button" class="icon-btn" wire:click="closeDeleteConfirm" aria-label="ปิด">
-                <x-icon name="x-mark" size="sm" />
-            </button>
-        </div>
-        <div class="dialog-body">
-            <p>{{ $deleteConfirmMessage }}</p>
-        </div>
-        <div class="dialog-foot">
-            <button type="button" class="btn btn-secondary" wire:click="closeDeleteConfirm">ไม่ใช่</button>
-            <button type="button" class="btn btn-danger" wire:click="confirmDelete">ยืนยันลบ</button>
-        </div>
-    </div>
+    <x-admin.confirm-dialog
+        :open="$showDeleteConfirm"
+        :title="$deleteConfirmTitle"
+        title-id="product-delete-title"
+        close="closeDeleteConfirm"
+        confirm="confirmDelete"
+    >
+        {{ $deleteConfirmMessage }}
+    </x-admin.confirm-dialog>
 </div>

@@ -167,37 +167,23 @@
         </form>
     @endif
 
-    <div class="overlay {{ $showBannerDeleteConfirm ? 'is-open' : '' }}" wire:click="closeDeleteBanner"></div>
-    <div class="dialog {{ $showBannerDeleteConfirm ? 'is-open' : '' }}" role="dialog" aria-modal="true" aria-labelledby="delete-banner-title">
-        <div class="dialog-head">
-            <h2 id="delete-banner-title">ลบแบนเนอร์</h2>
-            <button type="button" class="icon-btn" wire:click="closeDeleteBanner" aria-label="ปิด">
-                <x-icon name="x-mark" size="sm" />
-            </button>
-        </div>
-        <div class="dialog-body">
-            <p>ต้องการลบแบนเนอร์นี้หรือไม่? การลบจะเอาไฟล์รูปออกด้วย</p>
-        </div>
-        <div class="dialog-foot">
-            <button type="button" class="btn btn-secondary" wire:click="closeDeleteBanner">ไม่ใช่</button>
-            <button type="button" class="btn btn-danger" wire:click="confirmDeleteBanner">ยืนยันลบ</button>
-        </div>
-    </div>
+    <x-admin.confirm-dialog
+        :open="$showBannerDeleteConfirm"
+        title="ลบแบนเนอร์"
+        title-id="delete-banner-title"
+        close="closeDeleteBanner"
+        confirm="confirmDeleteBanner"
+    >
+        ต้องการลบแบนเนอร์นี้หรือไม่? การลบจะเอาไฟล์รูปออกด้วย
+    </x-admin.confirm-dialog>
 
-    <div class="overlay {{ $showLogoClearConfirm ? 'is-open' : '' }}" wire:click="closeClearLogo"></div>
-    <div class="dialog {{ $showLogoClearConfirm ? 'is-open' : '' }}" role="dialog" aria-modal="true" aria-labelledby="clear-logo-title">
-        <div class="dialog-head">
-            <h2 id="clear-logo-title">ลบโลโก้</h2>
-            <button type="button" class="icon-btn" wire:click="closeClearLogo" aria-label="ปิด">
-                <x-icon name="x-mark" size="sm" />
-            </button>
-        </div>
-        <div class="dialog-body">
-            <p>ต้องการลบโลโก้หรือไม่? header จะกลับไปแสดงชื่อร้านแทน</p>
-        </div>
-        <div class="dialog-foot">
-            <button type="button" class="btn btn-secondary" wire:click="closeClearLogo">ไม่ใช่</button>
-            <button type="button" class="btn btn-danger" wire:click="confirmClearLogo">ยืนยันลบ</button>
-        </div>
-    </div>
+    <x-admin.confirm-dialog
+        :open="$showLogoClearConfirm"
+        title="ลบโลโก้"
+        title-id="clear-logo-title"
+        close="closeClearLogo"
+        confirm="confirmClearLogo"
+    >
+        ต้องการลบโลโก้หรือไม่? header จะกลับไปแสดงชื่อร้านแทน
+    </x-admin.confirm-dialog>
 </div>

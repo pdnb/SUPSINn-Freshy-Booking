@@ -259,20 +259,14 @@ class extends Component
         </div>
     </div>
 
-    <div class="overlay {{ $showCancelConfirm ? 'is-open' : '' }}" wire:click="closeCancelConfirm"></div>
-    <div class="dialog {{ $showCancelConfirm ? 'is-open' : '' }}" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title">
-        <div class="dialog-head">
-            <h2 id="cancel-order-title">ยกเลิกออเดอร์</h2>
-            <button type="button" class="icon-btn" wire:click="closeCancelConfirm" aria-label="ปิด">
-                <x-icon name="x-mark" size="sm" />
-            </button>
-        </div>
-        <div class="dialog-body">
-            <p>ต้องการยกเลิกออเดอร์ <span class="mono">{{ $order->number }}</span> ของ {{ $order->full_name }} หรือไม่?</p>
-        </div>
-        <div class="dialog-foot">
-            <button type="button" class="btn btn-secondary" wire:click="closeCancelConfirm">ไม่ใช่</button>
-            <button type="button" class="btn btn-danger" wire:click="cancel">ยืนยันยกเลิก</button>
-        </div>
-    </div>
+    <x-admin.confirm-dialog
+        :open="$showCancelConfirm"
+        title="ยกเลิกออเดอร์"
+        title-id="cancel-order-title"
+        close="closeCancelConfirm"
+        confirm="cancel"
+        confirm-label="ยืนยันยกเลิก"
+    >
+        ต้องการยกเลิกออเดอร์ <span class="mono">{{ $order->number }}</span> ของ {{ $order->full_name }} หรือไม่?
+    </x-admin.confirm-dialog>
 </div>
