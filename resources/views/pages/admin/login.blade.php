@@ -78,16 +78,15 @@ class extends Component
             </div>
 
             <div class="relative">
-                <p class="text-sm font-medium tracking-wide text-brand-fg/80">ระบบเจ้าหน้าที่</p>
                 <p class="mt-5 max-w-md text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
-                    มรส. ชุดเฟรชชี่
+                    จองชุดเฟรชชี่ มรส.
                 </p>
                 <p class="mt-4 max-w-sm text-base leading-relaxed text-brand-fg/85">
-                    จัดการออเดอร์ สต็อก และรอบจองในที่เดียว
+                    จัดการออเดอร์ สินค้า และรอบจองในที่เดียว
                 </p>
             </div>
 
-            <p class="relative mt-10 text-sm text-brand-fg/70 lg:mt-0">สำหรับเจ้าหน้าที่เท่านั้น</p>
+            <p class="relative mt-10 text-sm text-brand-fg/70 lg:mt-0">Made with ❤️ by <a href="https://cc.sru.ac.th" target="_blank">SRU Computer Center</a></p>
         </aside>
 
         <main class="relative flex items-center justify-center px-4 py-10 sm:px-8 lg:px-12">
@@ -97,7 +96,7 @@ class extends Component
                         <x-icon name="lock-closed" size="md" />
                     </span>
                     <div>
-                        <h1 class="text-2xl font-semibold tracking-tight text-balance">เข้าสู่ระบบแอดมิน</h1>
+                        <h1 class="text-2xl font-semibold tracking-tight text-balance text-brand">เข้าสู่ระบบแอดมิน</h1>
                         <p class="mt-1 text-sm leading-relaxed text-muted">ใช้อีเมลและรหัสผ่านของเจ้าหน้าที่</p>
                     </div>
                 </div>
@@ -112,7 +111,7 @@ class extends Component
                             autocomplete="username"
                             wire:model="email"
                             class="mt-1.5 min-h-11 w-full rounded-brand border border-border bg-surface px-3 text-base text-fg transition-colors duration-200 placeholder:text-muted/70 focus:border-accent focus:ring-2 focus:ring-accent"
-                            placeholder="name@example.com"
+                            placeholder="email@sru.ac.th"
                         >
                         @error('email')
                             <p role="alert" class="mt-2 rounded-brand border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">{{ $message }}</p>

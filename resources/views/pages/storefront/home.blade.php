@@ -247,5 +247,6 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
         @endif
     </main>
 
+    <x-storefront.footer />
     <x-storefront.tabbar />
 </div>

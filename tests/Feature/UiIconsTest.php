@@ -16,6 +16,20 @@ test('storefront home tabbar and cart button include heroicons', function () {
     expect(substr_count($html, '<svg'))->toBeGreaterThanOrEqual(4);
 });
 
+test('storefront pages show the SRU Computer Center footer credit', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Made with', false)
+        ->assertSee('SRU Computer Center', false)
+        ->assertSee('href="https://cc.sru.ac.th"', false)
+        ->assertSee('target="_blank"', false);
+
+    $this->get(route('cart'))
+        ->assertOk()
+        ->assertSee('SRU Computer Center', false)
+        ->assertSee('href="https://cc.sru.ac.th"', false);
+});
+
 test('empty cart and empty order pages show icons', function () {
     $cart = $this->get(route('cart'))
         ->assertOk()
