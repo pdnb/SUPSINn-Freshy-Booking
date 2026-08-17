@@ -42,6 +42,7 @@ test('the payment page shows the amount and promptpay details', function () {
     Livewire::test('pages::storefront.payment')
         ->assertSee('350.00')
         ->assertSee('PromptPay')
+        ->assertSee('data:image/svg+xml', false)
         ->assertSee('ยืนยันการจอง');
 });
 

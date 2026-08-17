@@ -3,6 +3,7 @@
 use App\Services\Cart\CartService;
 use App\Services\Checkout\CheckoutService;
 use App\Services\Order\OrderService;
+use App\Services\Payment\PromptPayQrService;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -46,13 +47,17 @@ new #[Title('ชำระเงิน')] class extends Component
         ]));
     }
 
-    public function render(CartService $cart, CheckoutService $checkout)
+    public function render(CartService $cart, CheckoutService $checkout, PromptPayQrService $promptPayQr)
     {
+        $draft = $checkout->draft();
+        $amountDueNow = (float) ($draft['amount_due_now'] ?? $draft['total'] ?? 0);
+
         return $this->view([
-            'draft' => $checkout->draft(),
+            'draft' => $draft,
             'cartCount' => $cart->count(),
             'promptpayId' => config('booking.promptpay_id'),
             'promptpayName' => config('booking.promptpay_name'),
+            'promptpayQrDataUri' => $draft !== null ? $promptPayQr->dataUri($amountDueNow) : null,
         ]);
     }
 };
@@ -106,9 +111,15 @@ new #[Title('ชำระเงิน')] class extends Component
             <section class="mt-4 rounded-brand border border-border bg-surface p-5 text-center">
                 <p class="text-sm text-muted">PromptPay QR</p>
                 <p class="mt-1 font-semibold">สแกนเพื่อชำระเงิน</p>
-                <div class="mx-auto mt-4 flex aspect-square w-48 items-center justify-center rounded-brand border border-dashed border-border bg-bg" aria-hidden="true">
-                    QR
-                </div>
+                @if ($promptpayQrDataUri)
+                    <img
+                        src="{{ $promptpayQrDataUri }}"
+                        alt="PromptPay QR สำหรับชำระ ฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}"
+                        width="250"
+                        height="250"
+                        class="mx-auto mt-4 aspect-square w-48 rounded-brand border border-border bg-white"
+                    >
+                @endif
                 <p class="mt-3 text-sm">{{ $promptpayName }}</p>
                 <p class="font-medium tracking-wide">{{ $promptpayId }}</p>
                 <p class="mt-2 text-sm text-muted">ยอด ฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</p>

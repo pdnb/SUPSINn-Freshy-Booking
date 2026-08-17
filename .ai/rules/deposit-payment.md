@@ -9,3 +9,6 @@ paths:
 # Deposit payment
 
 Optional fixed-baht deposit for pickup only (`bookstore` / `hall`). Admin sets `deposit_amount` via `DepositSettingService` (settings tab มัดจำ); `0` hides the choice. Guests pick full vs deposit when `total > deposit`. Post always pays full. PromptPay/slip uses `amount_due_now`; `amount_remaining` is collected cash/transfer at pickup via `OrderService::collectBalance()`. Block `Completed` / `markPickedUp` while `hasOutstandingBalance()`.
+
+## PromptPay QR
+Prefer `booking.promptpay_qr_payload` (`PROMPTPAY_QR_PAYLOAD`): static Bill Payment EMV (Tag 30). `PromptPayQrService` regenerates with Tag 54 = `amount_due_now`. Without payload, falls back to AnyID from `promptpay_id`.
