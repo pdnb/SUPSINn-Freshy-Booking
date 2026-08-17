@@ -21,6 +21,7 @@
         @endif
     >
         <x-storefront.page-loading />
+        <x-storefront.toast />
         {{ $slot }}
         @livewireScripts
     </body>

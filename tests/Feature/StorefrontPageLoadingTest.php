@@ -13,6 +13,7 @@ test('the storefront layout shows a page loading overlay and navigates chrome li
         ->assertOk()
         ->assertSee('กำลังโหลด...', false)
         ->assertSee('page-loading-overlay', false)
+        ->assertSee('data-storefront-toast', false)
         ->assertSee('aria-label="เมนูหลัก"', false)
         ->getContent();
 

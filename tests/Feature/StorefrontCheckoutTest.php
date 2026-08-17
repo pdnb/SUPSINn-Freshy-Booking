@@ -40,6 +40,17 @@ test('staff guests can change quantity and open checkout from the cart', functio
         ->assertSee('ดำเนินการจอง');
 });
 
+test('cart quantity changes toast when the booking round has closed', function () {
+    $shirt = pageShirt();
+    $round = openBookingRound([$shirt]);
+    $item = app(CartService::class)->add($shirt, ['options' => ['size' => 'M']]);
+    $round->update(['ends_at' => now()->subMinute()]);
+
+    Livewire::test('pages::storefront.cart')
+        ->call('increment', $item['id'])
+        ->assertDispatched('storefront-toast', message: 'ไม่สามารถสร้างออเดอร์ได้ เพราะไม่อยู่ในช่วงเปิดจอง');
+});
+
 test('checkout pickup shows zero shipping and saves a draft', function () {
     $shirt = pageShirt();
     openBookingRound([$shirt]);
@@ -106,4 +117,33 @@ test('checkout offers deposit for pickup when the cart exceeds the deposit amoun
         ->set('payment_mode', PaymentMode::Deposit->value)
         ->assertSee('500.00')
         ->assertSee('550.00');
+});
+
+test('checkout save toasts when the booking round has closed', function () {
+    $shirt = pageShirt();
+    $round = openBookingRound([$shirt]);
+    app(CartService::class)->add($shirt, ['options' => ['size' => 'M']]);
+    $round->update(['ends_at' => now()->subMinute()]);
+
+    Livewire::test('pages::storefront.checkout')
+        ->set('student_id', '67011234567')
+        ->set('full_name', 'สมชาย ใจดี')
+        ->set('faculty', 'คณะวิทยาศาสตร์และเทคโนโลยี')
+        ->set('major', 'วิทยาการคอมพิวเตอร์')
+        ->set('phone', '0812345678')
+        ->set('fulfillment', FulfillmentMethod::Bookstore->value)
+        ->call('save')
+        ->assertNoRedirect()
+        ->assertDispatched('storefront-toast', message: 'ไม่สามารถสร้างออเดอร์ได้ เพราะไม่อยู่ในช่วงเปิดจอง');
+});
+
+test('checkout field errors stay inline and do not toast', function () {
+    $shirt = pageShirt();
+    openBookingRound([$shirt]);
+    app(CartService::class)->add($shirt, ['options' => ['size' => 'M']]);
+
+    Livewire::test('pages::storefront.checkout')
+        ->call('save')
+        ->assertHasErrors('student_id')
+        ->assertNotDispatched('storefront-toast');
 });

@@ -155,5 +155,6 @@ test('a bundle cannot be added until every component is configured', function ()
         ->assertSeeHtml("wire:target=\"selectComponentOption({$combo->components[0]->id}, 'size', 'M')\"")
         ->call('selectComponentOption', $combo->components[0]->id, 'size', 'M')
         ->call('addToCart')
-        ->assertHasErrors('components');
+        ->assertHasNoErrors('components')
+        ->assertDispatched('storefront-toast', message: 'กรุณาเลือกตัวเลือกให้ครบทุกชิ้น');
 });

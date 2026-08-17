@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\Cart\CartService;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -14,7 +15,7 @@ new #[Title('ตะกร้า')] class extends Component
             return;
         }
 
-        $cart->updateQty($itemId, (int) $item['qty'] + 1);
+        $this->changeQty($itemId, (int) $item['qty'] + 1, $cart);
     }
 
     public function decrement(string $itemId, CartService $cart): void
@@ -31,7 +32,16 @@ new #[Title('ตะกร้า')] class extends Component
             return;
         }
 
-        $cart->updateQty($itemId, (int) $item['qty'] - 1);
+        $this->changeQty($itemId, (int) $item['qty'] - 1, $cart);
+    }
+
+    private function changeQty(string $itemId, int $qty, CartService $cart): void
+    {
+        try {
+            $cart->updateQty($itemId, $qty);
+        } catch (ValidationException $exception) {
+            $this->dispatch('storefront-toast', message: $exception->validator->errors()->first());
+        }
     }
 
     public function remove(string $itemId, CartService $cart): void
@@ -125,7 +135,7 @@ new #[Title('ตะกร้า')] class extends Component
                 </div>
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดรวมสินค้า</span>
-                    <span>฿{{ number_format((float) $subtotal, 2) }}</span>
+                    <span class="text-accent">฿{{ number_format((float) $subtotal, 2) }}</span>
                 </div>
             </section>
         @endif

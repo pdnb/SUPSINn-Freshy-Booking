@@ -3,6 +3,7 @@
 use App\Models\Product;
 use App\Services\Booking\BookingRoundService;
 use App\Services\Cart\CartService;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -37,10 +38,16 @@ new #[Title('รายละเอียดสินค้า')] class extends C
 
     public function addToCart(CartService $cart): void
     {
-        $cart->add($this->product, [
-            'options' => $this->options,
-            'components' => $this->componentOptions,
-        ]);
+        try {
+            $cart->add($this->product, [
+                'options' => $this->options,
+                'components' => $this->componentOptions,
+            ]);
+        } catch (ValidationException $exception) {
+            $this->dispatch('storefront-toast', message: $exception->validator->errors()->first());
+
+            return;
+        }
 
         $this->redirect(route('cart'), navigate: true);
     }
@@ -108,7 +115,7 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                 {{ $product->type === \App\Enums\ProductType::Bundle ? 'คอมโบ · ไม่ขายแยก' : 'ซื้อแยกได้' }}
             </span>
             <h2 class="mt-2 text-xl font-semibold">{{ $product->name }}</h2>
-            <p class="mt-1 text-lg font-medium">฿{{ number_format((float) $product->price, 2) }}</p>
+            <p class="mt-1 text-lg font-medium text-accent">฿{{ number_format((float) $product->price, 2) }}</p>
             @if ($product->description)
                 <p class="mt-3 text-sm text-muted">{{ $product->description }}</p>
             @elseif ($product->type === \App\Enums\ProductType::Bundle)
@@ -120,7 +127,7 @@ new #[Title('รายละเอียดสินค้า')] class extends C
             @foreach ($product->optionGroups as $group)
                 <section class="border-b border-border bg-surface px-4 py-5" wire:key="group-{{ $group->id }}">
                     <h3 class="font-semibold">{{ $group->label }}</h3>
-                    <p class="mt-1 text-xs text-muted">จำเป็น</p>
+                    <p class="mt-1 text-xs text-muted">Required</p>
                     <div class="mt-3 flex flex-wrap gap-2" role="group" aria-label="{{ $group->label }}">
                         @foreach ($group->values as $value)
                             <button
@@ -142,13 +149,12 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                     </div>
                 </section>
             @endforeach
-            @error('options') <p class="px-4 py-3 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
         @else
             @foreach ($product->components as $index => $component)
                 <section class="border-b border-border bg-surface px-4 py-5" wire:key="component-{{ $component->id }}">
                     <div class="flex items-baseline justify-between gap-2">
                         <h3 class="font-semibold">{{ $index + 1 }}. {{ $component->name }}</h3>
-                        <span class="text-xs text-muted">จำเป็น</span>
+                        <span class="text-xs text-muted">Required</span>
                     </div>
                     @foreach ($component->optionGroups as $group)
                         <div class="mt-4" wire:key="component-group-{{ $group->id }}">
@@ -176,17 +182,14 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                     @endforeach
                 </section>
             @endforeach
-            @error('components') <p class="px-4 py-3 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
         @endif
-
-        @error('product') <p class="px-4 py-3 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
     </main>
 
     <div class="fixed inset-x-0 bottom-14 z-10 border-t border-border bg-surface">
         <div class="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
             <div>
                 <p class="text-xs text-muted">{{ $product->type === \App\Enums\ProductType::Bundle ? 'รวมทั้งชุด' : 'ราคา' }}</p>
-                <p class="font-semibold">฿{{ number_format((float) $product->price, 2) }}</p>
+                <p class="font-semibold text-accent">฿{{ number_format((float) $product->price, 2) }}</p>
             </div>
             <button
                 type="button"

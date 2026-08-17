@@ -75,21 +75,33 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 
     public function save(CheckoutService $checkout): void
     {
-        $checkout->save([
-            'student_id' => $this->student_id,
-            'full_name' => $this->full_name,
-            'faculty' => $this->faculty,
-            'major' => $this->major,
-            'phone' => $this->phone,
-            'fulfillment' => $this->fulfillment,
-            'payment_mode' => $this->payment_mode,
-            'address_line' => $this->address_line !== '' ? $this->address_line : null,
-            'subdistrict' => $this->subdistrict !== '' ? $this->subdistrict : null,
-            'district' => $this->district !== '' ? $this->district : null,
-            'province' => $this->province !== '' ? $this->province : null,
-            'postcode' => $this->postcode !== '' ? $this->postcode : null,
-            'shipping_rate_id' => $this->shipping_rate_id !== '' ? (int) $this->shipping_rate_id : null,
-        ]);
+        try {
+            $checkout->save([
+                'student_id' => $this->student_id,
+                'full_name' => $this->full_name,
+                'faculty' => $this->faculty,
+                'major' => $this->major,
+                'phone' => $this->phone,
+                'fulfillment' => $this->fulfillment,
+                'payment_mode' => $this->payment_mode,
+                'address_line' => $this->address_line !== '' ? $this->address_line : null,
+                'subdistrict' => $this->subdistrict !== '' ? $this->subdistrict : null,
+                'district' => $this->district !== '' ? $this->district : null,
+                'province' => $this->province !== '' ? $this->province : null,
+                'postcode' => $this->postcode !== '' ? $this->postcode : null,
+                'shipping_rate_id' => $this->shipping_rate_id !== '' ? (int) $this->shipping_rate_id : null,
+            ]);
+        } catch (ValidationException $exception) {
+            $errors = $exception->validator->errors();
+
+            if ($errors->hasAny(['cart', 'product', 'qty', 'options', 'components'])) {
+                $this->dispatch('storefront-toast', message: $errors->first());
+
+                return;
+            }
+
+            throw $exception;
+        }
 
         $this->redirect(route('pay'), navigate: true);
     }
@@ -300,8 +312,6 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                     <span class="text-accent">฿{{ number_format((float) ($quote['amount_due_now'] ?? $quote['total']), 2) }}</span>
                 </div>
             </section>
-
-            @error('cart') <p class="text-sm text-danger" role="alert">{{ $message }}</p> @enderror
         </form>
     </main>
 
