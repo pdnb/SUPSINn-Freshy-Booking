@@ -129,9 +129,8 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
         @endif
 
         <section class="rounded-brand border border-border bg-surface p-5">
-            <p class="text-sm text-muted">ศูนย์หนังสือ มรส.</p>
-            <h1 class="mt-1 text-xl font-semibold">จองชุดเฟรชชี่ออนไลน์</h1>
-            <p class="mt-2 text-sm text-muted">รับสินค้าที่ร้านศูนย์หนังสือฯ หรือหอประชุมฯ วันรายงานตัว · ใบเสร็จได้รับตอนรับของ</p>
+            <h1 class="text-xl font-semibold">ระบบจองชุดเฟรชชี่</h1>
+            <p class="mt-2 text-sm text-muted">สำนักจัดการทรัพย์สิน มหาวิทยาลัยราชภัฏสุราษฎร์ธานี</p>
         </section>
 
         @if (! $isOpen)
