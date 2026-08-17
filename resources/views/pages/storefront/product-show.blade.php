@@ -65,13 +65,6 @@ new #[Title('รายละเอียดสินค้า')] class extends C
     <x-storefront.header :cart-count="$cartCount" />
 
     <main id="content" class="mx-auto max-w-lg">
-        <div class="flex items-center gap-2 border-b border-border bg-surface px-2">
-            <x-storefront.button variant="ghost" :href="route('home')" aria-label="กลับหน้าหลัก">
-                <x-icon name="chevron-left" size="lg" />
-            </x-storefront.button>
-            <h1 class="text-xl font-semibold">รายละเอียดสินค้า</h1>
-        </div>
-
         @if ($product->images->isNotEmpty())
             <section
                 class="touch-pan-y overflow-hidden bg-bg"

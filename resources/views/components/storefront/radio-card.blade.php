@@ -6,7 +6,7 @@
 <label {{ $attributes->except(['wire:model', 'wire:model.live', 'value', 'type', 'name'])->class('flex min-h-11 items-start gap-3 rounded-brand border border-border p-3') }}>
     <input
         type="radio"
-        class="mt-1"
+        class="mt-1 accent-accent"
         {{ $attributes->only(['wire:model', 'wire:model.live', 'value', 'name']) }}
     >
     <span>

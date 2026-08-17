@@ -155,7 +155,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 <div class="min-h-dvh bg-bg pb-40 text-fg">
     <x-storefront.header :cart-count="$cartCount" />
 
-    <main id="content" class="mx-auto max-w-lg px-4 py-6">
+    <main id="content" class="mx-auto max-w-lg p-4">
         <div class="flex items-center gap-2">
             <x-storefront.button variant="ghost" :href="route('cart')" aria-label="กลับตะกร้า">
                 <x-icon name="chevron-left" size="lg" />
