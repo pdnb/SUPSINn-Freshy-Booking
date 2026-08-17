@@ -141,7 +141,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
             </section>
         @else
             <section class="mt-6">
-                <h2 class="text-base font-semibold">สินค้าจอง</h2>
+                <h2 class="text-base font-semibold">สินค้าเปิดจอง</h2>
 
                 @if ($products->isEmpty())
                     <p class="mt-3 text-sm text-muted">รอบเปิดอยู่ แต่ยังไม่มีสินค้าในรอบนี้</p>
@@ -170,7 +170,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                                             {{ $product->type === \App\Enums\ProductType::Bundle ? 'ซื้อทั้งชุด' : 'ซื้อแยกได้' }}
                                         </span>
                                         <span class="font-medium">{{ $product->name }}</span>
-                                        <span class="mt-auto text-sm text-muted">฿{{ number_format((float) $product->price, 2) }}</span>
+                                        <span class="mt-auto text-sm text-accent">฿{{ number_format((float) $product->price, 2) }}</span>
                                     </div>
                                 </a>
                             </li>
