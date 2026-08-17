@@ -4,8 +4,10 @@ use App\Enums\ProductType;
 use App\Models\AdsBanner;
 use App\Models\BookingRound;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ShippingRate;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -255,6 +257,85 @@ test('product editor auto-generates option group keys on save', function () {
         ->and($keys[0])->not->toBe('')
         ->and($keys[1])->not->toBe('')
         ->and($keys[0])->not->toBe($keys[1]);
+});
+
+test('product editor can remove pending uploads before saving', function () {
+    $staff = User::factory()->create();
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.product-edit')
+        ->set('uploads', [
+            UploadedFile::fake()->image('front.jpg'),
+            UploadedFile::fake()->image('back.jpg'),
+        ])
+        ->call('removePendingUpload', 0)
+        ->assertCount('uploads', 1);
+});
+
+test('product editor can reorder images and set a new cover image', function () {
+    $staff = User::factory()->create();
+    $product = Product::factory()->create();
+    $first = ProductImage::factory()->for($product)->create(['sort_order' => 0]);
+    $second = ProductImage::factory()->for($product)->create(['sort_order' => 1]);
+    $third = ProductImage::factory()->for($product)->create(['sort_order' => 2]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.product-edit', ['product' => $product])
+        ->assertSeeHtml('wire:sort="reorderImages"')
+        ->assertSeeHtml('wire:sort:item="'.$first->id.'"')
+        ->assertSeeHtml('media-item media-card is-sortable')
+        ->assertSeeHtml('wire:sort:handle')
+        ->call('reorderImages', $third->id, 0)
+        ->call('setCover', $second->id);
+
+    expect($product->fresh()->images->pluck('id')->all())->toBe([
+        $second->id,
+        $third->id,
+        $first->id,
+    ])->and($product->fresh()->coverImage?->id)->toBe($second->id);
+});
+
+test('product editor requires confirmation before deleting an image', function () {
+    Storage::fake('public');
+    $staff = User::factory()->create();
+    $product = Product::factory()->create();
+    $image = ProductImage::factory()->for($product)->create([
+        'path' => 'product-images/delete-me.jpg',
+        'sort_order' => 0,
+    ]);
+    Storage::disk('public')->put($image->path, 'fake');
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.product-edit', ['product' => $product])
+        ->call('askDeleteImage', $image->id)
+        ->assertSet('showDeleteConfirm', true)
+        ->assertSet('pendingImageId', $image->id)
+        ->assertSee('ต้องการลบรูปนี้หรือไม่?', false)
+        ->call('closeDeleteConfirm')
+        ->assertSet('showDeleteConfirm', false);
+
+    expect($image->fresh())->not->toBeNull();
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.product-edit', ['product' => $product])
+        ->call('askDeleteImage', $image->id)
+        ->call('confirmDelete')
+        ->assertSet('showDeleteConfirm', false);
+
+    expect(ProductImage::query()->find($image->id))->toBeNull();
+    Storage::disk('public')->assertMissing($image->path);
+});
+
+test('product editor image actions stay scoped to the current product', function () {
+    $staff = User::factory()->create();
+    $product = Product::factory()->create();
+    $other = Product::factory()->create();
+    $image = ProductImage::factory()->for($other)->create(['sort_order' => 0]);
+
+    expect(fn () => Livewire::actingAs($staff)
+        ->test('pages::admin.product-edit', ['product' => $product])
+        ->call('askDeleteImage', $image->id))
+        ->toThrow(ModelNotFoundException::class);
 });
 
 test('staff can create a booking round', function () {

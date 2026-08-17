@@ -984,13 +984,46 @@ img.slip-frame {
 }
 .media-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
 }
 .media-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.media-card {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  gap: 10px;
+}
+.media-card.is-sortable {
+  cursor: grab;
+}
+.media-card.is-sortable:active {
+  cursor: grabbing;
+}
+.media-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.media-card-head .icon-btn {
+  width: 32px;
+  height: 32px;
+  border-color: var(--border);
+}
+.media-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.media-actions > .btn {
+  flex: 1 1 auto;
+  min-height: 36px;
 }
 .dropzone {
   position: relative;

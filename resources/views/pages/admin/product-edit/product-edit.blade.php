@@ -152,11 +152,30 @@
             </div>
             <div class="panel-body stack">
                 @if ($product?->images?->isNotEmpty())
-                    <div class="media-grid">
+                    <div class="media-grid" wire:sort="reorderImages">
                         @foreach ($product->images as $image)
-                            <div class="media-item" wire:key="img-{{ $image->id }}">
+                            <div
+                                class="media-item media-card is-sortable"
+                                wire:key="img-{{ $image->id }}"
+                                wire:sort:item="{{ $image->id }}"
+                            >
+                                <div class="media-card-head">
+                                    @if ($product->coverImage?->is($image))
+                                        <span class="pill pill-active">ปก</span>
+                                    @else
+                                        <span class="pill pill-neutral">รูป</span>
+                                    @endif
+                                    <button type="button" class="icon-btn" wire:sort:handle aria-label="ลากเพื่อเรียงรูป">
+                                        <x-icon name="bars-3" size="sm" />
+                                    </button>
+                                </div>
                                 <img class="media-thumb lg" src="{{ $image->url() }}" alt="">
-                                <button type="button" class="btn btn-ghost btn-sm" wire:click="deleteImage({{ $image->id }})">ลบ</button>
+                                <div class="media-actions" wire:sort:ignore>
+                                    @unless ($product->coverImage?->is($image))
+                                        <button type="button" class="btn btn-ghost btn-sm" wire:click="setCover({{ $image->id }})">ตั้งเป็นปก</button>
+                                    @endunless
+                                    <button type="button" class="btn btn-danger btn-sm" wire:click="askDeleteImage({{ $image->id }})">ลบ</button>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -165,12 +184,18 @@
                 @if ($uploads !== [])
                     <div class="media-grid">
                         @foreach ($uploads as $index => $file)
-                            <div class="media-item" wire:key="upload-{{ $index }}">
+                            <div class="media-item media-card" wire:key="upload-{{ $index }}">
+                                <div class="media-card-head">
+                                    <span class="pill pill-neutral">รออัปโหลด</span>
+                                </div>
                                 @if ($file->isPreviewable())
                                     <img class="media-thumb lg" src="{{ $file->temporaryUrl() }}" alt="">
                                 @else
                                     <div class="ph-img">{{ $file->getClientOriginalName() }}</div>
                                 @endif
+                                <div class="media-actions">
+                                    <button type="button" class="btn btn-ghost btn-sm" wire:click="removePendingUpload({{ $index }})">เอาออก</button>
+                                </div>
                             </div>
                         @endforeach
                     </div>

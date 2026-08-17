@@ -4,6 +4,7 @@ namespace App\Services\Catalog;
 
 use App\Models\Product;
 use App\Models\ProductImage;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -71,15 +72,76 @@ class ProductImageService
 
     public function setAsCover(ProductImage $image): void
     {
-        $min = (int) ProductImage::query()
-            ->where('product_id', $image->product_id)
-            ->min('sort_order');
+        $images = $this->orderedImages($image->product_id);
 
-        if ($image->sort_order === $min) {
+        if ($images->isEmpty() || $images->first()?->is($image)) {
             return;
         }
 
-        $image->update(['sort_order' => $min - 1]);
+        $orderedIds = $images
+            ->reject(fn (ProductImage $candidate): bool => $candidate->is($image))
+            ->prepend($image)
+            ->pluck('id')
+            ->all();
+
+        $this->reorder($image->product, $orderedIds);
+    }
+
+    /**
+     * @param  list<int>  $orderedIds
+     */
+    public function reorder(Product $product, array $orderedIds): void
+    {
+        $images = $this->orderedImages($product->id);
+
+        if ($images->isEmpty()) {
+            return;
+        }
+
+        $orderedIds = collect($orderedIds)
+            ->map(fn (mixed $id): int => (int) $id)
+            ->values();
+
+        $remainingIds = $images
+            ->pluck('id')
+            ->reject(fn (int $id): bool => $orderedIds->contains($id))
+            ->values();
+
+        $finalIds = $orderedIds
+            ->filter(fn (int $id): bool => $images->contains('id', $id))
+            ->merge($remainingIds)
+            ->values();
+
+        foreach ($finalIds as $index => $id) {
+            ProductImage::query()
+                ->whereKey($id)
+                ->update(['sort_order' => $index]);
+        }
+    }
+
+    public function moveToPosition(ProductImage $image, int $position): void
+    {
+        $images = $this->orderedImages($image->product_id);
+        $currentIndex = $images->search(fn (ProductImage $candidate): bool => $candidate->is($image));
+
+        if ($currentIndex === false) {
+            return;
+        }
+
+        $targetIndex = max(0, min($position, $images->count() - 1));
+
+        if ($currentIndex === $targetIndex) {
+            return;
+        }
+
+        $orderedIds = $images->pluck('id')->all();
+        $movedId = $orderedIds[$currentIndex];
+
+        unset($orderedIds[$currentIndex]);
+        $orderedIds = array_values($orderedIds);
+        array_splice($orderedIds, $targetIndex, 0, [$movedId]);
+
+        $this->reorder($image->product, $orderedIds);
     }
 
     public function copyImagesTo(Product $source, Product $target): void
@@ -111,5 +173,17 @@ class ProductImageService
         if ($path !== '' && Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
         }
+    }
+
+    /**
+     * @return Collection<int, ProductImage>
+     */
+    private function orderedImages(int $productId)
+    {
+        return ProductImage::query()
+            ->where('product_id', $productId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
     }
 }

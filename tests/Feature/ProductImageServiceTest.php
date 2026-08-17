@@ -87,6 +87,35 @@ test('set as cover moves the image ahead of the current first image', function (
         ->and($cover->fresh()->sort_order)->toBe(0);
 });
 
+test('set as cover reindexes safely when the current first image is already zero', function () {
+    $product = Product::factory()->create();
+    $first = ProductImage::factory()->for($product)->create(['sort_order' => 0]);
+    $middle = ProductImage::factory()->for($product)->create(['sort_order' => 2]);
+    $cover = ProductImage::factory()->for($product)->create(['sort_order' => 5]);
+
+    app(ProductImageService::class)->setAsCover($cover);
+
+    expect($product->fresh()->coverImage->id)->toBe($cover->id)
+        ->and($cover->fresh()->sort_order)->toBe(0)
+        ->and($first->fresh()->sort_order)->toBe(1)
+        ->and($middle->fresh()->sort_order)->toBe(2);
+});
+
+test('move to position reorders the full image list', function () {
+    $product = Product::factory()->create();
+    $first = ProductImage::factory()->for($product)->create(['sort_order' => 0]);
+    $second = ProductImage::factory()->for($product)->create(['sort_order' => 1]);
+    $third = ProductImage::factory()->for($product)->create(['sort_order' => 2]);
+
+    app(ProductImageService::class)->moveToPosition($third, 0);
+
+    expect($product->fresh()->images->pluck('id')->all())->toBe([
+        $third->id,
+        $first->id,
+        $second->id,
+    ])->and($product->fresh()->images->pluck('sort_order')->all())->toBe([0, 1, 2]);
+});
+
 test('the cover image is the first image by sort order', function () {
     $product = Product::factory()->create();
     ProductImage::factory()->for($product)->create(['sort_order' => 5]);

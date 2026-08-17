@@ -54,6 +54,8 @@ class extends Component
 
     public ?int $deleteGroupIndex = null;
 
+    public ?int $pendingImageId = null;
+
     public string $deleteConfirmTitle = '';
 
     public string $deleteConfirmMessage = '';
@@ -216,11 +218,12 @@ class extends Component
         $this->deleteKind = '';
         $this->deleteComponentIndex = null;
         $this->deleteGroupIndex = null;
+        $this->pendingImageId = null;
         $this->deleteConfirmTitle = '';
         $this->deleteConfirmMessage = '';
     }
 
-    public function confirmDelete(): void
+    public function confirmDelete(ProductImageService $images): void
     {
         match ($this->deleteKind) {
             'component' => $this->deleteComponentIndex !== null
@@ -231,6 +234,9 @@ class extends Component
                 : null,
             'option_group' => $this->deleteGroupIndex !== null
                 ? $this->removeOptionGroup($this->deleteGroupIndex)
+                : null,
+            'image' => $this->pendingImageId !== null
+                ? $images->deleteImage($this->currentProductImage($this->pendingImageId))
                 : null,
             default => null,
         };
@@ -251,6 +257,51 @@ class extends Component
         $this->deleteComponentIndex = $componentIndex;
         $this->deleteGroupIndex = $groupIndex;
         $this->showDeleteConfirm = true;
+    }
+
+    public function reorderImages(int $imageId, int $position, ProductImageService $images): void
+    {
+        if ($this->productId === null) {
+            return;
+        }
+
+        $images->moveToPosition($this->currentProductImage($imageId), $position);
+    }
+
+    public function setCover(int $imageId, ProductImageService $images): void
+    {
+        if ($this->productId === null) {
+            return;
+        }
+
+        $images->setAsCover($this->currentProductImage($imageId));
+    }
+
+    public function askDeleteImage(int $imageId): void
+    {
+        if ($this->productId === null) {
+            return;
+        }
+
+        $this->currentProductImage($imageId);
+        $this->pendingImageId = $imageId;
+        $this->openDeleteConfirm(
+            kind: 'image',
+            title: 'ลบรูปภาพ',
+            message: 'ต้องการลบรูปนี้หรือไม่?',
+            componentIndex: null,
+            groupIndex: null,
+        );
+    }
+
+    public function removePendingUpload(int $index): void
+    {
+        if (! isset($this->uploads[$index])) {
+            return;
+        }
+
+        unset($this->uploads[$index]);
+        $this->uploads = array_values($this->uploads);
     }
 
     public function pushComponentOptionGroupValues(int $componentIndex, int $groupIndex, string $raw): void
@@ -331,12 +382,6 @@ class extends Component
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
         }
-    }
-
-    public function deleteImage(int $imageId, ProductImageService $images): void
-    {
-        $image = ProductImage::query()->findOrFail($imageId);
-        $images->deleteImage($image);
     }
 
     public function render()
@@ -430,6 +475,13 @@ class extends Component
         $usedKeys[$key] = true;
 
         return $key;
+    }
+
+    private function currentProductImage(int $imageId): ProductImage
+    {
+        return ProductImage::query()
+            ->where('product_id', $this->productId)
+            ->findOrFail($imageId);
     }
 
     /**

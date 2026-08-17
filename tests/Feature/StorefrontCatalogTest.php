@@ -119,6 +119,10 @@ test('the product page shows a gallery in sort order or the placeholder', functi
 
     Livewire::test('pages::storefront.product-show', ['product' => $shirt])
         ->assertSeeInOrder($urls, false)
+        ->assertSee('data-od-id="product-gallery"', false)
+        ->assertSee('x-on:pointerdown="onPointerDown($event)"', false)
+        ->assertSee('x-transition:enter="transition ease-out duration-500"', false)
+        ->assertSee('aria-label="รูปก่อนหน้า"', false)
         ->assertSee('aria-label="รูปถัดไป"', false);
 
     $plain = storefrontCombo();
@@ -126,7 +130,7 @@ test('the product page shows a gallery in sort order or the placeholder', functi
 
     Livewire::test('pages::storefront.product-show', ['product' => $plain])
         ->assertSee('ชุด', false)
-        ->assertDontSee('aria-label="รูปถัดไป"', false);
+        ->assertDontSee('data-od-id="product-gallery"', false);
 });
 
 test('a guest can add a simple product from the product page', function () {

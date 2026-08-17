@@ -73,37 +73,76 @@ new #[Title('รายละเอียดสินค้า')] class extends C
         </div>
 
         @if ($product->images->isNotEmpty())
-            <div
-                class="relative overflow-hidden bg-bg"
+            <section
+                class="touch-pan-y overflow-hidden bg-bg"
+                data-od-id="product-gallery"
+                wire:ignore
+                aria-roledescription="carousel"
+                aria-label="รูปสินค้า"
+                @if ($product->images->count() > 1) tabindex="0" @endif
                 x-data="{
                     index: 0,
                     count: {{ $product->images->count() }},
+                    startX: null,
                     next() { this.index = (this.index + 1) % this.count },
                     prev() { this.index = (this.index - 1 + this.count) % this.count },
+                    onPointerDown(event) {
+                        this.startX = event.clientX;
+                    },
+                    onPointerUp(event) {
+                        if (this.startX === null || this.count < 2) {
+                            return;
+                        }
+
+                        const deltaX = event.clientX - this.startX;
+                        this.startX = null;
+
+                        if (Math.abs(deltaX) < 40) {
+                            return;
+                        }
+
+                        deltaX < 0 ? this.next() : this.prev();
+                    },
                 }"
-            >
-                @foreach ($product->images as $index => $image)
-                    <img
-                        src="{{ $image->url() }}"
-                        alt="{{ $product->name }}"
-                        wire:key="product-gallery-{{ $image->id }}"
-                        x-show="index === {{ $index }}"
-                        x-cloak
-                        class="aspect-[4/3] w-full object-cover"
-                    >
-                @endforeach
                 @if ($product->images->count() > 1)
-                    <button type="button" class="absolute left-2 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-brand bg-surface/80" x-on:click="prev()" aria-label="รูปก่อนหน้า">
-                        <x-icon name="chevron-left" size="md" />
-                    </button>
-                    <button type="button" class="absolute right-2 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-brand bg-surface/80" x-on:click="next()" aria-label="รูปถัดไป">
-                        <x-icon name="chevron-right" size="md" />
-                    </button>
-                    <p class="absolute bottom-2 right-2 rounded-full bg-surface/80 px-2 py-0.5 text-xs text-muted" aria-hidden="true">
-                        <span x-text="index + 1"></span>/{{ $product->images->count() }}
-                    </p>
+                    x-on:pointerdown="onPointerDown($event)"
+                    x-on:pointerup="onPointerUp($event)"
+                    x-on:pointercancel="startX = null"
+                    x-on:keydown.left.prevent="prev()"
+                    x-on:keydown.right.prevent="next()"
                 @endif
-            </div>
+            >
+                <div class="relative aspect-[16/9]">
+                    @foreach ($product->images as $index => $image)
+                        <img
+                            src="{{ $image->url() }}"
+                            alt="{{ $product->name }}"
+                            wire:key="product-gallery-{{ $image->id }}"
+                            x-show="index === {{ $index }}"
+                            x-transition:enter="transition ease-out duration-500"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-300"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                            x-cloak
+                            draggable="false"
+                            class="absolute inset-0 h-full w-full object-cover"
+                        >
+                    @endforeach
+                    @if ($product->images->count() > 1)
+                        <button type="button" class="absolute left-2 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center" x-on:click="prev()" x-on:pointerdown.stop x-on:pointerup.stop aria-label="รูปก่อนหน้า">
+                            <x-icon name="chevron-left" size="md" />
+                        </button>
+                        <button type="button" class="absolute right-2 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center" x-on:click="next()" x-on:pointerdown.stop x-on:pointerup.stop aria-label="รูปถัดไป">
+                            <x-icon name="chevron-right" size="md" />
+                        </button>
+                        <p class="absolute bottom-2 right-2 z-10 rounded-full bg-surface/80 px-2 py-0.5 text-xs text-muted" aria-hidden="true">
+                            <span x-text="index + 1"></span>/{{ $product->images->count() }}
+                        </p>
+                    @endif
+                </div>
+            </section>
         @else
             <div class="flex aspect-[4/3] items-center justify-center bg-bg text-muted" aria-hidden="true">
                 {{ $product->type === \App\Enums\ProductType::Bundle ? 'ชุด' : 'สินค้า' }}
