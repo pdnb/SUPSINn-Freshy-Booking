@@ -45,6 +45,56 @@ npm run build
 
 สลิปตรวจด้วย stub: ชื่อไฟล์มี `fail` จะไม่ผ่าน, มี `dup` ถือว่าซ้ำ, อื่นๆ ผ่าน — แล้วเข้าคิว `pending_review`
 
+## แชร์ไซต์ด้วย Cloudflare Tunnel
+
+เปิดไซต์ Herd ให้เข้าจากอินเทอร์เน็ต (มือถือ / LINE LIFF) โดยไม่ต้องเปิดพอร์ต — ใช้ `npm run build` ก่อน อย่าใช้ `npm run dev` ผ่าน tunnel
+
+ติดตั้งครั้งแรก:
+
+```bash
+winget install --id Cloudflare.cloudflared
+```
+
+Quick Tunnel (URL สุ่ม `https://….trycloudflare.com` เปลี่ยนทุกครั้งที่รีสตาร์ท):
+
+```bash
+cloudflared tunnel --url http://127.0.0.1:80 --http-host-header supsinn-freshy-booking.test
+```
+
+ถ้า Herd ฟังเฉพาะ HTTPS:
+
+```bash
+cloudflared tunnel --url https://127.0.0.1:443 --http-host-header supsinn-freshy-booking.test --no-tls-verify
+```
+
+`--http-host-header` จำเป็น เพราะ Herd เลือกไซต์จาก hostname `.test`
+
+ได้ URL แล้วใส่ใน `.env` แล้วเคลียร์คอนฟิก:
+
+```env
+APP_URL=https://xxxx.trycloudflare.com
+```
+
+```bash
+php artisan config:clear
+php artisan view:clear
+```
+
+ถ้าใช้ LIFF ตั้ง Endpoint URL ใน LINE Developers ให้ตรง origin นี้ด้วย
+
+Named tunnel (hostname คงที่ — ต้องมีบัญชี Cloudflare และโดเมนบน Cloudflare):
+
+```bash
+cloudflared tunnel login
+cloudflared tunnel create freshy-booking
+cloudflared tunnel route dns freshy-booking demo.yourdomain.com
+cloudflared tunnel run freshy-booking
+```
+
+ใน `%USERPROFILE%\.cloudflared\config.yml` ต้องมี `httpHostHeader: supsinn-freshy-booking.test` แล้วตั้ง `APP_URL` เป็น hostname นั้น
+
+Tunnel เปิดทั้งแอป รวม `/admin` — เปลี่ยนรหัสแอดมินก่อนแชร์ URL
+
 ## ฐานข้อมูล / Redis
 
 - Local ใช้ **SQLite** (`database/database.sqlite`)
