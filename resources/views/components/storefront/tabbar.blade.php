@@ -2,6 +2,7 @@
     <div class="mx-auto grid max-w-lg grid-cols-3">
         <a
             href="{{ route('home') }}"
+            wire:navigate
             @class([
                 'inline-flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs',
                 'text-accent font-medium' => request()->routeIs('home'),
@@ -14,6 +15,7 @@
         </a>
         <a
             href="{{ route('orders.index') }}"
+            wire:navigate
             @class([
                 'inline-flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs',
                 'text-accent font-medium' => request()->routeIs('orders.index', 'orders.confirmation'),
@@ -26,6 +28,7 @@
         </a>
         <a
             href="{{ route('cart') }}"
+            wire:navigate
             @class([
                 'inline-flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs',
                 'text-accent font-medium' => request()->routeIs('cart'),

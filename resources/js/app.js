@@ -80,3 +80,11 @@ async function bootstrapLiff() {
 }
 
 bootstrapLiff();
+
+document.addEventListener('livewire:navigate', () => {
+    document.documentElement.classList.add('is-page-loading');
+});
+
+document.addEventListener('livewire:navigated', () => {
+    document.documentElement.classList.remove('is-page-loading');
+});

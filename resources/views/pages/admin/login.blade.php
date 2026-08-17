@@ -148,7 +148,7 @@ class extends Component
                 </form>
 
                 <p class="mt-8 text-sm text-muted">
-                    <a href="{{ route('home') }}" class="font-medium text-accent underline-offset-4 transition-colors duration-200 hover:underline">
+                    <a href="{{ route('home') }}" wire:navigate class="font-medium text-accent underline-offset-4 transition-colors duration-200 hover:underline">
                         กลับหน้าร้าน
                     </a>
                 </p>

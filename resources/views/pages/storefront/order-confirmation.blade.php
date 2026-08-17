@@ -77,7 +77,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         <div class="flex items-center gap-2">
-            <a href="{{ route('home') }}" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับหน้าหลัก">
+            <a href="{{ route('home') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับหน้าหลัก">
                 <x-icon name="chevron-left" size="lg" />
             </a>
             <h1 class="text-xl font-semibold">คำสั่งซื้อ</h1>

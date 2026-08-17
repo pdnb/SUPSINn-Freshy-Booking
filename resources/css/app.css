@@ -45,6 +45,20 @@
 }
 
 @layer components {
+    .page-loading-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        align-items: center;
+        justify-content: center;
+        background-color: color-mix(in oklch, var(--color-bg) 80%, transparent);
+    }
+
+    html.is-page-loading .page-loading-overlay {
+        display: flex;
+    }
+
     .admin-login__brand,
     .admin-login__panel {
         animation: admin-login-enter 420ms ease-out both;

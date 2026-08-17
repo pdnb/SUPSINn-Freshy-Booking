@@ -42,7 +42,7 @@ new #[Title('รายละเอียดสินค้า')] class extends C
             'components' => $this->componentOptions,
         ]);
 
-        $this->redirect(route('cart'));
+        $this->redirect(route('cart'), navigate: true);
     }
 
     public function render(CartService $cart)
@@ -59,7 +59,7 @@ new #[Title('รายละเอียดสินค้า')] class extends C
 
     <main id="content" class="mx-auto max-w-lg">
         <div class="flex items-center gap-2 border-b border-border bg-surface px-2">
-            <a href="{{ route('home') }}" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-bg" aria-label="กลับหน้าหลัก">
+            <a href="{{ route('home') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-bg" aria-label="กลับหน้าหลัก">
                 <x-icon name="chevron-left" size="lg" />
             </a>
             <h1 class="text-base font-semibold">รายละเอียดสินค้า</h1>

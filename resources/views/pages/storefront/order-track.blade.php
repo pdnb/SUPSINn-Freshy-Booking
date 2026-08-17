@@ -23,7 +23,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
         $this->redirect(route('orders.confirmation', [
             'order' => $order,
             'token' => $order->tracking_token,
-        ]));
+        ]), navigate: true);
     }
 
     public function render(CartService $cart, LineIdentityService $line)
@@ -44,7 +44,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         <div class="flex items-center gap-2">
-            <a href="{{ route('home') }}" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับหน้าหลัก">
+            <a href="{{ route('home') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับหน้าหลัก">
                 <x-icon name="chevron-left" size="lg" />
             </a>
             <h1 class="text-xl font-semibold">คำสั่งซื้อ</h1>
@@ -57,7 +57,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                     <p class="mt-4 text-sm font-medium text-accent">ยังไม่มีการจอง</p>
                     <h2 class="mt-2 text-xl font-semibold">ยังไม่มีคำสั่งซื้อ</h2>
                     <p class="mt-2 text-sm text-muted">เมื่อจองผ่าน LINE และแนบสลิปแล้ว สถานะจะแสดงที่นี่</p>
-                    <a href="{{ route('home') }}" class="mt-5 inline-flex min-h-11 items-center rounded-brand border border-border bg-surface px-4 font-medium hover:bg-bg">ไปหน้าหลัก</a>
+                    <a href="{{ route('home') }}" wire:navigate class="mt-5 inline-flex min-h-11 items-center rounded-brand border border-border bg-surface px-4 font-medium hover:bg-bg">ไปหน้าหลัก</a>
                 </section>
             @else
                 <ul class="mt-6 space-y-3" aria-label="ออเดอร์ของฉัน">
@@ -65,6 +65,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                         <li>
                             <a
                                 href="{{ route('orders.confirmation', ['order' => $order, 'token' => $order->tracking_token]) }}"
+                                wire:navigate
                                 class="block rounded-brand border border-border bg-surface p-4 hover:border-accent"
                             >
                                 <div class="flex items-start justify-between gap-3">
@@ -86,7 +87,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                 <p class="mt-4 text-sm font-medium text-accent">ยังไม่มีการจอง</p>
                 <h2 class="mt-2 text-xl font-semibold">ยังไม่มีคำสั่งซื้อ</h2>
                 <p class="mt-2 text-sm text-muted">เมื่อจองและแนบสลิปแล้ว สถานะจะแสดงที่นี่</p>
-                <a href="{{ route('home') }}" class="mt-5 inline-flex min-h-11 items-center rounded-brand border border-border bg-surface px-4 font-medium hover:bg-bg">ไปหน้าหลัก</a>
+                <a href="{{ route('home') }}" wire:navigate class="mt-5 inline-flex min-h-11 items-center rounded-brand border border-border bg-surface px-4 font-medium hover:bg-bg">ไปหน้าหลัก</a>
             </section>
         @endif
     </main>

@@ -18,13 +18,13 @@ new #[Title('ชำระเงิน')] class extends Component
     public function mount(CartService $cart, CheckoutService $checkout): void
     {
         if ($cart->items()->isEmpty()) {
-            $this->redirect(route('cart'));
+            $this->redirect(route('cart'), navigate: true);
 
             return;
         }
 
         if ($checkout->draft() === null) {
-            $this->redirect(route('checkout'));
+            $this->redirect(route('checkout'), navigate: true);
         }
     }
 
@@ -44,7 +44,7 @@ new #[Title('ชำระเงิน')] class extends Component
         $this->redirect(route('orders.confirmation', [
             'order' => $order,
             'token' => $order->tracking_token,
-        ]));
+        ]), navigate: true);
     }
 
     public function render(CartService $cart, CheckoutService $checkout, PromptPayQrService $promptPayQr)
@@ -68,7 +68,7 @@ new #[Title('ชำระเงิน')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         <div class="flex items-center gap-2">
-            <a href="{{ route('checkout') }}" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับข้อมูลการจอง">
+            <a href="{{ route('checkout') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับข้อมูลการจอง">
                 <x-icon name="chevron-left" size="lg" />
             </a>
             <h1 class="text-xl font-semibold">ชำระเงิน</h1>

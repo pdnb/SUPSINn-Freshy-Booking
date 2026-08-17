@@ -40,7 +40,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
     public function mount(CartService $cart, CheckoutService $checkout): void
     {
         if ($cart->items()->isEmpty()) {
-            $this->redirect(route('cart'));
+            $this->redirect(route('cart'), navigate: true);
 
             return;
         }
@@ -91,7 +91,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
             'shipping_rate_id' => $this->shipping_rate_id !== '' ? (int) $this->shipping_rate_id : null,
         ]);
 
-        $this->redirect(route('pay'));
+        $this->redirect(route('pay'), navigate: true);
     }
 
     public function render(CheckoutService $checkout, CartService $cart, ShippingRateService $shipping)
@@ -145,7 +145,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         <div class="flex items-center gap-2">
-            <a href="{{ route('cart') }}" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับตะกร้า">
+            <a href="{{ route('cart') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับตะกร้า">
                 <x-icon name="chevron-left" size="lg" />
             </a>
             <h1 class="text-xl font-semibold">ข้อมูลการจอง</h1>

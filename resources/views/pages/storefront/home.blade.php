@@ -151,6 +151,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                             <li wire:key="product-{{ $product->id }}">
                                 <a
                                     href="{{ route('products.show', $product) }}"
+                                    wire:navigate
                                     class="flex min-h-11 h-full flex-col overflow-hidden rounded-brand border border-border bg-surface hover:border-accent"
                                 >
                                     @if ($product->coverImage)

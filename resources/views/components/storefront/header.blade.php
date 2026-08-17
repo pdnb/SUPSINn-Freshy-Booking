@@ -10,7 +10,7 @@
 @endphp
 <header class="bg-brand text-brand-fg">
     <div class="mx-auto flex min-h-[58px] max-w-lg items-center justify-between gap-3 px-4">
-        <a href="{{ route('home') }}" class="min-h-11 inline-flex items-center text-base font-semibold hover:opacity-90">
+        <a href="{{ route('home') }}" wire:navigate class="min-h-11 inline-flex items-center text-base font-semibold hover:opacity-90">
             @if ($logoUrl)
                 <img
                     src="{{ $logoUrl }}"
@@ -23,6 +23,7 @@
         </a>
         <a
             href="{{ route('cart') }}"
+            wire:navigate
             class="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-brand-press"
             aria-label="ตะกร้า{{ $cartCount > 0 ? ' มี '.$cartCount.' รายการ' : '' }}"
         >

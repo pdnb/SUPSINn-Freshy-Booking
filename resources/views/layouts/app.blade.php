@@ -20,6 +20,7 @@
             data-line-session-url="{{ route('line.session') }}"
         @endif
     >
+        <x-storefront.page-loading />
         {{ $slot }}
         @livewireScripts
     </body>
