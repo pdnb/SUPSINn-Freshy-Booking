@@ -10,21 +10,33 @@
  */
 @theme {
     --font-sans: 'Anuphan', 'Sarabun', ui-sans-serif, system-ui, sans-serif;
-    --color-bg: oklch(98% 0.004 250);
+
+    --color-bg: oklch(98.5% 0.006 310);
     --color-surface: oklch(100% 0 0);
-    --color-fg: oklch(24% 0.02 255);
-    --color-muted: oklch(48% 0.014 255);
-    --color-border: oklch(88% 0.01 250);
-    --color-accent: oklch(48% 0.13 255);
-    --color-accent-press: oklch(40% 0.13 255);
-    --color-accent-fg: oklch(99% 0.01 255);
-    --color-brand: oklch(48% 0.13 255);
-    --color-brand-press: oklch(40% 0.13 255);
-    --color-brand-fg: oklch(99% 0.01 255);
+    --color-surface-2: oklch(96.5% 0.012 310);
+    --color-fg: oklch(24% 0.04 300);
+    --color-muted: oklch(48% 0.03 300);
+    --color-border: oklch(89% 0.014 310);
+
+    --color-brand: oklch(32% 0.19 300);
+    --color-brand-press: oklch(26% 0.17 300);
+    --color-brand-fg: oklch(99% 0.005 310);
+
+    --color-accent: oklch(42% 0.21 300);
+    --color-accent-press: oklch(35% 0.19 300);
+    --color-accent-fg: oklch(99% 0.005 310);
+
+    --color-highlight: oklch(70% 0.17 52);
+    --color-highlight-press: oklch(62% 0.18 45);
+    --color-highlight-fg: oklch(47% 0.16 45);
+    --color-highlight-soft: oklch(95% 0.035 65);
+
     --color-success: oklch(52% 0.14 145);
     --color-warn: oklch(62% 0.14 75);
-    --color-danger: oklch(42% 0.16 20);
+    --color-danger: oklch(45% 0.18 22);
+
     --radius-brand: 14px;
+    --radius-brand-sm: 10px;
 }
 
 @layer base {

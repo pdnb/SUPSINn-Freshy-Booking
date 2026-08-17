@@ -65,22 +65,20 @@ new #[Title('ตะกร้า')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         <div class="flex items-center gap-2">
-            <a href="{{ route('home') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับหน้าหลัก">
+            <x-storefront.button variant="ghost" :href="route('home')" aria-label="กลับหน้าหลัก">
                 <x-icon name="chevron-left" size="lg" />
-            </a>
+            </x-storefront.button>
             <h1 class="text-xl font-semibold">ตะกร้า</h1>
         </div>
 
         @if ($items->isEmpty())
-            <div class="mt-6 flex flex-col items-center text-center">
-                <x-icon name="shopping-cart" size="xl" class="text-muted" />
-                <p class="mt-4 text-sm text-muted">ยังไม่มีสินค้าในตะกร้า</p>
-                <a href="{{ route('home') }}" wire:navigate class="mt-4 inline-flex min-h-11 items-center rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press">ไปเลือกสินค้า</a>
-            </div>
+            <x-storefront.empty-state class="mt-6" icon="shopping-cart" description="ยังไม่มีสินค้าในตะกร้า">
+                <x-storefront.button :href="route('home')">ไปเลือกสินค้า</x-storefront.button>
+            </x-storefront.empty-state>
         @else
             <ul class="mt-4 space-y-3">
                 @foreach ($items as $item)
-                    <li class="rounded-brand border border-border bg-surface p-4" wire:key="cart-{{ $item['id'] }}">
+                    <x-storefront.card as="li" wire:key="cart-{{ $item['id'] }}">
                         <div class="flex items-start justify-between gap-3">
                             <p class="font-medium">{{ $item['name'] }}</p>
                             <p class="text-sm">฿{{ number_format((float) $item['price'], 2) }}</p>
@@ -94,37 +92,30 @@ new #[Title('ตะกร้า')] class extends Component
                         @endif
                         <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
                             <div class="flex items-center gap-2" role="group" aria-label="จำนวน {{ $item['name'] }}">
-                                <button
-                                    type="button"
+                                <x-storefront.button
+                                    variant="secondary"
+                                    size="icon"
                                     wire:click="decrement('{{ $item['id'] }}')"
-                                    wire:loading.attr="disabled"
-                                    wire:target="decrement('{{ $item['id'] }}')"
-                                    class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border border-border hover:border-accent disabled:cursor-not-allowed disabled:opacity-60"
                                     aria-label="ลดจำนวน"
-                                >−</button>
+                                >−</x-storefront.button>
                                 <span class="min-w-8 text-center">{{ $item['qty'] }}</span>
-                                <button
-                                    type="button"
+                                <x-storefront.button
+                                    variant="secondary"
+                                    size="icon"
                                     wire:click="increment('{{ $item['id'] }}')"
-                                    wire:loading.attr="disabled"
-                                    wire:target="increment('{{ $item['id'] }}')"
-                                    class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border border-border hover:border-accent disabled:cursor-not-allowed disabled:opacity-60"
                                     aria-label="เพิ่มจำนวน"
-                                >+</button>
+                                >+</x-storefront.button>
                             </div>
-                            <button
-                                type="button"
+                            <x-storefront.button
+                                variant="quiet"
                                 wire:click="remove('{{ $item['id'] }}')"
-                                wire:loading.attr="disabled"
-                                wire:target="remove('{{ $item['id'] }}')"
-                                class="inline-flex min-h-11 items-center text-sm text-muted hover:text-fg disabled:cursor-not-allowed disabled:opacity-60"
-                            >ลบรายการ</button>
+                            >ลบรายการ</x-storefront.button>
                         </div>
-                    </li>
+                    </x-storefront.card>
                 @endforeach
             </ul>
 
-            <section class="mt-6 rounded-brand border border-border bg-surface p-4">
+            <x-storefront.card as="section" class="mt-6">
                 <div class="flex justify-between gap-3 text-sm">
                     <span>ราคาสินค้า</span>
                     <span>฿{{ number_format((float) $subtotal, 2) }}</span>
@@ -135,18 +126,16 @@ new #[Title('ตะกร้า')] class extends Component
                 </div>
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดรวมสินค้า</span>
-                    <span class="text-brand">฿{{ number_format((float) $subtotal, 2) }}</span>
+                    <x-storefront.price :amount="$subtotal" />
                 </div>
-            </section>
+            </x-storefront.card>
         @endif
     </main>
 
     @if ($items->isNotEmpty())
-        <div class="fixed inset-x-0 bottom-14 z-10 border-t border-border bg-surface">
-            <div class="mx-auto max-w-lg px-4 py-3">
-                <a href="{{ route('checkout') }}" wire:navigate class="inline-flex min-h-11 w-full items-center justify-center rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press">ดำเนินการจอง</a>
-            </div>
-        </div>
+        <x-storefront.bottom-bar>
+            <x-storefront.button :href="route('checkout')" block>ดำเนินการจอง</x-storefront.button>
+        </x-storefront.bottom-bar>
     @endif
 
     <x-storefront.tabbar />

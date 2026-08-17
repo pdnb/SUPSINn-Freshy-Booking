@@ -77,29 +77,15 @@ new #[Title('คำสั่งซื้อ')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         <div class="flex items-center gap-2">
-            <a href="{{ route('home') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับหน้าหลัก">
+            <x-storefront.button variant="ghost" :href="route('home')" aria-label="กลับหน้าหลัก">
                 <x-icon name="chevron-left" size="lg" />
-            </a>
+            </x-storefront.button>
             <h1 class="text-xl font-semibold">คำสั่งซื้อ</h1>
         </div>
 
-        <ol class="mt-4 grid grid-cols-4 gap-1.5 text-center text-[11px]" aria-label="สถานะคำสั่งซื้อ">
-            @foreach ($steps as $step)
-                <li
-                    @class([
-                        'rounded-brand px-1 py-2 font-medium',
-                        'bg-accent text-brand-fg' => $step['state'] === 'current',
-                        'bg-accent/15 text-brand' => $step['state'] === 'done',
-                        'bg-border/50 text-muted' => $step['state'] === 'upcoming',
-                    ])
-                    @if ($step['state'] === 'current') aria-current="step" @endif
-                >
-                    {{ $step['label'] }}
-                </li>
-            @endforeach
-        </ol>
+        <x-storefront.step-bar variant="order" :steps="$steps" label="สถานะคำสั่งซื้อ" />
 
-        <section class="mt-4 rounded-brand border border-border bg-surface p-4">
+        <x-storefront.card as="section" class="mt-4">
             <p class="flex items-center justify-between gap-3 text-xs font-medium text-brand">
                 <span>รหัสออเดอร์</span>
                 <button
@@ -119,9 +105,9 @@ new #[Title('คำสั่งซื้อ')] class extends Component
             @if ($order->status === \App\Enums\OrderStatus::PendingReview)
                 <p class="mt-3 text-sm text-muted">สลิปผ่านการตรวจเบื้องต้นแล้ว รอเจ้าหน้าที่ยืนยัน — ยังไม่ถือว่าชำระแล้ว</p>
             @endif
-        </section>
+        </x-storefront.card>
 
-        <section class="mt-4 rounded-brand border border-border bg-surface px-4">
+        <x-storefront.card as="section" padding="0" class="mt-4 px-4">
             <dl class="text-sm">
                 <div class="flex justify-between gap-3 border-b border-border py-2">
                     <dt class="text-muted">ผู้จอง</dt>
@@ -176,14 +162,13 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                                 >
                                     <div class="flex items-center justify-between gap-3">
                                         <h2 class="text-sm font-medium">สลิป</h2>
-                                        <button
-                                            type="button"
-                                            class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-bg"
+                                        <x-storefront.button
+                                            variant="ghost"
                                             x-on:click="$refs.preview.close()"
                                             aria-label="ปิดตัวอย่างสลิป"
                                         >
                                             <x-icon name="x-mark" size="md" />
-                                        </button>
+                                        </x-storefront.button>
                                     </div>
                                     @if (str_ends_with(mb_strtolower($order->slip->original_name), '.pdf'))
                                         <iframe
@@ -208,13 +193,13 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                     </dd>
                 </div>
             </dl>
-        </section>
+        </x-storefront.card>
 
         <section class="mt-5">
             <h2 class="font-semibold">รายการที่จอง</h2>
             <ul class="mt-3 space-y-3">
                 @forelse ($order->items as $item)
-                    <li wire:key="guest-item-{{ $item->id }}" class="rounded-brand border border-border bg-surface p-4 text-sm">
+                    <x-storefront.card as="li" class="text-sm" wire:key="guest-item-{{ $item->id }}">
                         <div class="flex justify-between gap-3 font-medium">
                             <span>{{ $item->name }}</span>
                             <span>× {{ $item->qty }}</span>
@@ -233,12 +218,12 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                             </ul>
                         @endif
                         <p class="mt-1 text-right text-muted">{{ number_format((float) $item->price, 2) }} บาท</p>
-                    </li>
+                    </x-storefront.card>
                 @empty
                     <li class="text-sm text-muted">ไม่มีรายการ</li>
                 @endforelse
             </ul>
-            <dl class="mt-4 space-y-2 rounded-brand border border-border bg-surface p-4 text-sm">
+            <x-storefront.card as="dl" class="mt-4 space-y-2 text-sm">
                 <div class="flex justify-between gap-3">
                     <dt class="text-muted">ยอดสินค้า</dt>
                     <dd>{{ number_format((float) $order->subtotal, 2) }} บาท</dd>
@@ -261,21 +246,21 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                         <dd>{{ number_format((float) $order->amount_remaining, 2) }} บาท</dd>
                     </div>
                 @endif
-            </dl>
+            </x-storefront.card>
         </section>
 
         @if (! $order->fulfillment->chargesShipping())
             <section class="mt-6">
                 <h2 class="font-semibold">จุดรับสินค้า</h2>
                 <div class="mt-3 space-y-3">
-                    <article class="rounded-brand border border-border bg-surface p-4">
+                    <x-storefront.card as="article">
                         <h3 class="font-medium">{{ \App\Enums\FulfillmentMethod::Bookstore->label() }}</h3>
                         <p class="mt-1 text-sm text-muted">{{ \App\Enums\FulfillmentMethod::Bookstore->caption() }}</p>
-                    </article>
-                    <article class="rounded-brand border border-border bg-surface p-4">
+                    </x-storefront.card>
+                    <x-storefront.card as="article">
                         <h3 class="font-medium">{{ \App\Enums\FulfillmentMethod::Hall->label() }}</h3>
                         <p class="mt-1 text-sm text-muted">{{ \App\Enums\FulfillmentMethod::Hall->caption() }}</p>
-                    </article>
+                    </x-storefront.card>
                 </div>
             </section>
         @endif

@@ -68,21 +68,16 @@ new #[Title('ชำระเงิน')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         <div class="flex items-center gap-2">
-            <a href="{{ route('checkout') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับข้อมูลการจอง">
+            <x-storefront.button variant="ghost" :href="route('checkout')" aria-label="กลับข้อมูลการจอง">
                 <x-icon name="chevron-left" size="lg" />
-            </a>
+            </x-storefront.button>
             <h1 class="text-xl font-semibold">ชำระเงิน</h1>
         </div>
 
-        <ol class="mt-4 grid grid-cols-4 gap-1 text-center text-xs text-muted" aria-label="ขั้นตอนการจอง">
-            <li class="rounded-brand bg-surface px-1 py-2">ตะกร้า</li>
-            <li class="rounded-brand bg-surface px-1 py-2">ข้อมูล</li>
-            <li class="rounded-brand bg-accent px-1 py-2 font-medium text-brand-fg" aria-current="step">ชำระเงิน</li>
-            <li class="rounded-brand bg-surface px-1 py-2">เสร็จสิ้น</li>
-        </ol>
+        <x-storefront.step-bar :steps="['ตะกร้า', 'ข้อมูล', 'ชำระเงิน', 'เสร็จสิ้น']" current="ชำระเงิน" />
 
         @if ($draft)
-            <section class="mt-6 rounded-brand border border-border bg-surface p-5">
+            <x-storefront.card as="section" padding="5" class="mt-6">
                 <div class="flex justify-between gap-3 text-sm">
                     <span>ยอดสินค้า</span>
                     <span>฿{{ number_format((float) $draft['subtotal'], 2) }}</span>
@@ -93,7 +88,7 @@ new #[Title('ชำระเงิน')] class extends Component
                 </div>
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดที่ต้องชำระตอนนี้</span>
-                    <span class="text-brand">฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</span>
+                    <x-storefront.price :amount="$draft['amount_due_now'] ?? $draft['total']" />
                 </div>
                 @if (($draft['payment_mode'] ?? 'full') === \App\Enums\PaymentMode::Deposit->value)
                     <div class="mt-2 flex justify-between gap-3 text-sm text-muted">
@@ -106,9 +101,9 @@ new #[Title('ชำระเงิน')] class extends Component
                     </div>
                 @endif
                 <p class="mt-3 text-sm text-muted">ชำระผ่าน PromptPay แล้วแนบสลิปเพื่อยืนยันการจองในขั้นตอนเดียวกัน</p>
-            </section>
+            </x-storefront.card>
 
-            <section class="mt-4 rounded-brand border border-border bg-surface p-5 text-center">
+            <x-storefront.card as="section" padding="5" class="mt-4 text-center">
                 <img
                     src="{{ asset('images/Thai_QR_Logo.svg') }}"
                     alt="Thai QR Payment"
@@ -125,40 +120,22 @@ new #[Title('ชำระเงิน')] class extends Component
                 @endif
                 <p class="mt-3 text-sm">{{ $promptpayName }}</p>
                 <p class="font-medium tracking-wide">{{ $promptpayId }}</p>
-                <p class="mt-2 text-sm text-brand">฿{{ number_format((float) ($draft['amount_due_now'] ?? $draft['total']), 2) }}</p>
-            </section>
+                <x-storefront.price :amount="$draft['amount_due_now'] ?? $draft['total']" size="sm" class="mt-2" />
+            </x-storefront.card>
 
             <p class="mt-4 text-sm text-muted" id="slip-hint">ต้องแนบสลิปก่อนกดยืนยันการจอง</p>
 
-            <label class="mt-2 flex min-h-24 cursor-pointer flex-col justify-center rounded-brand border border-dashed border-border bg-surface px-4 py-4">
-                <span class="font-medium">แนบสลิปการโอน</span>
-                <span class="text-sm text-muted">รูปภาพหรือ PDF ไม่เกิน 5MB</span>
-                <input type="file" wire:model="slip" accept="image/*,.pdf" class="mt-3 text-sm" aria-describedby="slip-hint">
-                @if ($slip)
-                    <span class="mt-2 text-sm text-success">แนบแล้ว: {{ $slip->getClientOriginalName() }}</span>
-                @endif
-            </label>
+            <x-storefront.slip-dropzone
+                wire:model="slip"
+                :filename="$slip?->getClientOriginalName()"
+            />
             @error('slip') <p class="mt-2 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
         @endif
     </main>
 
-    <div class="fixed inset-x-0 bottom-14 z-10 border-t border-border bg-surface">
-        <div class="mx-auto max-w-lg px-4 py-3">
-            <button
-                type="button"
-                wire:click="confirm"
-                wire:loading.attr="disabled"
-                wire:target="confirm"
-                @disabled(! $slip)
-                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-50"
-            >
-                <span wire:loading.remove wire:target="confirm">ยืนยันการจอง</span>
-                <span wire:loading wire:target="confirm" class="inline-flex items-center gap-2">
-                    <x-icon name="arrow-path" size="sm" class="animate-spin" />
-                </span>
-            </button>
-        </div>
-    </div>
+    <x-storefront.bottom-bar>
+        <x-storefront.button wire:click="confirm" :disabled="! $slip" block>ยืนยันการจอง</x-storefront.button>
+    </x-storefront.bottom-bar>
 
     <x-storefront.tabbar />
 </div>

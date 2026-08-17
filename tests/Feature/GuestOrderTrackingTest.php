@@ -51,7 +51,9 @@ test('a valid tracking link shows the guest order status', function () {
         ->assertSee('350.00 บาท', false)
         ->assertSee('0.00 บาท', false)
         ->assertSee('mt-1 text-right text-muted', false)
-        ->assertSee('mt-4 space-y-2 rounded-brand border border-border bg-surface p-4 text-sm', false);
+        ->assertSee('rounded-brand', false)
+        ->assertSee('border-border', false)
+        ->assertSee('bg-surface', false);
 
     Livewire::test('pages::storefront.order-confirmation', [
         'order' => $order->number,

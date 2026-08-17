@@ -12,3 +12,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/views/pages/**, app/Livewire/** | .ai/rules/livewire-pages.md |
 | resources/views/pages/storefront/**, resources/views/components/storefront/**, resources/views/layouts/app.blade.php | .ai/rules/storefront-livewire-loading.md |
 | resources/views/pages/storefront/**, resources/views/components/storefront/**, resources/views/layouts/app.blade.php | .ai/rules/storefront-toast.md |
+| resources/views/components/storefront/**, resources/views/pages/storefront/**, resources/css/app.css | .ai/rules/storefront-design-system.md |

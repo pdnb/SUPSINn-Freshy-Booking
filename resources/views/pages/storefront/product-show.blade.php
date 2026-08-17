@@ -66,10 +66,10 @@ new #[Title('รายละเอียดสินค้า')] class extends C
 
     <main id="content" class="mx-auto max-w-lg">
         <div class="flex items-center gap-2 border-b border-border bg-surface px-2">
-            <a href="{{ route('home') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-bg" aria-label="กลับหน้าหลัก">
+            <x-storefront.button variant="ghost" :href="route('home')" aria-label="กลับหน้าหลัก">
                 <x-icon name="chevron-left" size="lg" />
-            </a>
-            <h1 class="text-base font-semibold">รายละเอียดสินค้า</h1>
+            </x-storefront.button>
+            <h1 class="text-xl font-semibold">รายละเอียดสินค้า</h1>
         </div>
 
         @if ($product->images->isNotEmpty())
@@ -150,11 +150,11 @@ new #[Title('รายละเอียดสินค้า')] class extends C
         @endif
 
         <section class="border-b border-border bg-surface px-4 py-5">
-            <span class="inline-flex rounded-full bg-bg px-2 py-0.5 text-xs text-muted">
+            <x-storefront.badge>
                 {{ $product->type === \App\Enums\ProductType::Bundle ? 'คอมโบ · ไม่ขายแยก' : 'ซื้อแยกได้' }}
-            </span>
+            </x-storefront.badge>
             <h2 class="mt-2 text-xl font-semibold">{{ $product->name }}</h2>
-            <p class="mt-1 text-lg font-medium text-brand">฿{{ number_format((float) $product->price, 2) }}</p>
+            <x-storefront.price :amount="$product->price" size="lg" class="mt-1" />
             @if ($product->description)
                 <p class="mt-3 text-sm text-muted">{{ $product->description }}</p>
             @elseif ($product->type === \App\Enums\ProductType::Bundle)
@@ -166,55 +166,41 @@ new #[Title('รายละเอียดสินค้า')] class extends C
             @foreach ($product->optionGroups as $group)
                 <section class="border-b border-border bg-surface px-4 py-5" wire:key="group-{{ $group->id }}">
                     <h3 class="font-semibold">{{ $group->label }}</h3>
-                    <p class="mt-1 text-xs text-muted">Required</p>
+                    <p class="mt-1 text-xs text-muted">จำเป็น</p>
                     <div class="mt-3 flex flex-wrap gap-2" role="group" aria-label="{{ $group->label }}">
                         @foreach ($group->values as $value)
-                            <button
-                                type="button"
+                            <x-storefront.chip
                                 wire:key="option-{{ $group->id }}-{{ $value->id }}"
                                 wire:click="selectOption('{{ $group->key }}', '{{ $value->value }}')"
-                                wire:loading.attr="disabled"
                                 wire:target="selectOption('{{ $group->key }}', '{{ $value->value }}')"
-                                aria-pressed="{{ ($options[$group->key] ?? null) === $value->value ? 'true' : 'false' }}"
-                                @class([
-                                    'inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60',
-                                    'border-accent bg-accent text-brand-fg' => ($options[$group->key] ?? null) === $value->value,
-                                    'border-border bg-surface hover:border-accent' => ($options[$group->key] ?? null) !== $value->value,
-                                ])
+                                :selected="($options[$group->key] ?? null) === $value->value"
                             >
                                 {{ $value->value }}
-                            </button>
+                            </x-storefront.chip>
                         @endforeach
                     </div>
                 </section>
             @endforeach
         @else
-            @foreach ($product->components as $index => $component)
-                <section class="border-b border-border bg-surface px-4 py-5" wire:key="component-{{ $component->id }}">
+            @foreach ($product->components as $index => $bundleComponent)
+                <section class="border-b border-border bg-surface px-4 py-5" wire:key="component-{{ $bundleComponent->id }}">
                     <div class="flex items-baseline justify-between gap-2">
-                        <h3 class="font-semibold">{{ $index + 1 }}. {{ $component->name }}</h3>
-                        <span class="text-xs text-muted">Required</span>
+                        <h3 class="font-semibold">{{ $index + 1 }}. {{ $bundleComponent->name }}</h3>
+                        <span class="text-xs text-muted">จำเป็น</span>
                     </div>
-                    @foreach ($component->optionGroups as $group)
+                    @foreach ($bundleComponent->optionGroups as $group)
                         <div class="mt-4" wire:key="component-group-{{ $group->id }}">
                             <p class="text-sm font-medium" id="label-{{ $group->id }}">{{ $group->label }}</p>
                             <div class="mt-2 flex flex-wrap gap-2" role="group" aria-labelledby="label-{{ $group->id }}">
                                 @foreach ($group->values as $value)
-                                    <button
-                                        type="button"
+                                    <x-storefront.chip
                                         wire:key="component-option-{{ $group->id }}-{{ $value->id }}"
-                                        wire:click="selectComponentOption({{ $component->id }}, '{{ $group->key }}', '{{ $value->value }}')"
-                                        wire:loading.attr="disabled"
-                                        wire:target="selectComponentOption({{ $component->id }}, '{{ $group->key }}', '{{ $value->value }}')"
-                                        aria-pressed="{{ ($componentOptions[$component->id][$group->key] ?? null) === $value->value ? 'true' : 'false' }}"
-                                        @class([
-                                            'inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand border px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60',
-                                            'border-accent bg-accent text-brand-fg' => ($componentOptions[$component->id][$group->key] ?? null) === $value->value,
-                                            'border-border bg-surface hover:border-accent' => ($componentOptions[$component->id][$group->key] ?? null) !== $value->value,
-                                        ])
+                                        wire:click="selectComponentOption({{ $bundleComponent->id }}, '{{ $group->key }}', '{{ $value->value }}')"
+                                        wire:target="selectComponentOption({{ $bundleComponent->id }}, '{{ $group->key }}', '{{ $value->value }}')"
+                                        :selected="($componentOptions[$bundleComponent->id][$group->key] ?? null) === $value->value"
                                     >
                                         {{ $value->value }}
-                                    </button>
+                                    </x-storefront.chip>
                                 @endforeach
                             </div>
                         </div>
@@ -224,26 +210,13 @@ new #[Title('รายละเอียดสินค้า')] class extends C
         @endif
     </main>
 
-    <div class="fixed inset-x-0 bottom-14 z-10 border-t border-border bg-surface">
-        <div class="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
-            <div>
-                <p class="text-xs text-muted">{{ $product->type === \App\Enums\ProductType::Bundle ? 'รวมทั้งชุด' : 'ราคา' }}</p>
-                <p class="font-semibold text-brand">฿{{ number_format((float) $product->price, 2) }}</p>
-            </div>
-            <button
-                type="button"
-                wire:click="addToCart"
-                wire:loading.attr="disabled"
-                wire:target="addToCart"
-                class="inline-flex min-h-11 items-center gap-2 rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-60"
-            >
-                <span wire:loading.remove wire:target="addToCart">ใส่ตะกร้า</span>
-                <span wire:loading wire:target="addToCart" class="inline-flex items-center gap-2">
-                    <x-icon name="arrow-path" size="sm" class="animate-spin" />
-                </span>
-            </button>
+    <x-storefront.bottom-bar class="flex items-center justify-between gap-3">
+        <div>
+            <p class="text-xs text-muted">{{ $product->type === \App\Enums\ProductType::Bundle ? 'รวมทั้งชุด' : 'ราคา' }}</p>
+            <x-storefront.price :amount="$product->price" />
         </div>
-    </div>
+        <x-storefront.button wire:click="addToCart">ใส่ตะกร้า</x-storefront.button>
+    </x-storefront.bottom-bar>
 
     <x-storefront.tabbar />
 </div>

@@ -22,7 +22,7 @@ test('guests can view the admin login page', function () {
 test('the storefront stays public', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('จองชุดเฟรชชี่ออนไลน์', false);
+        ->assertSee('ระบบจองชุดเฟรชชี่', false);
 });
 
 test('invalid credentials do not authenticate', function () {

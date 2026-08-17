@@ -157,71 +157,56 @@ new #[Title('ข้อมูลการจอง')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         <div class="flex items-center gap-2">
-            <a href="{{ route('cart') }}" wire:navigate class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-brand hover:bg-surface" aria-label="กลับตะกร้า">
+            <x-storefront.button variant="ghost" :href="route('cart')" aria-label="กลับตะกร้า">
                 <x-icon name="chevron-left" size="lg" />
-            </a>
+            </x-storefront.button>
             <h1 class="text-xl font-semibold">ข้อมูลการจอง</h1>
         </div>
 
-        <ol class="mt-4 grid grid-cols-4 gap-1 text-center text-xs text-muted" aria-label="ขั้นตอนการจอง">
-            <li class="rounded-brand bg-surface px-1 py-2">ตะกร้า</li>
-            <li class="rounded-brand bg-accent px-1 py-2 font-medium text-brand-fg" aria-current="step">ข้อมูล</li>
-            <li class="rounded-brand bg-surface px-1 py-2">ชำระเงิน</li>
-            <li class="rounded-brand bg-surface px-1 py-2">เสร็จสิ้น</li>
-        </ol>
+        <x-storefront.step-bar :steps="['ตะกร้า', 'ข้อมูล', 'ชำระเงิน', 'เสร็จสิ้น']" current="ข้อมูล" />
 
         <form class="mt-6 space-y-6">
-            <section class="space-y-4 rounded-brand border border-border bg-surface p-4">
+            <x-storefront.card as="section" class="space-y-4">
                 <h2 class="text-base font-semibold">ข้อมูลนักศึกษา</h2>
 
-                <div>
-                    <label for="student_id" class="block text-sm font-medium">รหัสนักศึกษา</label>
-                    <input id="student_id" type="text" inputmode="numeric" autocomplete="off" wire:model="student_id" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent">
-                    @error('student_id') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                </div>
+                <x-storefront.field label="รหัสนักศึกษา" name="student_id">
+                    <x-storefront.input id="student_id" type="text" inputmode="numeric" autocomplete="off" wire:model="student_id" />
+                </x-storefront.field>
 
-                <div>
-                    <label for="full_name" class="block text-sm font-medium">ชื่อ-นามสกุล</label>
-                    <input id="full_name" type="text" autocomplete="name" wire:model="full_name" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent">
-                    @error('full_name') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                </div>
+                <x-storefront.field label="ชื่อ-นามสกุล" name="full_name">
+                    <x-storefront.input id="full_name" type="text" autocomplete="name" wire:model="full_name" />
+                </x-storefront.field>
 
-                <div>
-                    <label for="faculty" class="block text-sm font-medium">คณะ</label>
-                    <select id="faculty" wire:model="faculty" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent">
+                <x-storefront.field label="คณะ" name="faculty">
+                    <x-storefront.select id="faculty" wire:model="faculty">
                         <option value="">เลือกคณะ</option>
                         @foreach ($faculties as $name)
                             <option value="{{ $name }}">{{ $name }}</option>
                         @endforeach
-                    </select>
-                    @error('faculty') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                </div>
+                    </x-storefront.select>
+                </x-storefront.field>
 
-                <div>
-                    <label for="major" class="block text-sm font-medium">สาขาวิชา</label>
-                    <input id="major" type="text" autocomplete="organization-title" wire:model="major" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="เช่น วิทยาการคอมพิวเตอร์">
-                    @error('major') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                </div>
+                <x-storefront.field label="สาขาวิชา" name="major">
+                    <x-storefront.input id="major" type="text" autocomplete="organization-title" wire:model="major" placeholder="เช่น วิทยาการคอมพิวเตอร์" />
+                </x-storefront.field>
 
-                <div>
-                    <label for="phone" class="block text-sm font-medium">เบอร์โทรศัพท์</label>
-                    <input id="phone" type="tel" inputmode="tel" autocomplete="tel" wire:model="phone" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent">
-                    @error('phone') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                </div>
-            </section>
+                <x-storefront.field label="เบอร์โทรศัพท์" name="phone">
+                    <x-storefront.input id="phone" type="tel" inputmode="tel" autocomplete="tel" wire:model="phone" />
+                </x-storefront.field>
+            </x-storefront.card>
 
-            <section class="space-y-4 rounded-brand border border-border bg-surface p-4">
+            <x-storefront.card as="section" class="space-y-4">
                 <h2 class="text-base font-semibold">วิธีรับสินค้า</h2>
 
                 <div class="space-y-2" role="radiogroup" aria-label="วิธีรับสินค้า">
                     @foreach ($methods as $method)
-                        <label class="flex min-h-11 items-start gap-3 rounded-brand border border-border p-3" wire:key="fulfill-{{ $method->value }}">
-                            <input type="radio" wire:model.live="fulfillment" value="{{ $method->value }}" class="mt-1">
-                            <span>
-                                <span class="block font-medium">{{ $method->label() }}</span>
-                                <span class="block text-sm text-muted">{{ $method->caption() }}</span>
-                            </span>
-                        </label>
+                        <x-storefront.radio-card
+                            wire:key="fulfill-{{ $method->value }}"
+                            wire:model.live="fulfillment"
+                            value="{{ $method->value }}"
+                            :title="$method->label()"
+                            :caption="$method->caption()"
+                        />
                     @endforeach
                 </div>
 
@@ -229,66 +214,54 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                     <div class="space-y-3">
                         <h3 class="text-sm font-semibold">ที่อยู่จัดส่ง</h3>
 
-                        <div>
-                            <label for="address_line" class="block text-sm font-medium">บ้านเลขที่ ถนน หมู่บ้าน/อาคาร</label>
-                            <input id="address_line" type="text" autocomplete="address-line1" wire:model="address_line" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="เช่น 99 หมู่ 1 ถนนมหาวิทยาลัย">
-                            @error('address_line') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
+                        <x-storefront.field label="บ้านเลขที่ ถนน หมู่บ้าน/อาคาร" name="address_line">
+                            <x-storefront.input id="address_line" type="text" autocomplete="address-line1" wire:model="address_line" placeholder="เช่น 99 หมู่ 1 ถนนมหาวิทยาลัย" />
+                        </x-storefront.field>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <x-storefront.field label="ตำบล" name="subdistrict">
+                                <x-storefront.input id="subdistrict" type="text" autocomplete="address-level3" wire:model="subdistrict" placeholder="ตำบล/แขวง" />
+                            </x-storefront.field>
+                            <x-storefront.field label="อำเภอ" name="district">
+                                <x-storefront.input id="district" type="text" autocomplete="address-level2" wire:model="district" placeholder="อำเภอ/เขต" />
+                            </x-storefront.field>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label for="subdistrict" class="block text-sm font-medium">ตำบล</label>
-                                <input id="subdistrict" type="text" autocomplete="address-level3" wire:model="subdistrict" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="ตำบล/แขวง">
-                                @error('subdistrict') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                            </div>
-                            <div>
-                                <label for="district" class="block text-sm font-medium">อำเภอ</label>
-                                <input id="district" type="text" autocomplete="address-level2" wire:model="district" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="อำเภอ/เขต">
-                                @error('district') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label for="province" class="block text-sm font-medium">จังหวัด</label>
-                                <input id="province" type="text" autocomplete="address-level1" wire:model="province" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="จังหวัด">
-                                @error('province') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                            </div>
-                            <div>
-                                <label for="postcode" class="block text-sm font-medium">รหัสไปรษณีย์</label>
-                                <input id="postcode" type="text" inputmode="numeric" maxlength="5" autocomplete="postal-code" wire:model="postcode" class="mt-1 min-h-11 w-full rounded-brand border border-border px-3 focus:ring-2 focus:ring-accent" placeholder="xxxxx">
-                                @error('postcode') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                            </div>
+                            <x-storefront.field label="จังหวัด" name="province">
+                                <x-storefront.input id="province" type="text" autocomplete="address-level1" wire:model="province" placeholder="จังหวัด" />
+                            </x-storefront.field>
+                            <x-storefront.field label="รหัสไปรษณีย์" name="postcode">
+                                <x-storefront.input id="postcode" type="text" inputmode="numeric" maxlength="5" autocomplete="postal-code" wire:model="postcode" placeholder="xxxxx" />
+                            </x-storefront.field>
                         </div>
                     </div>
                 @endif
-            </section>
+            </x-storefront.card>
 
             @if ($depositEligible)
-                <section class="space-y-4 rounded-brand border border-border bg-surface p-4">
+                <x-storefront.card as="section" class="space-y-4">
                     <h2 class="text-base font-semibold">การชำระเงิน</h2>
                     <p class="text-sm text-muted">เลือกจ่ายเต็มตอนนี้ หรือมัดจำแล้วชำระส่วนที่เหลือตอนรับสินค้า</p>
                     <div class="space-y-2" role="radiogroup" aria-label="การชำระเงิน">
-                        <label class="flex min-h-11 items-start gap-3 rounded-brand border border-border p-3">
-                            <input type="radio" wire:model.live="payment_mode" value="{{ \App\Enums\PaymentMode::Full->value }}" class="mt-1">
-                            <span>
-                                <span class="block font-medium">จ่ายเต็ม</span>
-                                <span class="block text-sm text-muted">฿{{ number_format((float) $quote['total'], 2) }}</span>
-                            </span>
-                        </label>
-                        <label class="flex min-h-11 items-start gap-3 rounded-brand border border-border p-3">
-                            <input type="radio" wire:model.live="payment_mode" value="{{ \App\Enums\PaymentMode::Deposit->value }}" class="mt-1">
-                            <span>
-                                <span class="block font-medium">มัดจำ ฿{{ number_format((float) $depositAmount, 2) }}</span>
-                                <span class="block text-sm text-muted">เหลือ ฿{{ number_format((float) $quote['total'] - (float) $depositAmount, 2) }} ตอนรับสินค้า</span>
-                            </span>
-                        </label>
+                        <x-storefront.radio-card
+                            wire:model.live="payment_mode"
+                            value="{{ \App\Enums\PaymentMode::Full->value }}"
+                            title="จ่ายเต็ม"
+                            :caption="'฿'.number_format((float) $quote['total'], 2)"
+                        />
+                        <x-storefront.radio-card
+                            wire:model.live="payment_mode"
+                            value="{{ \App\Enums\PaymentMode::Deposit->value }}"
+                            :title="'มัดจำ ฿'.number_format((float) $depositAmount, 2)"
+                            :caption="'เหลือ ฿'.number_format((float) $quote['total'] - (float) $depositAmount, 2).' ตอนรับสินค้า'"
+                        />
                     </div>
                     @error('payment_mode') <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
-                </section>
+                </x-storefront.card>
             @endif
 
-            <section class="rounded-brand border border-border bg-surface p-4">
+            <x-storefront.card as="section">
                 <div class="flex justify-between gap-3 text-sm">
                     <span>ราคาสินค้า</span>
                     <span>฿{{ number_format((float) $quote['subtotal'], 2) }}</span>
@@ -309,28 +282,15 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 @endif
                 <div class="mt-3 flex justify-between gap-3 font-medium">
                     <span>ยอดที่ต้องชำระตอนนี้</span>
-                    <span class="text-brand">฿{{ number_format((float) ($quote['amount_due_now'] ?? $quote['total']), 2) }}</span>
+                    <x-storefront.price :amount="$quote['amount_due_now'] ?? $quote['total']" />
                 </div>
-            </section>
+            </x-storefront.card>
         </form>
     </main>
 
-    <div class="fixed inset-x-0 bottom-14 z-10 border-t border-border bg-surface">
-        <div class="mx-auto max-w-lg px-4 py-3">
-            <button
-                type="button"
-                wire:click="save"
-                wire:loading.attr="disabled"
-                wire:target="save"
-                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-brand bg-accent px-4 font-medium text-brand-fg hover:bg-accent-press disabled:cursor-not-allowed disabled:opacity-60"
-            >
-                <span wire:loading.remove wire:target="save">ไปชำระเงิน</span>
-                <span wire:loading wire:target="save" class="inline-flex items-center gap-2">
-                    <x-icon name="arrow-path" size="sm" class="animate-spin" />
-                </span>
-            </button>
-        </div>
-    </div>
+    <x-storefront.bottom-bar>
+        <x-storefront.button wire:click="save" block>ไปชำระเงิน</x-storefront.button>
+    </x-storefront.bottom-bar>
 
     <x-storefront.tabbar />
 </div>

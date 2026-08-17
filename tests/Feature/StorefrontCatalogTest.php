@@ -55,7 +55,8 @@ test('the home page shows the short booking steps when a round is open', functio
     openBookingRound([storefrontShirt()]);
 
     Livewire::test('pages::storefront.home')
-        ->assertSee('ขั้นตอนสั้น ๆ', false)
+        ->assertSee('ขั้นตอนการจอง', false)
+        ->assertSee('จองครบใน 4 ขั้น', false)
         ->assertSee('เลือกสินค้าและไซส์', false)
         ->assertSee('กรอกรายละเอียดนักศึกษา', false)
         ->assertSee('เลือกรับเองหรือไปรษณีย์', false)
@@ -75,7 +76,8 @@ test('the home page lists only products in an open booking round', function () {
 
     Livewire::test('pages::storefront.home')
         ->assertSee('เสื้อ ปี 69')
-        ->assertSee('overflow-hidden rounded-brand border', false)
+        ->assertSee('overflow-hidden', false)
+        ->assertSee('hover:border-accent', false)
         ->assertDontSee('กางเกงนอกรอบ');
 
     $this->get(route('products.show', $notInRound))->assertNotFound();

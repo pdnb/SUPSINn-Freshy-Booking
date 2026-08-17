@@ -60,9 +60,9 @@ test('srs 8: seeded catalog round and shipping are ready for a guest demo', func
     app(CartService::class)->add($shirt, ['options' => ['size' => 'M']]);
 
     Livewire::test('pages::storefront.checkout')
-        ->assertSee('รับที่ร้านศูนย์หนังสือฯ')
-        ->assertSee('รับที่หอประชุมฯ วันรายงานตัว')
-        ->assertSee('จัดส่งทางไปรษณีย์')
+        ->assertSee(FulfillmentMethod::Bookstore->label())
+        ->assertSee(FulfillmentMethod::Hall->label())
+        ->assertSee(FulfillmentMethod::Post->label())
         ->set('fulfillment', FulfillmentMethod::Post->value)
         ->assertDontSee('เรทค่าส่ง', false)
         ->assertSee('ระบบคำนวณให้อัตโนมัติ', false)

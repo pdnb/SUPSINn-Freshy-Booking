@@ -128,16 +128,18 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
             </section>
         @endif
 
-        <section class="rounded-brand border border-border bg-surface p-5">
-            <h1 class="text-xl font-semibold">ระบบจองชุดเฟรชชี่</h1>
-            <p class="mt-2 text-sm text-muted">สำนักจัดการทรัพย์สิน มหาวิทยาลัยราชภัฏสุราษฎร์ธานี</p>
-        </section>
+        <x-storefront.card as="section" padding="5">
+            <h1 class="inline-block bg-linear-to-br from-brand to-highlight bg-clip-text text-xl font-semibold text-transparent">
+                ระบบจองชุดเฟรชชี่
+            </h1>
+            <p class="mt-2 text-sm text-highlight-fg">สำนักจัดการทรัพย์สิน มหาวิทยาลัยราชภัฏสุราษฎร์ธานี</p>
+        </x-storefront.card>
 
         @if (! $isOpen)
-            <section class="mt-6 rounded-brand border border-border bg-surface p-5" role="status">
+            <x-storefront.card as="section" padding="5" class="mt-6" role="status">
                 <h2 class="text-lg font-semibold">ยังไม่เปิดรับจอง</h2>
                 <p class="mt-2 text-sm text-muted">ขณะนี้ไม่มีรอบที่เปิดอยู่ ใส่ตะกร้าหรือสั่งซื้อยังไม่ได้ กรุณากลับมาใหม่เมื่อถึงรอบจอง</p>
-            </section>
+            </x-storefront.card>
         @else
             <section class="mt-6">
                 <h2 class="text-base font-semibold">สินค้าเปิดจอง</h2>
@@ -148,10 +150,12 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                     <ul class="mt-3 grid grid-cols-2 gap-3">
                         @foreach ($products as $product)
                             <li wire:key="product-{{ $product->id }}">
-                                <a
+                                <x-storefront.card
+                                    as="a"
                                     href="{{ route('products.show', $product) }}"
                                     wire:navigate
-                                    class="flex min-h-11 h-full flex-col overflow-hidden rounded-brand border border-border bg-surface hover:border-accent"
+                                    padding="0"
+                                    class="flex h-full min-h-11 flex-col overflow-hidden hover:border-accent"
                                 >
                                     @if ($product->coverImage)
                                         <img
@@ -165,20 +169,20 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                                         </div>
                                     @endif
                                     <div class="flex flex-1 flex-col gap-1 p-3">
-                                        <span class="inline-flex w-fit rounded-full bg-bg px-2 py-0.5 text-xs text-muted">
+                                        <x-storefront.badge>
                                             {{ $product->type === \App\Enums\ProductType::Bundle ? 'ซื้อทั้งชุด' : 'ซื้อแยกได้' }}
-                                        </span>
+                                        </x-storefront.badge>
                                         <span class="font-medium">{{ $product->name }}</span>
-                                        <span class="mt-auto text-sm text-brand">฿{{ number_format((float) $product->price, 2) }}</span>
+                                        <x-storefront.price :amount="$product->price" size="sm" class="mt-auto" />
                                     </div>
-                                </a>
+                                </x-storefront.card>
                             </li>
                         @endforeach
                     </ul>
                 @endif
             </section>
 
-            <section class="mt-8 rounded-brand border border-border bg-surface p-5" aria-labelledby="home-steps-heading">
+            <x-storefront.card as="section" padding="5" class="mt-8" aria-labelledby="home-steps-heading">
                 <h2 id="home-steps-heading" class="text-base font-semibold">ขั้นตอนการจอง</h2>
                 <p class="mt-1 text-sm text-muted">จองครบใน 4 ขั้น ไม่ต้องสมัครบัญชี</p>
 
@@ -239,7 +243,7 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
                         </div>
                     </li>
                 </ol>
-            </section>
+            </x-storefront.card>
         @endif
     </main>
 
