@@ -187,7 +187,7 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 </x-storefront.field>
 
                 <x-storefront.field label="สาขาวิชา" name="major">
-                    <x-storefront.input id="major" type="text" autocomplete="organization-title" wire:model="major" placeholder="เช่น วิทยาการคอมพิวเตอร์" />
+                    <x-storefront.input id="major" type="text" autocomplete="organization-title" wire:model="major" />
                 </x-storefront.field>
 
                 <x-storefront.field label="เบอร์โทรศัพท์" name="phone">
