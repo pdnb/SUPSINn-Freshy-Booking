@@ -154,14 +154,16 @@ test('ordersForCurrentUser returns only matching line orders', function () {
 test('livewire order-track lists line orders when identity is present', function () {
     session(['line.user_id' => 'Ulineuser00000000000000000000011']);
 
-    Order::factory()->create([
+    $order = Order::factory()->create([
         'number' => 'FRLW00001',
         'line_user_id' => 'Ulineuser00000000000000000000011',
         'status' => OrderStatus::Shipped,
+        'created_at' => now()->timezone(config('app.timezone'))->setTime(14, 30),
     ]);
 
     Livewire::test('pages::storefront.order-track')
         ->assertOk()
         ->assertSee('FRLW00001')
-        ->assertSee('จัดส่งแล้ว');
+        ->assertSee('จัดส่งแล้ว')
+        ->assertSee($order->created_at->toThaiDatetime());
 });

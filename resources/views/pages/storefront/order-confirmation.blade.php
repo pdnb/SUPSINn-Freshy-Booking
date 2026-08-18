@@ -35,7 +35,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
             'cartCount' => $cart->count(),
             'steps' => $this->trackingSteps($order),
             'receiptNote' => $order->receipt_issued_at !== null
-                ? 'ออกใบเสร็จแล้ว '.$order->receipt_issued_at->timezone(config('app.timezone'))->format('d/m/Y H:i')
+                ? 'ออกใบเสร็จแล้ว '.$order->receipt_issued_at->toThaiDatetime()
                 : 'ใบเสร็จจะได้รับตอนรับสินค้า',
         ]);
     }

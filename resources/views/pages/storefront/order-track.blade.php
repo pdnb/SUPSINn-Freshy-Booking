@@ -74,7 +74,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <p class="font-medium">{{ $order->number }}</p>
-                                        <p class="mt-1 text-sm text-muted">{{ $order->created_at?->timezone(config('app.timezone'))->format('d/m/Y H:i') }}</p>
+                                        <p class="mt-1 text-sm text-muted">{{ $order->created_at?->toThaiDatetime() }}</p>
                                     </div>
                                     <p class="text-right text-sm font-medium">{{ number_format((float) $order->total, 2) }} บาท</p>
                                 </div>

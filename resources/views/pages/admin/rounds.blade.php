@@ -171,8 +171,8 @@ class extends Component
                     @endphp
                     <tr wire:key="round-{{ $round->id }}">
                         <td>{{ $round->name }}</td>
-                        <td class="mono">{{ $round->starts_at?->format('Y-m-d H:i') }}</td>
-                        <td class="mono">{{ $round->ends_at?->format('Y-m-d H:i') }}</td>
+                        <td class="mono">{{ $round->starts_at?->toThaiDatetime() }}</td>
+                        <td class="mono">{{ $round->ends_at?->toThaiDatetime() }}</td>
                         <td><span class="pill {{ $pill }}">{{ $label }}</span></td>
                         <td><button type="button" class="btn btn-ghost btn-sm" wire:click="edit({{ $round->id }})">แก้ไข</button></td>
                     </tr>

@@ -258,6 +258,22 @@ test('a guest cannot preview another order slip or one without a tracking sessio
         ->assertDontSee('private-slip.png', false);
 });
 
+test('the confirmation page shows a thai receipt issued datetime', function () {
+    $issuedAt = now()->timezone(config('app.timezone'))->setTime(14, 30);
+    $order = Order::factory()->create([
+        'number' => 'FRRECEIPT',
+        'tracking_token' => str_repeat('s', 40),
+        'receipt_issued_at' => $issuedAt,
+    ]);
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))
+        ->assertOk()
+        ->assertSee('ออกใบเสร็จแล้ว '.$issuedAt->toThaiDatetime(), false);
+});
+
 test('the tracking token is hidden when the order is serialized', function () {
     $order = Order::factory()->create([
         'tracking_token' => str_repeat('h', 40),

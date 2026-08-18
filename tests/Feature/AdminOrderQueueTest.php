@@ -32,7 +32,7 @@ test('staff can see pending review orders in the slip queue', function () {
         ->assertOk()
         ->assertSee('ออเดอร์', false)
         ->assertSee('วันที่', false)
-        ->assertSee($order->created_at->timezone(config('app.timezone'))->format('Y-m-d H:i'), false)
+        ->assertSee($order->created_at->toThaiDatetime(), false)
         ->assertSee('aria-label="ค้นหา"', false)
         ->assertDontSeeHtml('<label class="field">')
         ->assertSee('ล้างตัวกรอง', false)

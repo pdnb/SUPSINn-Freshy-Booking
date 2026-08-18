@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Contracts\SlipVerifier;
 use App\Services\Payment\StubSlipVerifier;
+use App\Support\ThaiDate;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Carbon::macro('toThaiDatetime', function (): string {
+            /** @var Carbon $this */
+            return ThaiDate::datetime($this);
+        });
+
         // Named limiter: https://laravel.com/docs/13.x/routing#defining-rate-limiters
         RateLimiter::for('order-tracking', function (Request $request) {
             return app()->runningUnitTests()

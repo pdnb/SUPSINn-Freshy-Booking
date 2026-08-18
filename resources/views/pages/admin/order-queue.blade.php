@@ -105,7 +105,7 @@ class extends Component
                     @foreach ($orders as $order)
                         <tr class="is-clickable" wire:key="order-{{ $order->id }}" onclick="window.location='{{ route('admin.orders.show', $order) }}'">
                             <td><a class="linkish" href="{{ route('admin.orders.show', $order) }}">{{ $order->number }}</a></td>
-                            <td class="mono">{{ $order->created_at?->timezone(config('app.timezone'))->format('Y-m-d H:i') }}</td>
+                            <td class="mono">{{ $order->created_at?->toThaiDatetime() }}</td>
                             <td>{{ $order->full_name }}<div class="meta">{{ $order->student_id }}</div></td>
                             <td>{{ $order->fulfillment->label() }}</td>
                             <td class="num-col">{{ number_format((float) $order->total, 0) }}</td>

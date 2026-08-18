@@ -364,6 +364,8 @@ test('staff can edit a booking round from the list', function () {
     Livewire::actingAs($staff)
         ->test('pages::admin.rounds')
         ->assertSee('แก้ไข', false)
+        ->assertSee($round->starts_at->toThaiDatetime(), false)
+        ->assertSee($round->ends_at->toThaiDatetime(), false)
         ->call('edit', $round->id)
         ->assertSet('editingId', $round->id)
         ->assertSet('name', 'รอบเดิม')

@@ -248,7 +248,7 @@ class extends Component
                         @forelse ($order->statusChanges as $change)
                             <li @class(['is-latest' => $loop->first]) wire:key="change-{{ $change->id }}">
                                 <div>{{ $change->to_status->label() }}</div>
-                                <div class="muted">{{ $change->created_at?->timezone(config('app.timezone'))->format('Y-m-d H:i') }} · {{ $change->user?->name }}</div>
+                                <div class="muted">{{ $change->created_at?->toThaiDatetime() }} · {{ $change->user?->name }}</div>
                             </li>
                         @empty
                             <li>รับออเดอร์เข้าระบบ</li>
