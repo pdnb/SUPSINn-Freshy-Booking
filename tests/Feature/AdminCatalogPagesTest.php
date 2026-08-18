@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ShippingRate;
 use App\Models\User;
+use App\Services\Order\AcademicYearSettingService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -499,4 +500,21 @@ test('settings shipping tiers stay on one row', function () {
     $css = file_get_contents(resource_path('css/admin.css'));
 
     expect($css)->toMatch('/\.field-row\.tier-row\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)\s+auto/s');
+});
+
+test('staff can save the academic year from settings', function () {
+    $staff = User::factory()->create();
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.settings')
+        ->set('tab', 'academic')
+        ->assertSee('ปีการศึกษา', false)
+        ->assertSee('FB-69-0001', false)
+        ->set('academic_year', '2570')
+        ->call('saveAcademicYear')
+        ->assertHasNoErrors()
+        ->assertSet('academic_year', '2570');
+
+    expect(app(AcademicYearSettingService::class)->year())->toBe(2570)
+        ->and(app(AcademicYearSettingService::class)->prefix())->toBe('70');
 });

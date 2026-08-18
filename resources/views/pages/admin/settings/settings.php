@@ -4,6 +4,7 @@ use App\Models\AdsBanner;
 use App\Models\ShippingRate;
 use App\Services\Ads\AdsBannerService;
 use App\Services\Checkout\DepositSettingService;
+use App\Services\Order\AcademicYearSettingService;
 use App\Services\Shipping\ShippingRateService;
 use App\Services\Storefront\StorefrontLogoService;
 use Illuminate\Validation\ValidationException;
@@ -48,9 +49,12 @@ class extends Component
 
     public string $deposit_amount = '0.00';
 
-    public function mount(DepositSettingService $deposit): void
+    public string $academic_year = '';
+
+    public function mount(DepositSettingService $deposit, AcademicYearSettingService $academicYear): void
     {
         $this->deposit_amount = $deposit->amount();
+        $this->academic_year = (string) $academicYear->year();
     }
 
     public function editRate(int $id, ShippingRateService $rates): void
@@ -201,6 +205,17 @@ class extends Component
             $deposit->update($this->deposit_amount);
             $this->deposit_amount = $deposit->amount();
             session()->flash('status', 'บันทึกจำนวนมัดจำแล้ว');
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+        }
+    }
+
+    public function saveAcademicYear(AcademicYearSettingService $academicYear): void
+    {
+        try {
+            $academicYear->update($this->academic_year);
+            $this->academic_year = (string) $academicYear->year();
+            session()->flash('status', 'บันทึกปีการศึกษาแล้ว');
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
         }

@@ -2,7 +2,7 @@
     <div class="page-head">
         <div>
             <h1>ตั้งค่า</h1>
-            <p class="sub">เรทค่าส่งตามช่วงจำนวน แบนเนอร์หน้าแรก โลโก้หน้าร้าน และมัดจำ</p>
+            <p class="sub">เรทค่าส่งตามช่วงจำนวน แบนเนอร์หน้าแรก โลโก้หน้าร้าน มัดจำ และปีการศึกษา</p>
         </div>
     </div>
 
@@ -10,6 +10,7 @@
         <button type="button" class="tab {{ $tab === 'banners' ? 'is-active' : '' }}" wire:click="$set('tab', 'banners')">แบนเนอร์</button>
         <button type="button" class="tab {{ $tab === 'shipping' ? 'is-active' : '' }}" wire:click="$set('tab', 'shipping')">ค่าส่ง</button>
         <button type="button" class="tab {{ $tab === 'deposit' ? 'is-active' : '' }}" wire:click="$set('tab', 'deposit')">มัดจำ</button>
+        <button type="button" class="tab {{ $tab === 'academic' ? 'is-active' : '' }}" wire:click="$set('tab', 'academic')">ปีการศึกษา</button>
         <button type="button" class="tab {{ $tab === 'logo' ? 'is-active' : '' }}" wire:click="$set('tab', 'logo')">โลโก้</button>
     </div>
 
@@ -163,6 +164,19 @@
                     @error('amount') <span class="error">{{ $message }}</span> @enderror
                 </label>
                 <button type="submit" class="btn btn-primary">บันทึกมัดจำ</button>
+            </div>
+        </form>
+    @elseif ($tab === 'academic')
+        <form class="panel" wire:submit="saveAcademicYear" style="max-width:420px">
+            <div class="panel-head">ปีการศึกษา</div>
+            <div class="panel-body stack">
+                <p class="muted">รหัสคำสั่งซื้อจะเป็น FB- + 2 ตัวท้ายของ พ.ศ. + running 4 หลัก เช่น FB-69-0001 — เปลี่ยนปีแล้ว running เริ่ม 0001 ใหม่</p>
+                <label class="field">
+                    พ.ศ.
+                    <input class="input" type="number" min="2500" max="2700" step="1" wire:model="academic_year">
+                    @error('year') <span class="error">{{ $message }}</span> @enderror
+                </label>
+                <button type="submit" class="btn btn-primary">บันทึกปีการศึกษา</button>
             </div>
         </form>
     @endif
