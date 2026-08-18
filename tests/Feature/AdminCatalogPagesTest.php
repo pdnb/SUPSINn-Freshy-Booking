@@ -75,6 +75,8 @@ test('staff can create a product from the admin editor', function () {
         ->call('publish')
         ->assertRedirect(route('admin.products'));
 
+    expect(session('status'))->toBe('เผยแพร่สินค้าแล้ว');
+
     $product = Product::query()->where('name', 'เข็มที่ระลึก')->first();
 
     expect($product)->not->toBeNull()
@@ -384,6 +386,7 @@ test('staff can create a shipping rate from settings', function () {
 
     Livewire::actingAs($staff)
         ->test('pages::admin.settings')
+        ->set('tab', 'shipping')
         ->set('rate_name', 'ไปรษณีย์มาตรฐาน')
         ->set('tiers', [
             ['min_qty' => '1', 'max_qty' => '2', 'amount' => '50'],
@@ -406,6 +409,7 @@ test('staff can edit a shipping rate from settings', function () {
 
     Livewire::actingAs($staff)
         ->test('pages::admin.settings')
+        ->set('tab', 'shipping')
         ->assertSee('แก้ไข', false)
         ->call('editRate', $rate->id)
         ->assertSet('rateId', $rate->id)
@@ -480,6 +484,7 @@ test('settings shipping form uses a switch for active state', function () {
 
     Livewire::actingAs($staff)
         ->test('pages::admin.settings')
+        ->set('tab', 'shipping')
         ->assertSeeHtml('class="switch"')
         ->assertSeeHtml('class="switch-input"')
         ->assertSee('เปิดใช้', false)
@@ -495,6 +500,7 @@ test('settings shipping tiers stay on one row', function () {
 
     Livewire::actingAs($staff)
         ->test('pages::admin.settings')
+        ->set('tab', 'shipping')
         ->assertSeeHtml('class="field-row tier-row"');
 
     $css = file_get_contents(resource_path('css/admin.css'));
@@ -513,7 +519,8 @@ test('staff can save the academic year from settings', function () {
         ->set('academic_year', '2570')
         ->call('saveAcademicYear')
         ->assertHasNoErrors()
-        ->assertSet('academic_year', '2570');
+        ->assertSet('academic_year', '2570')
+        ->assertDispatched('admin-toast', message: 'บันทึกปีการศึกษาแล้ว');
 
     expect(app(AcademicYearSettingService::class)->year())->toBe(2570)
         ->and(app(AcademicYearSettingService::class)->prefix())->toBe('70');

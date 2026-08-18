@@ -82,7 +82,7 @@ class extends Component
                 $this->adjustValue,
                 (int) $this->threshold,
             );
-            session()->flash('status', 'ปรับยอดของที่มีแล้ว');
+            $this->dispatch('admin-toast', message: 'ปรับยอดของที่มีแล้ว');
             $this->showAdjust = false;
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());

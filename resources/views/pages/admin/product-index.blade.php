@@ -35,7 +35,7 @@ class extends Component
     public function duplicate(int $productId, CatalogService $catalog): void
     {
         $catalog->duplicate(Product::query()->findOrFail($productId));
-        session()->flash('status', 'คัดลอกสินค้าแล้ว');
+        $this->dispatch('admin-toast', message: 'คัดลอกสินค้าแล้ว');
     }
 
     public function render(CatalogService $catalog)

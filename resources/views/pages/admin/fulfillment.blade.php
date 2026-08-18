@@ -46,7 +46,7 @@ class extends Component
         }
 
         $orders->transition($order, OrderStatus::ReadyForPickup, Auth::user());
-        session()->flash('status', 'ทำเครื่องหมายพร้อมรับแล้ว');
+        $this->dispatch('admin-toast', message: 'ทำเครื่องหมายพร้อมรับแล้ว');
         $this->id = $order->number;
     }
 
@@ -59,7 +59,7 @@ class extends Component
         }
 
         $orders->transition($order, OrderStatus::Shipped, Auth::user());
-        session()->flash('status', 'ทำเครื่องหมายจัดส่งแล้ว');
+        $this->dispatch('admin-toast', message: 'ทำเครื่องหมายจัดส่งแล้ว');
         $this->id = $order->number;
     }
 

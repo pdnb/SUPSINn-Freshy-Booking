@@ -39,7 +39,8 @@ test('staff can adjust on-hand stock from the inventory page', function () {
         ->set('delta', '7')
         ->set('reason', InventoryAdjustmentReason::FactoryReceipt->value)
         ->call('applyAdjust')
-        ->assertSee('7', false);
+        ->assertSee('7', false)
+        ->assertDispatched('admin-toast', message: 'ปรับยอดของที่มีแล้ว');
 
     expect(InventoryItem::query()->where('product_id', $shirt->id)->value('on_hand'))->toBe(7);
 });

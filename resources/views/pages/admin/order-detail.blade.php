@@ -51,7 +51,7 @@ class extends Component
     {
         try {
             $this->order = $orders->collectBalance($this->order, Auth::user());
-            session()->flash('status', 'บันทึกเก็บส่วนที่เหลือแล้ว');
+            $this->dispatch('admin-toast', message: 'บันทึกเก็บส่วนที่เหลือแล้ว');
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
         }

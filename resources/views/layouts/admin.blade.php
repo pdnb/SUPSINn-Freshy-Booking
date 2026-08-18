@@ -29,11 +29,7 @@
                 {{ $slot }}
             </main>
         </div>
-        @if (session('status'))
-            <div class="toast-host" role="status">
-                <div class="toast">{{ session('status') }}</div>
-            </div>
-        @endif
+        <x-admin.toast />
         @livewireScripts
     </body>
 </html>

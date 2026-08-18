@@ -60,7 +60,7 @@ class extends Component
                 $rounds->create($payload);
             }
 
-            session()->flash('status', 'บันทึกรอบจองแล้ว');
+            $this->dispatch('admin-toast', message: 'บันทึกรอบจองแล้ว');
             $this->resetForm();
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());

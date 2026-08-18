@@ -105,7 +105,7 @@ class extends Component
                 $rates->update(ShippingRate::query()->findOrFail($this->rateId), $payload);
             }
 
-            session()->flash('status', 'บันทึกเรทค่าส่งแล้ว');
+            $this->dispatch('admin-toast', message: 'บันทึกเรทค่าส่งแล้ว');
             $this->resetRateForm();
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
@@ -128,7 +128,7 @@ class extends Component
             ]);
             $this->banner_url = '';
             $this->banner_image = null;
-            session()->flash('status', 'เพิ่มแบนเนอร์แล้ว');
+            $this->dispatch('admin-toast', message: 'เพิ่มแบนเนอร์แล้ว');
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
         }
@@ -162,7 +162,7 @@ class extends Component
 
         $banners->delete(AdsBanner::query()->findOrFail($this->bannerPendingDeleteId));
         $this->closeDeleteBanner();
-        session()->flash('status', 'ลบแบนเนอร์แล้ว');
+        $this->dispatch('admin-toast', message: 'ลบแบนเนอร์แล้ว');
     }
 
     public function moveBanner(int $id, int $direction, AdsBannerService $banners): void
@@ -175,7 +175,7 @@ class extends Component
         try {
             $logo->update($this->logo_image);
             $this->logo_image = null;
-            session()->flash('status', 'บันทึกโลโก้แล้ว');
+            $this->dispatch('admin-toast', message: 'บันทึกโลโก้แล้ว');
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
         }
@@ -196,7 +196,7 @@ class extends Component
     {
         $logo->clear();
         $this->closeClearLogo();
-        session()->flash('status', 'ลบโลโก้แล้ว — แสดงชื่อร้านแทน');
+        $this->dispatch('admin-toast', message: 'ลบโลโก้แล้ว — แสดงชื่อร้านแทน');
     }
 
     public function saveDeposit(DepositSettingService $deposit): void
@@ -204,7 +204,7 @@ class extends Component
         try {
             $deposit->update($this->deposit_amount);
             $this->deposit_amount = $deposit->amount();
-            session()->flash('status', 'บันทึกจำนวนมัดจำแล้ว');
+            $this->dispatch('admin-toast', message: 'บันทึกจำนวนมัดจำแล้ว');
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
         }
@@ -215,7 +215,7 @@ class extends Component
         try {
             $academicYear->update($this->academic_year);
             $this->academic_year = (string) $academicYear->year();
-            session()->flash('status', 'บันทึกปีการศึกษาแล้ว');
+            $this->dispatch('admin-toast', message: 'บันทึกปีการศึกษาแล้ว');
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
         }
