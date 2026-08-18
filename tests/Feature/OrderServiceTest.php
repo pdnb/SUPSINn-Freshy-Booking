@@ -10,6 +10,7 @@ use App\Services\Cart\CartService;
 use App\Services\Catalog\CatalogService;
 use App\Services\Checkout\CheckoutService;
 use App\Services\Checkout\DepositSettingService;
+use App\Services\Order\AcademicYearSettingService;
 use App\Services\Order\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -59,7 +60,7 @@ test('a passing slip creates a pending review order without locking stock', func
     $order = orders()->place(UploadedFile::fake()->image('slip.jpg'));
 
     expect($order->status)->toBe(OrderStatus::PendingReview)
-        ->and($order->number)->toMatch('/^\d{8}$/')
+        ->and($order->number)->toMatch('/^FB-\d{2}-\d{4}$/')
         ->and($order->slip)->not->toBeNull()
         ->and($order->items)->toHaveCount(1)
         ->and($order->payment_mode)->toBe(PaymentMode::Full)
@@ -74,6 +75,29 @@ test('a passing slip creates a pending review order without locking stock', func
         ]);
 
     Storage::disk('local')->assertExists($order->slip->path);
+});
+
+test('placed orders get sequential academic year numbers', function () {
+    Storage::fake('local');
+    app(AcademicYearSettingService::class)->update('2569');
+    $shirt = readyToPay();
+
+    $first = orders()->place(UploadedFile::fake()->createWithContent('slip-a.jpg', random_bytes(128)));
+
+    app(CartService::class)->add($shirt, ['options' => ['size' => 'L']]);
+    app(CheckoutService::class)->save([
+        'student_id' => '67011234567',
+        'full_name' => 'สมชาย ใจดี',
+        'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+        'major' => 'วิทยาการคอมพิวเตอร์',
+        'phone' => '0812345678',
+        'fulfillment' => FulfillmentMethod::Bookstore->value,
+    ]);
+
+    $second = orders()->place(UploadedFile::fake()->createWithContent('slip-b.jpg', random_bytes(128)));
+
+    expect($first->number)->toBe('FB-69-0001')
+        ->and($second->number)->toBe('FB-69-0002');
 });
 
 test('placing with deposit stores due and remaining amounts', function () {

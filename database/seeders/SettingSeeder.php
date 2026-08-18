@@ -18,5 +18,10 @@ class SettingSeeder extends Seeder
             ['key' => 'deposit_amount'],
             ['value' => '0.00'],
         );
+
+        Setting::query()->updateOrCreate(
+            ['key' => 'academic_year'],
+            ['value' => '2569'],
+        );
     }
 }

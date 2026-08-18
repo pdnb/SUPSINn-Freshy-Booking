@@ -29,6 +29,7 @@ class OrderService
         private SlipVerificationService $slips,
         private BookingRoundService $booking,
         private LineIdentityService $line,
+        private OrderNumberGenerator $numbers,
         private Session $session,
     ) {}
 
@@ -134,7 +135,7 @@ class OrderService
 
         return DB::transaction(function () use ($slip, $draft, $checksum) {
             $order = Order::query()->create([
-                'number' => $this->uniqueNumber(),
+                'number' => $this->numbers->next(),
                 'tracking_token' => Str::random(40),
                 'line_user_id' => $this->line->userId(),
                 'student_id' => $draft['student_id'],
@@ -385,14 +386,5 @@ class OrderService
     {
         return strlen($token) === strlen($order->tracking_token)
             && hash_equals($order->tracking_token, $token);
-    }
-
-    private function uniqueNumber(): string
-    {
-        do {
-            $number = sprintf('%08d', random_int(0, 99_999_999));
-        } while (Order::query()->where('number', $number)->exists());
-
-        return $number;
     }
 }
