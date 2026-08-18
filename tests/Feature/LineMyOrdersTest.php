@@ -59,7 +59,8 @@ test('orders bound to the current line user appear on the orders page', function
         ->assertSee(route('orders.confirmation', [
             'order' => $mineB,
             'token' => $mineB->tracking_token,
-        ]), false);
+        ]), false)
+        ->assertDontSee('ค้นหาคำสั่งซื้อ', false);
 });
 
 test('a line identity with no orders shows the empty state without guest redirect', function () {
@@ -75,7 +76,8 @@ test('a line identity with no orders shows the empty state without guest redirec
         ->assertOk()
         ->assertSee('ยังไม่มีคำสั่งซื้อ', false)
         ->assertSee('เมื่อจองผ่าน LINE และแนบสลิปแล้ว', false)
-        ->assertDontSee('FRGUEST01', false);
+        ->assertDontSee('FRGUEST01', false)
+        ->assertDontSee('ค้นหาคำสั่งซื้อ', false);
 });
 
 test('placing an order copies the line user id from the session', function () {
@@ -165,5 +167,34 @@ test('livewire order-track lists line orders when identity is present', function
         ->assertOk()
         ->assertSee('FRLW00001')
         ->assertSee('จัดส่งแล้ว')
-        ->assertSee($order->created_at->toThaiDatetime());
+        ->assertSee($order->created_at->toThaiDatetime())
+        ->assertDontSee('ค้นหาคำสั่งซื้อ');
+});
+
+test('a line identity cannot look up orders by student id and phone', function () {
+    session(['line.user_id' => 'Ulineuser00000000000000000000021']);
+
+    Order::factory()->create([
+        'number' => 'FRLINE021',
+        'line_user_id' => 'Ulineuser00000000000000000000021',
+        'student_id' => '67013333333',
+        'phone' => '0877777777',
+    ]);
+    Order::factory()->create([
+        'number' => 'FRWEB0001',
+        'line_user_id' => null,
+        'student_id' => '67013333333',
+        'phone' => '0877777777',
+        'full_name' => 'ออเดอร์เว็บธรรมดา',
+    ]);
+
+    Livewire::test('pages::storefront.order-track')
+        ->set('student_id', '67013333333')
+        ->set('phone', '0877777777')
+        ->call('search')
+        ->assertOk()
+        ->assertSee('FRLINE021')
+        ->assertDontSee('FRWEB0001')
+        ->assertDontSee('ออเดอร์เว็บธรรมดา')
+        ->assertDontSee('ค้นหาคำสั่งซื้อ');
 });

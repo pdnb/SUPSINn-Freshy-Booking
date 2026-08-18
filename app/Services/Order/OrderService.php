@@ -46,6 +46,19 @@ class OrderService
         return $order;
     }
 
+    /**
+     * @return Collection<int, Order>
+     */
+    public function findForGuestLookup(string $studentId, string $phone): Collection
+    {
+        return Order::query()
+            ->where('student_id', $studentId)
+            ->where('phone', $phone)
+            ->with(['items', 'slip'])
+            ->latest()
+            ->get();
+    }
+
     public function rememberGuestTracking(Order $order): void
     {
         $this->session->put('order.tracking', [

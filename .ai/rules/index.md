@@ -10,6 +10,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Services/Catalog/** | .ai/rules/catalog.md |
 | app/Services/Checkout/**, resources/views/pages/storefront/checkout.blade.php | .ai/rules/checkout-shipping.md |
 | app/Services/Checkout/**, app/Services/Order/**, resources/views/pages/storefront/checkout.blade.php, resources/views/pages/storefront/payment.blade.php | .ai/rules/deposit-payment.md |
+| app/Services/Order/**, resources/views/pages/storefront/order-track.blade.php | .ai/rules/guest-order-lookup.md |
 | resources/views/pages/**, app/Livewire/** | .ai/rules/livewire-pages.md |
 | resources/views/pages/storefront/**, resources/views/components/storefront/**, resources/views/layouts/app.blade.php | .ai/rules/storefront-livewire-loading.md |
 | resources/views/pages/storefront/**, resources/views/components/storefront/**, resources/views/layouts/app.blade.php | .ai/rules/storefront-toast.md |

@@ -40,7 +40,7 @@ test('empty cart and empty order pages show icons', function () {
 
     $orders = $this->get(route('orders.index'))
         ->assertOk()
-        ->assertSee('ยังไม่มีคำสั่งซื้อ', false)
+        ->assertSee('ค้นหาคำสั่งซื้อ', false)
         ->getContent();
 
     expect($orders)->toContain('<svg');

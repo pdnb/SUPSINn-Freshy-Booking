@@ -117,11 +117,42 @@ test('order service resolves guest tracking only with a matching token', functio
         ->and($orders->findForGuestTracking('UNKNOWN1', str_repeat('e', 40)))->toBeNull();
 });
 
-test('the orders page shows an empty state when the guest has no tracking link', function () {
+test('order service looks up guest orders by exact student id and phone', function () {
+    Order::factory()->create([
+        'number' => 'FRLOOK001',
+        'student_id' => '67019999999',
+        'phone' => '0891111111',
+    ]);
+    Order::factory()->create([
+        'number' => 'FRLOOK002',
+        'student_id' => '67019999999',
+        'phone' => '0891111111',
+    ]);
+    Order::factory()->create([
+        'number' => 'FRSKIP001',
+        'student_id' => '67019999999',
+        'phone' => '0892222222',
+    ]);
+    Order::factory()->create([
+        'number' => 'FRSKIP002',
+        'student_id' => '67018888888',
+        'phone' => '0891111111',
+    ]);
+
+    $orders = app(OrderService::class)->findForGuestLookup('67019999999', '0891111111');
+
+    expect($orders->pluck('number')->all())->toEqualCanonicalizing(['FRLOOK001', 'FRLOOK002']);
+});
+
+test('the orders page shows a lookup form when the guest has no tracking link', function () {
     $this->get(route('orders.index'))
         ->assertOk()
-        ->assertSee('ยังไม่มีคำสั่งซื้อ', false)
-        ->assertSee('ไปหน้าหลัก', false)
+        ->assertSee('ค้นหาคำสั่งซื้อ', false)
+        ->assertSee('รหัสนักศึกษา', false)
+        ->assertSee('เบอร์โทรศัพท์', false)
+        ->assertSee('ค้นหา', false)
+        ->assertSeeHtml('wire:click="search"')
+        ->assertDontSee('ยังไม่มีคำสั่งซื้อ', false)
         ->assertDontSee('โทเคนติดตาม', false);
 });
 
@@ -272,6 +303,114 @@ test('the confirmation page shows a thai receipt issued datetime', function () {
     ]))
         ->assertOk()
         ->assertSee('ออกใบเสร็จแล้ว '.$issuedAt->toThaiDatetime(), false);
+});
+
+test('a guest can list matching orders by student id and phone', function () {
+    $mineA = Order::factory()->create([
+        'number' => 'FRFIND001',
+        'student_id' => '67017777777',
+        'phone' => '0811111111',
+        'status' => OrderStatus::PendingReview,
+        'total' => '350.00',
+        'full_name' => 'สมชาย หาเจอ',
+    ]);
+    $mineB = Order::factory()->create([
+        'number' => 'FRFIND002',
+        'student_id' => '67017777777',
+        'phone' => '0811111111',
+        'status' => OrderStatus::Confirmed,
+        'total' => '700.00',
+    ]);
+    Order::factory()->create([
+        'number' => 'FROTHER01',
+        'student_id' => '67017777777',
+        'phone' => '0822222222',
+        'full_name' => 'ไม่ควรเห็นชื่อนี้',
+    ]);
+    Order::factory()->create([
+        'number' => 'FROTHER02',
+        'student_id' => '67016666666',
+        'phone' => '0811111111',
+        'full_name' => 'ออเดอร์คนอื่น',
+    ]);
+
+    Livewire::test('pages::storefront.order-track')
+        ->set('student_id', '67017777777')
+        ->set('phone', '081-111-1111')
+        ->call('search')
+        ->assertHasNoErrors()
+        ->assertSee('ออเดอร์ของฉัน')
+        ->assertSee('FRFIND001')
+        ->assertSee('FRFIND002')
+        ->assertSee('รอเจ้าหน้าที่ตรวจสลิป')
+        ->assertSee('ยืนยันการชำระแล้ว')
+        ->assertDontSee('FROTHER01')
+        ->assertDontSee('ไม่ควรเห็นชื่อนี้')
+        ->assertDontSee('FROTHER02')
+        ->assertDontSee('ออเดอร์คนอื่น')
+        ->assertSee(route('orders.confirmation', [
+            'order' => $mineA,
+            'token' => $mineA->tracking_token,
+        ]))
+        ->assertSee(route('orders.confirmation', [
+            'order' => $mineB,
+            'token' => $mineB->tracking_token,
+        ]));
+});
+
+test('a mismatched student id or phone does not reveal orders', function () {
+    Order::factory()->create([
+        'number' => 'FRSECRET2',
+        'student_id' => '67015555555',
+        'phone' => '0833333333',
+        'full_name' => 'ห้ามโชว์ชื่อนี้',
+    ]);
+
+    Livewire::test('pages::storefront.order-track')
+        ->set('student_id', '67015555555')
+        ->set('phone', '0844444444')
+        ->call('search')
+        ->assertHasErrors(['lookup'])
+        ->assertSee('ไม่พบคำสั่งซื้อที่ตรงกับข้อมูลนี้')
+        ->assertDontSee('FRSECRET2')
+        ->assertDontSee('ห้ามโชว์ชื่อนี้');
+});
+
+test('guest order lookup rejects invalid student id and phone formats', function () {
+    Livewire::test('pages::storefront.order-track')
+        ->set('student_id', '123')
+        ->set('phone', '0812345678')
+        ->call('search')
+        ->assertHasErrors(['student_id'])
+        ->assertSee('รหัสนักศึกษาไม่ถูกต้อง');
+
+    Livewire::test('pages::storefront.order-track')
+        ->set('student_id', '67011234567')
+        ->set('phone', '912345678')
+        ->call('search')
+        ->assertHasErrors(['phone'])
+        ->assertSee('เบอร์โทรศัพท์ไม่ถูกต้อง');
+});
+
+test('guest order lookup is rate limited after too many failures', function () {
+    Order::factory()->create([
+        'student_id' => '67014444444',
+        'phone' => '0855555555',
+        'number' => 'FRHIDDEN1',
+    ]);
+
+    $page = Livewire::test('pages::storefront.order-track')
+        ->set('student_id', '67014444444')
+        ->set('phone', '0866666666');
+
+    foreach (range(1, 5) as $attempt) {
+        $page->call('search')->assertHasErrors('lookup');
+    }
+
+    $page->call('search')->assertHasErrors('lookup');
+
+    expect($page->errors()->first('lookup'))->toContain('ลองใหม่')
+        ->and($page->html())->not->toContain('FRHIDDEN1');
 });
 
 test('the tracking token is hidden when the order is serialized', function () {
