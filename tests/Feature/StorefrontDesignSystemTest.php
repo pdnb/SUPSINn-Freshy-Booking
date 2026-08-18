@@ -95,10 +95,21 @@ test('storefront form primitives render labels errors and step states', function
         ->toContain('focus:ring-accent')
         ->toContain('wire:model="student_id"');
 
-    expect(Blade::render('<x-storefront.select id="faculty"><option value="">เลือกคณะ</option></x-storefront.select>'))
-        ->toContain('<select')
+    $select = Blade::render(
+        '<x-storefront.select id="faculty" placeholder="เลือกคณะ" :options="$options" wire:model="faculty" />',
+        ['options' => ['คณะวิทยาศาสตร์และเทคโนโลยี']],
+    );
+
+    expect($select)
+        ->not->toContain('<select')
+        ->toContain('role="combobox"')
+        ->toContain('role="listbox"')
+        ->toContain('type="hidden"')
+        ->toContain('wire:model="faculty"')
         ->toContain('min-h-11')
-        ->toContain('เลือกคณะ');
+        ->toContain('bg-surface')
+        ->toContain('เลือกคณะ')
+        ->toContain('คณะวิทยาศาสตร์และเทคโนโลยี');
 
     expect(Blade::render('<x-storefront.radio-card title="จ่ายเต็ม" caption="฿350.00" value="full" wire:model.live="payment_mode" />'))
         ->toContain('type="radio"')

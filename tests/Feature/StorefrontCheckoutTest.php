@@ -68,6 +68,8 @@ test('checkout pickup shows zero shipping and saves a draft', function () {
         ->set('major', 'วิทยาการคอมพิวเตอร์')
         ->set('phone', '0812345678')
         ->set('fulfillment', FulfillmentMethod::Bookstore->value)
+        ->assertSeeHtml('role="combobox"')
+        ->assertDontSeeHtml('<select')
         ->assertSee('0.00')
         ->assertSeeHtml('wire:click="save"')
         ->assertSeeHtml('wire:target="save"')

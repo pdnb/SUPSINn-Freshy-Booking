@@ -178,12 +178,12 @@ new #[Title('ข้อมูลการจอง')] class extends Component
                 </x-storefront.field>
 
                 <x-storefront.field label="คณะ" name="faculty">
-                    <x-storefront.select id="faculty" wire:model="faculty">
-                        <option value="">เลือกคณะ</option>
-                        @foreach ($faculties as $name)
-                            <option value="{{ $name }}">{{ $name }}</option>
-                        @endforeach
-                    </x-storefront.select>
+                    <x-storefront.select
+                        id="faculty"
+                        wire:model="faculty"
+                        placeholder="เลือกคณะ"
+                        :options="$faculties"
+                    />
                 </x-storefront.field>
 
                 <x-storefront.field label="สาขาวิชา" name="major">
