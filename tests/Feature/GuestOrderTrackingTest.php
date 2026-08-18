@@ -162,13 +162,57 @@ test('remembered guest tracking reopens the order from the orders tab', function
         'tracking_token' => str_repeat('j', 40),
     ]);
 
-    app(OrderService::class)->rememberGuestTracking($order);
+    app(OrderService::class)->rememberGuestTracking($order, autoOpen: true);
 
     $this->get(route('orders.index'))
         ->assertRedirect(route('orders.confirmation', [
             'order' => $order,
             'token' => $order->tracking_token,
         ]));
+});
+
+test('viewing a looked up order returns to the search form on the orders tab', function () {
+    $order = Order::factory()->create([
+        'number' => 'FRLOOKUP1',
+        'tracking_token' => str_repeat('l', 40),
+        'student_id' => '67016666666',
+        'phone' => '0866666666',
+    ]);
+
+    Livewire::test('pages::storefront.order-track')
+        ->set('student_id', '67016666666')
+        ->set('phone', '0866666666')
+        ->call('search')
+        ->assertSee('FRLOOKUP1');
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))->assertOk();
+
+    $this->get(route('orders.index'))
+        ->assertOk()
+        ->assertSee('ค้นหาคำสั่งซื้อ', false)
+        ->assertDontSee('FRLOOKUP1', false);
+});
+
+test('the post booking orders tab shortcut only redirects once', function () {
+    $order = Order::factory()->create([
+        'number' => 'FRBOOK001',
+        'tracking_token' => str_repeat('b', 40),
+    ]);
+
+    app(OrderService::class)->rememberGuestTracking($order, autoOpen: true);
+
+    $this->get(route('orders.index'))
+        ->assertRedirect(route('orders.confirmation', [
+            'order' => $order,
+            'token' => $order->tracking_token,
+        ]));
+
+    $this->get(route('orders.index'))
+        ->assertOk()
+        ->assertSee('ค้นหาคำสั่งซื้อ', false);
 });
 
 test('opening a valid tracking link remembers it for the orders tab', function () {

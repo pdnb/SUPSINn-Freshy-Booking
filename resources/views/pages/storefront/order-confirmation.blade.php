@@ -77,7 +77,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
 
     <main id="content" class="mx-auto max-w-lg p-4">
         <div class="flex items-center gap-2">
-            <x-storefront.button variant="ghost" :href="route('home')" aria-label="กลับหน้าหลัก">
+            <x-storefront.button variant="ghost" :href="route('orders.index')" aria-label="กลับหน้าหลัก">
                 <x-icon name="chevron-left" size="lg" />
             </x-storefront.button>
             <h1 class="text-xl font-semibold">คำสั่งซื้อ</h1>

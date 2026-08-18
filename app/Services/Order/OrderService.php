@@ -59,12 +59,38 @@ class OrderService
             ->get();
     }
 
-    public function rememberGuestTracking(Order $order): void
+    public function rememberGuestTracking(Order $order, bool $autoOpen = false): void
     {
+        $existing = $this->session->get('order.tracking');
+        $preserveAutoOpen = ! $autoOpen
+            && is_array($existing)
+            && ($existing['number'] ?? null) === $order->number
+            && ($existing['auto_open'] ?? false) === true;
+
         $this->session->put('order.tracking', [
             'number' => $order->number,
             'token' => $order->tracking_token,
+            'auto_open' => $autoOpen || $preserveAutoOpen,
         ]);
+    }
+
+    public function shouldAutoOpenTrackedOrder(): bool
+    {
+        $tracking = $this->session->get('order.tracking');
+
+        return is_array($tracking) && ($tracking['auto_open'] ?? false) === true;
+    }
+
+    public function clearAutoOpenTrackedOrder(): void
+    {
+        $tracking = $this->session->get('order.tracking');
+
+        if (! is_array($tracking)) {
+            return;
+        }
+
+        $tracking['auto_open'] = false;
+        $this->session->put('order.tracking', $tracking);
     }
 
     public function trackedGuestOrder(): ?Order
@@ -155,7 +181,7 @@ class OrderService
 
             $order = $order->fresh(['items', 'slip']);
 
-            $this->rememberGuestTracking($order);
+            $this->rememberGuestTracking($order, autoOpen: true);
 
             return $order;
         });

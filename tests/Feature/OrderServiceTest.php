@@ -70,6 +70,7 @@ test('a passing slip creates a pending review order without locking stock', func
         ->and(session('order.tracking'))->toMatchArray([
             'number' => $order->number,
             'token' => $order->tracking_token,
+            'auto_open' => true,
         ]);
 
     Storage::disk('local')->assertExists($order->slip->path);

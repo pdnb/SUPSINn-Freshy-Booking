@@ -22,11 +22,17 @@ new #[Title('คำสั่งซื้อ')] class extends Component
             return;
         }
 
+        if (! $orders->shouldAutoOpenTrackedOrder()) {
+            return;
+        }
+
         $order = $orders->trackedGuestOrder();
 
         if ($order === null) {
             return;
         }
+
+        $orders->clearAutoOpenTrackedOrder();
 
         $this->redirect(route('orders.confirmation', [
             'order' => $order,
