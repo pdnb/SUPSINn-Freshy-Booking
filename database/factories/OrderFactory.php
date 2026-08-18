@@ -17,7 +17,7 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'number' => 'FR'.strtoupper(Str::random(8)),
+            'number' => fake()->unique()->numerify('########'),
             'tracking_token' => Str::random(40),
             'student_id' => '67011234567',
             'full_name' => fake()->name(),

@@ -351,7 +351,7 @@ class OrderService
     private function uniqueNumber(): string
     {
         do {
-            $number = 'FR'.strtoupper(Str::random(8));
+            $number = sprintf('%08d', random_int(0, 99_999_999));
         } while (Order::query()->where('number', $number)->exists());
 
         return $number;

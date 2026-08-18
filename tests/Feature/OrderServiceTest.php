@@ -59,6 +59,7 @@ test('a passing slip creates a pending review order without locking stock', func
     $order = orders()->place(UploadedFile::fake()->image('slip.jpg'));
 
     expect($order->status)->toBe(OrderStatus::PendingReview)
+        ->and($order->number)->toMatch('/^\d{8}$/')
         ->and($order->slip)->not->toBeNull()
         ->and($order->items)->toHaveCount(1)
         ->and($order->payment_mode)->toBe(PaymentMode::Full)
