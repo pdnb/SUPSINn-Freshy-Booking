@@ -18,3 +18,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/views/pages/admin/**, resources/views/components/admin/**, resources/views/layouts/admin.blade.php | .ai/rules/admin-toast.md |
 | resources/views/components/storefront/**, resources/views/pages/storefront/**, resources/css/app.css | .ai/rules/storefront-design-system.md |
 | resources/views/components/storefront/header-v2.blade.php, resources/views/pages/storefront/header-v2-preview.blade.php, resources/views/pages/storefront/home.blade.php, routes/web.php | .ai/rules/header-v2.md |
+| resources/views/components/storefront/header.blade.php, resources/views/components/storefront/header-v2.blade.php, resources/views/pages/admin/login.blade.php, resources/views/pages/admin/settings/**, resources/views/components/admin/sidebar.blade.php, resources/views/layouts/admin.blade.php, resources/views/pages/storefront/home.blade.php, config/app.php | .ai/rules/brand-name.md |

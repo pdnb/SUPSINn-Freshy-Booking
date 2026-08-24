@@ -26,7 +26,7 @@ Body and headings use Anuphan via `@fonts` (same as the storefront). Do not use 
 Admin chrome is gray + white (neutral oklch, chroma 0). Primary actions and active nav use dark gray `--accent`, not the ecommerce-admin green or the storefront blue. Status pills use `--warn`, `--danger`, `--success`, and `--info` chroma; do not put those hues on buttons or nav.
 
 ## Auth
-Staff login at `/admin/login`. Keep `AdminUserSeeder` and auth redirects. Login uses the storefront layout (`layouts.app`) with a brand/form split (brand panel + form); the signed-in console uses `layouts.admin`. Keep brand-first copy (`มรส. ชุดเฟรชชี่`), skip link to the form, lock icon beside the title, loading button state, and storefront tokens — do not restyle login with admin gray chrome or Inter/cyan “dashboard” palettes.
+Staff login at `/admin/login`. Keep `AdminUserSeeder` and auth redirects. Login uses the storefront layout (`layouts.app`) with a brand/form split (brand panel + form); the signed-in console uses `layouts.admin`. Keep brand-first copy (`config('app.name')`, currently SRU Shop), skip link to the form, lock icon beside the title, loading button state, and storefront tokens — do not restyle login with admin gray chrome or Inter/cyan “dashboard” palettes.
 
 ## Icons
 Admin CSS does not load Tailwind, so x-icon `size-*` classes have no effect. Size SVGs with `.nav-link svg`, `.icon-btn svg`, and `.btn svg` at 16px.

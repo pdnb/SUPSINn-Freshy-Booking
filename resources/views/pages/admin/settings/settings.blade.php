@@ -126,10 +126,10 @@
                 <div class="panel-head">โลโก้ปัจจุบัน</div>
                 <div class="panel-body stack">
                     @if ($logoUrl)
-                        <img class="media-thumb lg" src="{{ $logoUrl }}" alt="SRU Shop">
+                        <img class="media-thumb lg" src="{{ $logoUrl }}" alt="{{ config('app.name') }}">
                         <button type="button" class="btn btn-danger btn-sm" wire:click="openClearLogo">ลบโลโก้</button>
                     @else
-                        <p class="empty">ไม่มีโลโก้ — header แสดงชื่อร้าน «SRU Shop»</p>
+                        <p class="empty">ไม่มีโลโก้ — header แสดงชื่อร้าน «{{ config('app.name') }}»</p>
                     @endif
                 </div>
             </section>

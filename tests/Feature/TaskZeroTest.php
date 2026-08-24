@@ -21,14 +21,14 @@ uses(RefreshDatabase::class);
 test('the home page renders the branded storefront', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('ระบบจองชุดเฟรชชี่', false)
+        ->assertSee('SRU Shop', false)
         ->assertSee('Anuphan', false);
 });
 
 test('the home page is a livewire component', function () {
     Livewire::test('pages::storefront.home')
         ->assertOk()
-        ->assertSee('ระบบจองชุดเฟรชชี่');
+        ->assertSee('SRU Shop');
 });
 
 test('the slip verifier contract is bound to the stub', function () {

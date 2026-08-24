@@ -9,7 +9,7 @@ uses(RefreshDatabase::class);
 
 test('header v2 preview shows the remapped chrome without a location row', function () {
     Livewire::test('pages::storefront.header-v2-preview')
-        ->assertSee('SRU Freshy Shop', false)
+        ->assertSee('SRU Shop', false)
         ->assertSee('ค้นหาสินค้า...', false)
         ->assertSeeHtml('aria-label="หน้าหลัก"')
         ->assertSeeHtml('images/subsinn-logo.png')
@@ -39,12 +39,18 @@ test('the header v2 preview route is reachable', function () {
 test('the home page uses header v2', function () {
     Livewire::test('pages::storefront.home')
         ->assertSeeHtml('images/subsinn-logo.png')
+        ->assertSee('SRU Shop', false)
         ->assertSee('ค้นหาสินค้า...', false)
         ->assertSeeHtml('aria-label="หน้าหลัก"')
         ->assertSeeHtml('wire:model.live.debounce.300ms="search"')
         ->assertDontSeeHtml('<x-storefront.input')
         ->assertDontSeeHtml('role="listbox"')
         ->assertDontSee('ไม่พบสินค้า');
+});
+
+test('the cart page shows the brand name in header v1', function () {
+    Livewire::test('pages::storefront.cart')
+        ->assertSee('SRU Shop', false);
 });
 
 test('home search dropdown lists matching open products and keeps the grid intact', function () {

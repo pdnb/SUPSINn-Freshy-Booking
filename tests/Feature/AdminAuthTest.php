@@ -15,14 +15,14 @@ test('guests can view the admin login page', function () {
     $this->get('/admin/login')
         ->assertOk()
         ->assertSee('เข้าสู่ระบบ', false)
-        ->assertSee('มรส. ชุดเฟรชชี่', false)
+        ->assertSee('SRU Shop', false)
         ->assertSee('กลับหน้าร้าน', false);
 });
 
 test('the storefront stays public', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('ระบบจองชุดเฟรชชี่', false);
+        ->assertSee('SRU Shop', false);
 });
 
 test('invalid credentials do not authenticate', function () {

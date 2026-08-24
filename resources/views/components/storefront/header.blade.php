@@ -6,7 +6,7 @@
 </a>
 @php
     $logoUrl = app(\App\Services\Storefront\StorefrontLogoService::class)->url();
-    $brandName = 'SRU Freshy Shop';
+    $brandName = config('app.name');
 @endphp
 <header class="bg-linear-to-br from-brand to-highlight text-brand-fg">
     <div class="mx-auto flex min-h-[58px] max-w-lg items-center justify-between gap-3 px-4">

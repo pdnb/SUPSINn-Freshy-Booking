@@ -6,7 +6,7 @@ use App\Services\Cart\CartService;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new #[Title('จองชุดเฟรชชี่')] class extends Component
+new #[Title('SRU Shop')] class extends Component
 {
     public string $search = '';
 

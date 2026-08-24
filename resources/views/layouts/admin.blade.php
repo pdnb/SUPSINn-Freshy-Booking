@@ -13,7 +13,7 @@
         <x-admin.sidebar />
         <div class="admin-frame">
             <header class="topbar">
-                <p class="muted">SRU Shop Admin</p>
+                <p class="muted"></p>
                 <div class="topbar-actions">
                     <span class="muted">{{ auth()->user()?->name }}</span>
                     <form method="POST" action="{{ route('admin.logout') }}">

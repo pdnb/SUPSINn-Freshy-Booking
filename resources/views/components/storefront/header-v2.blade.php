@@ -7,7 +7,7 @@
 
 @php
     $logoUrl = app(\App\Services\Storefront\StorefrontLogoService::class)->url();
-    $brandName = 'SRU Freshy Shop';
+    $brandName = config('app.name');
     $circleButton = 'inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full bg-surface text-fg shadow-sm transition-colors duration-200 hover:bg-surface-2';
     $results = collect($results);
     $showResults = filled(trim((string) $query));

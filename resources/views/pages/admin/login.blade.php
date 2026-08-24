@@ -79,7 +79,7 @@ class extends Component
 
             <div class="relative">
                 <p class="mt-5 max-w-md text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
-                    SRU Shop
+                    {{ config('app.name') }}
                 </p>
                 <p class="mt-4 max-w-sm text-base leading-relaxed text-brand-fg/85">
                     Admin Console
