@@ -1,40 +1,40 @@
-# Todo: Admin console HTML mockup
+# Todo: เลขพัสดุไปรษณีย์ (v3 slice)
 
-อ้างอิง: `tasks/plan.md` · `docs/intent/admin-console-mockup.md`
-
-แผนเรทค่าส่งที่ปิดแล้วอยู่ที่ `tasks/archive/shipping-qty-tiers-todo.md`
+อ้างอิง: `tasks/plan.md` · `docs/intent/v3-post-parcel.md`
+แผน mockup แอดมินที่ปิดแล้วอยู่ที่ `tasks/archive/admin-console-mockup-todo.md`
+v2 ยังปิดอยู่ที่ `tasks/archive/v2-todo.md` — ไม่เปิดโปรแกรม v3
 
 ## Phase 0 — Intent + plan files
 
-- [x] **Task 0:** เขียน `docs/intent/admin-console-mockup.md` + แทนที่ `tasks/plan.md` / `tasks/todo.md` (ย้าย shipping ไป archive)
-  - Acceptance: intent มี confirmed statement/decisions/non-goals; ไฟล์แผนเป็นเนื้อหา mockup; shipping อยู่ที่ `tasks/archive/`
+- [x] **Task 0:** เขียน `docs/intent/v3-post-parcel.md` + แทนที่ `tasks/plan.md` / `tasks/todo.md` (ย้าย mockup ไป archive)
+  - Acceptance: intent มี confirmed statement/decisions/non-goals; ไฟล์แผนเป็นเนื้อหาเลขพัสดุ; mockup อยู่ที่ `tasks/archive/`
   - Verify: อ่านเทียบ restate ที่ผู้ใช้ยืนยัน
   - Depends: —
 
-## Phase 1 — Foundation
+## Phase 1 — Domain
 
-- [x] **Task 1:** โฟลเดอร์ prototype + tokens + shell + chrome + `admin-data.js` + `index.html`
-  - Acceptance: launcher ลิงก์ครบทุกโมดูล; โทเคนอยู่ใน `:root`; ไม่ยืม theme หน้าร้าน
-  - Verify: เปิด `docs/references/admin-prototype/index.html`
+- [x] **Task 1:** migration `orders.parcel_number` + factory + `OrderService::markShipped` / `updateParcelNumber`
+  - Acceptance: คอลัมน์คนละตัวกับ `tracking_token`; ส่งได้มีหรือไม่มีเลข; ค่าว่างเป็น `null`; ปฏิเสธเลขบน bookstore; อัปเดต/ล้างหลัง shipped ได้
+  - Verify: `php artisan test --compact tests/Feature/OrderAdminServiceTest.php`
   - Depends: Task 0
 
-## Phase 2 — Hero screens
+## Phase 2 — Admin fulfillment
 
-- [x] **Task 2:** Overview — KPI `[ตัวอย่าง]` + deep link F1/F2
-- [x] **Task 3:** คิวสลิป + รายละเอียด — ยืนยัน/ปฏิเสธ + ถัดไป + hint ปุ่มลัด
-- [x] **Task 4:** Fulfillment — กรองช่องทาง + พร้อมรับ/จัดส่งแล้ว
-  - Checkpoint: เดิน F1 และ F2 จาก Overview ไม่ตัน
+- [x] **Task 2:** คิวรอดำเนินการของ post + ช่องเลขพัสดุบนแผงรายละเอียด + แสดงเลขบน order-detail
+  - Acceptance: post active = confirmed + shipped ที่ยังไม่มีเลข; จัดส่งแล้ว / บันทึกเลขพัสดุ; toast + error inline; ไม่มีปุ่ม completed สำหรับ post
+  - Verify: `php artisan test --compact tests/Feature/AdminPickupTest.php`
   - Depends: Task 1
 
-## Phase 3 — Remaining modules
+## Phase 3 — Guest confirmation
 
-- [x] **Task 5:** สินค้า + ฟอร์ม (validation ชื่อ/ราคา, ไม่มี SKU)
-- [x] **Task 6:** Pickup + สรุปผลิต
-- [x] **Task 7:** รอบจอง + Settings (ค่าส่ง + แบนเนอร์)
+- [x] **Task 3:** ไทม์ไลน์ post สามขั้น + แสดง/คัดลอกเลขพัสดุ + ไม่ใช้ข้อความใบเสร็จตอนรับของกับ post
+  - Acceptance: post จบที่ shipped; pickup ไม่เปลี่ยน; เลขโชว์เมื่อมีค่า; ไม่มี URL ผู้ขนส่ง
+  - Verify: `php artisan test --compact tests/Feature/GuestOrderTrackingTest.php`
   - Depends: Task 1
 
-## Phase 4 — Gate
+## Phase 4 — Tests + pint
 
-- [x] **Task 8:** ลิงก์ข้ามจอ + อัปเดต SRS §4.1 + `tests/Feature/AdminPrototypeTest.php`
-  - Verify: `php artisan test --compact tests/Feature/AdminPrototypeTest.php`
-  - Depends: Task 2–7
+- [x] **Task 4:** เทสต์ service / fulfillment queue / guest steps ครบ แล้ว `vendor/bin/pint --dirty --format agent`
+  - Acceptance: เคสในแผนครบ; ไฟล์ที่แตะผ่าน; pint จัดรูปแบบแล้ว
+  - Verify: `php artisan test --compact tests/Feature/OrderAdminServiceTest.php tests/Feature/AdminPickupTest.php tests/Feature/GuestOrderTrackingTest.php`
+  - Depends: Task 1, Task 2, Task 3

@@ -196,14 +196,16 @@ class OrderService
     }
 
     /**
-     * @param  array{search?: string|null, status?: string|OrderStatus|null, statuses?: list<string|OrderStatus>|null, fulfillment?: string|FulfillmentMethod|null, booking_round_id?: int|string|null, date_from?: string|null, date_to?: string|null}  $filters
+     * @param  array{search?: string|null, status?: string|OrderStatus|null, statuses?: list<string|OrderStatus>|null, fulfillment?: string|FulfillmentMethod|null, booking_round_id?: int|string|null, date_from?: string|null, date_to?: string|null, awaiting_parcel?: bool}  $filters
      * @return Collection<int, Order>
      */
     public function queue(array $filters = []): Collection
     {
+        $awaitingParcel = ($filters['awaiting_parcel'] ?? false) === true;
+
         $status = array_key_exists('status', $filters)
             ? $filters['status']
-            : OrderStatus::PendingReview;
+            : ($awaitingParcel ? null : OrderStatus::PendingReview);
 
         $statuses = $filters['statuses'] ?? null;
 
@@ -218,6 +220,15 @@ class OrderService
                 if ($this->statusFilter($status) !== null) {
                     $query->where('status', $this->statusFilter($status));
                 }
+            })
+            ->when($awaitingParcel, function ($query) {
+                $query->where(function ($query) {
+                    $query->where('status', OrderStatus::Confirmed)
+                        ->orWhere(function ($query) {
+                            $query->where('status', OrderStatus::Shipped)
+                                ->whereNull('parcel_number');
+                        });
+                });
             })
             ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
                 $search = trim((string) $filters['search']);
@@ -308,6 +319,42 @@ class OrderService
         });
     }
 
+    public function markShipped(Order $order, User $actor, ?string $parcelNumber = null): Order
+    {
+        if ($order->fulfillment !== FulfillmentMethod::Post) {
+            throw ValidationException::withMessages([
+                'fulfillment' => 'บันทึกเลขพัสดุได้เฉพาะออเดอร์ไปรษณีย์',
+            ]);
+        }
+
+        $normalized = $this->normalizedParcelNumber($parcelNumber);
+
+        return DB::transaction(function () use ($order, $actor, $normalized) {
+            $order->update(['parcel_number' => $normalized]);
+
+            return $this->transition($order->fresh(), OrderStatus::Shipped, $actor);
+        });
+    }
+
+    public function updateParcelNumber(Order $order, User $actor, ?string $parcelNumber): Order
+    {
+        if ($order->fulfillment !== FulfillmentMethod::Post) {
+            throw ValidationException::withMessages([
+                'fulfillment' => 'บันทึกเลขพัสดุได้เฉพาะออเดอร์ไปรษณีย์',
+            ]);
+        }
+
+        if ($order->status !== OrderStatus::Shipped) {
+            throw ValidationException::withMessages([
+                'parcel_number' => 'แก้ไขเลขพัสดุได้เมื่อจัดส่งแล้ว',
+            ]);
+        }
+
+        $order->update(['parcel_number' => $this->normalizedParcelNumber($parcelNumber)]);
+
+        return $order->fresh(['items', 'slip', 'bookingRound', 'statusChanges.user']);
+    }
+
     public function issueReceipt(Order $order, User $actor): Order
     {
         if (! $this->canIssueReceipt($order)) {
@@ -380,6 +427,23 @@ class OrderService
         }
 
         return $status instanceof OrderStatus ? $status->value : $status;
+    }
+
+    private function normalizedParcelNumber(?string $parcelNumber): ?string
+    {
+        $trimmed = trim((string) $parcelNumber);
+
+        if ($trimmed === '') {
+            return null;
+        }
+
+        if (Str::length($trimmed) > 255) {
+            throw ValidationException::withMessages([
+                'parcel_number' => 'เลขพัสดุยาวเกินไป',
+            ]);
+        }
+
+        return $trimmed;
     }
 
     private function trackingTokenMatches(Order $order, string $token): bool

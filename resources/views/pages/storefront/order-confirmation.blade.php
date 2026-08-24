@@ -34,10 +34,21 @@ new #[Title('คำสั่งซื้อ')] class extends Component
             'order' => $order,
             'cartCount' => $cart->count(),
             'steps' => $this->trackingSteps($order),
-            'receiptNote' => $order->receipt_issued_at !== null
-                ? 'ออกใบเสร็จแล้ว '.$order->receipt_issued_at->toThaiDatetime()
-                : 'ใบเสร็จจะได้รับตอนรับสินค้า',
+            'receiptNote' => $this->receiptNote($order),
         ]);
+    }
+
+    private function receiptNote(Order $order): ?string
+    {
+        if ($order->receipt_issued_at !== null) {
+            return 'ออกใบเสร็จแล้ว '.$order->receipt_issued_at->toThaiDatetime();
+        }
+
+        if ($order->fulfillment->chargesShipping()) {
+            return null;
+        }
+
+        return 'ใบเสร็จจะได้รับตอนรับสินค้า';
     }
 
     /**
@@ -45,9 +56,12 @@ new #[Title('คำสั่งซื้อ')] class extends Component
      */
     private function trackingSteps(Order $order): array
     {
-        $labels = ['จองแล้ว', 'ตรวจสลิป', 'พร้อมรับ', 'รับแล้ว'];
+        $labels = $order->fulfillment->chargesShipping()
+            ? ['จองแล้ว', 'ตรวจสลิป', 'จัดส่งแล้ว']
+            : ['จองแล้ว', 'ตรวจสลิป', 'พร้อมรับ', 'รับแล้ว'];
 
-        if ($order->status === OrderStatus::Completed) {
+        if ($order->status === OrderStatus::Completed
+            || ($order->fulfillment->chargesShipping() && $order->status === OrderStatus::Shipped)) {
             return collect($labels)
                 ->map(fn (string $label): array => ['label' => $label, 'state' => 'done'])
                 ->all();
@@ -101,7 +115,25 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                 </button>
             </p>
             <h2 class="mt-1 text-xl font-semibold">{{ $order->status->label() }}</h2>
-            <p class="mt-1 text-sm text-muted">{{ $receiptNote }}</p>
+            @if ($receiptNote)
+                <p class="mt-1 text-sm text-muted">{{ $receiptNote }}</p>
+            @endif
+            @if (filled($order->parcel_number))
+                <p class="mt-3 flex items-center justify-between gap-3 text-xs font-medium text-brand">
+                    <span>เลขพัสดุ</span>
+                    <button
+                        type="button"
+                        class="-mr-1 inline-flex min-h-11 items-center gap-1 rounded-brand px-1 hover:bg-bg"
+                        x-data="{ copied: false }"
+                        x-on:click="navigator.clipboard.writeText(@js($order->parcel_number)).then(() => { copied = true; setTimeout(() => copied = false, 1600) })"
+                        aria-label="คัดลอกเลขพัสดุ {{ $order->parcel_number }}"
+                        x-bind:aria-label="copied ? 'คัดลอกเลขพัสดุแล้ว' : @js('คัดลอกเลขพัสดุ '.$order->parcel_number)"
+                    >
+                        <span x-text="copied ? 'คัดลอกแล้ว' : @js($order->parcel_number)">{{ $order->parcel_number }}</span>
+                        <x-icon name="clipboard-document" size="sm" />
+                    </button>
+                </p>
+            @endif
             @if ($order->status === \App\Enums\OrderStatus::PendingReview)
                 <p class="mt-3 text-sm text-muted">สลิปผ่านการตรวจเบื้องต้นแล้ว รอเจ้าหน้าที่ยืนยัน — ยังไม่ถือว่าชำระแล้ว</p>
             @endif

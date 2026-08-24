@@ -92,6 +92,29 @@ test('products not in an open round are excluded from the storefront query', fun
         ->and(booking()->isProductAvailable($onSale))->toBeTrue();
 });
 
+test('searchStorefrontProducts matches open product names case-insensitively', function () {
+    $onSale = Product::factory()->create(['name' => 'Combo Shirt']);
+    $other = Product::factory()->create(['name' => 'กางเกง ปี 69']);
+    $notInRound = Product::factory()->create(['name' => 'Combo Jacket']);
+
+    booking()->create([
+        'name' => 'รอบเปิด',
+        'starts_at' => '2026-08-01 09:00:00',
+        'ends_at' => '2026-08-31 18:00:00',
+        'is_enabled' => true,
+        'product_ids' => [$onSale->id, $other->id],
+    ]);
+
+    Carbon::setTestNow('2026-08-15 12:00:00');
+
+    expect(booking()->searchStorefrontProducts('combo')->pluck('id')->all())->toBe([$onSale->id])
+        ->and(booking()->searchStorefrontProducts('COMBO')->pluck('id')->all())->toBe([$onSale->id])
+        ->and(booking()->searchStorefrontProducts('กางเกง')->pluck('id')->all())->toBe([$other->id])
+        ->and(booking()->searchStorefrontProducts('Combo Jacket'))->toHaveCount(0)
+        ->and(booking()->searchStorefrontProducts(''))->toHaveCount(0)
+        ->and(booking()->searchStorefrontProducts('   '))->toHaveCount(0);
+});
+
 test('an end time before the start time is rejected', function () {
     booking()->create([
         'name' => 'รอบกลับด้าน',

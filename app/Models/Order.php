@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'phone',
     'fulfillment',
     'address',
+    'parcel_number',
     'shipping_rate_id',
     'shipping_rate_name',
     'subtotal',

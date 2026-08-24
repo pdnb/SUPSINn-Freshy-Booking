@@ -26,6 +26,7 @@ class OrderFactory extends Factory
             'phone' => '0812345678',
             'fulfillment' => FulfillmentMethod::Bookstore,
             'address' => null,
+            'parcel_number' => null,
             'subtotal' => '350.00',
             'shipping_amount' => '0.00',
             'total' => '350.00',

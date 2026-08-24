@@ -163,6 +163,12 @@ class extends Component
                                 <dd class="address">{{ $order->address }}</dd>
                             </div>
                         @endif
+                        @if ($order->fulfillment === \App\Enums\FulfillmentMethod::Post)
+                            <div>
+                                <dt>เลขพัสดุ</dt>
+                                <dd class="mono">{{ $order->parcel_number ?: '—' }}</dd>
+                            </div>
+                        @endif
                     </dl>
                     <table class="ds-table">
                         <thead>

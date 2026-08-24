@@ -1,97 +1,132 @@
-# Implementation Plan: Admin console HTML mockup
+# Implementation Plan: เลขพัสดุไปรษณีย์ (v3 slice)
 
-อ้างอิง: `docs/intent/admin-console-mockup.md` · `docs/srs.md` §4.1
+> แผน mockup แอดมินที่ปิดแล้วอยู่ที่ `tasks/archive/admin-console-mockup-plan.md`
+> v2 ยังปิดอยู่ที่ `tasks/archive/v2-plan.md` — ไม่เปิดโปรแกรม v3
 
-แผนเรทค่าส่งที่ปิดแล้วอยู่ที่ `tasks/archive/shipping-qty-tiers-plan.md`
+อ้างอิง: `docs/intent/v3-post-parcel.md` · `docs/intent/v2.md` · `docs/srs.md` · `.ai/rules/admin.md` · `.ai/rules/admin-toast.md`
 
 ## Overview
 
-สร้างโปรโตไทป์ HTML แอดมิน 11 ไฟล์ของระบบจองชุดเฟรชชี่ มรส. ที่ `docs/references/admin-prototype/` — โทน tech-utility, UI ไทย, hero เท่ากันระหว่างคิวสลิปกับ fulfillment ไม่แตะ Livewire ในรอบนี้
+แอดมินบันทึกเลขพัสดุ (optional, ข้อความว่าง) ตอนกดจัดส่งแล้วบนแท็บไปรษณีย์ แล้วแก้ย้อนหลังได้บนออเดอร์ shipped นักศึกษาเห็นเลขนั้นบนหน้าติดตามที่มีสามขั้นและจบที่ shipped
 
 ## Architecture decisions
 
-- สแตติก HTML + `admin-data.js` ชุดเดียว; mutation เก็บใน sessionStorage
-- Chrome ฉีดจาก `assets/chrome.js` (sidebar + topbar)
-- โทเคน tech-utility ใน `:root` เท่านั้น — slate + accent เขียว ไม่ยืม `theme.js` หน้าร้าน
-- ฟอนต์ IBM Plex Sans Thai + IBM Plex Mono (ไม่มี serif ละติน)
-- สถานะ/ช่องทางตามโดเมนจริง ไม่มี SKU / ส่วนลด / กราฟรายได้
+- คอลัมน์ใหม่ `orders.parcel_number` (string, nullable) — ห้ามใช้ซ้ำ `tracking_token` (ลิงก์ดูออเดอร์)
+- ค่าว่าง / ล้างช่อง เก็บ `null` ไม่มี regex รูปแบบ
+- `OrderService::transition()` คงเป็น status-only
+- `markShipped(Order, User, ?string $parcelNumber)` — post + `Confirmed` → `Shipped` ตั้งเลขในทรานแซกชันเดียว
+- `updateParcelNumber(Order, User, ?string $parcelNumber)` — post + `Shipped` เท่านั้น (shipped คือจบงาน ไม่มี UI completed)
+- ไม่มี reverse transition และไม่มาร์ค post เป็น completed ในสไลซ์นี้
+- คิว “รอดำเนินการ” แยกตามช่องทาง: bookstore/hall = `confirmed`; post = `confirmed` + `shipped` ที่ `parcel_number` เป็น null
+- ช่องเลขอยู่แผงรายละเอียดหน้าจัดส่ง (ไม่ไดอะล็อกครั้งเดียว) — unlabeled + `aria-label` ตามกฎแอดมิน
+- หน้า confirmation ของ post: จองแล้ว → ตรวจสลิป → จัดส่งแล้ว; pickup ไม่เปลี่ยน
+
+```mermaid
+flowchart LR
+  confirmed[Post confirmed]
+  shippedMissing["Shipped no number"]
+  shippedHas["Shipped with number"]
+  guest[Guest confirmation]
+  confirmed -->|"optional parcel_number"| shippedHas
+  confirmed -->|"empty"| shippedMissing
+  shippedMissing -->|"updateParcelNumber"| shippedHas
+  shippedHas --> guest
+  shippedMissing --> guest
+```
 
 ## Task List
 
-### Task 0: บันทึก intent + แทนที่ไฟล์แผน
+### Phase 0 — Intent + plan files
+
+#### Task 0: บันทึก intent + แทนที่ไฟล์แผน
+
+**Description:** เขียน `docs/intent/v3-post-parcel.md` จาก restate ที่ยืนยัน ย้ายแผน mockup ไป `tasks/archive/` แล้วแทนที่ `tasks/plan.md` / `tasks/todo.md`
 
 **Acceptance criteria:**
 
-- [x] `docs/intent/admin-console-mockup.md` มี confirmed statement + decisions + non-goals
-- [x] แผน shipping อยู่ที่ `tasks/archive/`
-- [x] `tasks/plan.md` / `tasks/todo.md` เป็นงาน mockup นี้
+- [x] intent มี confirmed statement + decisions + non-goals
+- [x] ไฟล์แผนเป็นเนื้อหาเลขพัสดุทั้งไฟล์
+- [x] mockup ยังอ่านได้ที่ `tasks/archive/admin-console-mockup-plan.md` และ `tasks/archive/admin-console-mockup-todo.md`
 
 **Verification:** อ่านไฟล์เทียบกับ restate ที่ผู้ใช้ตอบ Yes
 **Dependencies:** None
 **Scope:** S
 
-### Task 1: Foundation
+### Phase 1 — Domain
 
-โฟลเดอร์ + tokens + shell + chrome + data + launcher
+#### Task 1: schema + `OrderService::markShipped` / `updateParcelNumber`
 
-**Verification:** เปิด `index.html` แล้วลิงก์ครบ 11 โมดูล
+**Description:** migration เพิ่ม `orders.parcel_number` (nullable string); fillable/factory; `OrderService::markShipped` สำหรับ post+confirmed (ตั้งเลขในทรานแซกชันเดียวกับสถานะ) และ `updateParcelNumber` สำหรับ post+shipped; ค่าว่างเป็น `null`; `transition()` ไม่รับเลขพัสดุ
+
+**Acceptance criteria:**
+
+- [x] คอลัมน์ `parcel_number` มีใน `orders` คนละตัวกับ `tracking_token`
+- [x] ส่งได้ทั้งมีเลขและไม่มีเลข; ค่าว่างเก็บ `null`
+- [x] ปฏิเสธเลขบน bookstore/hall; อัปเดต/ล้างได้หลัง shipped; ข้ามไป `ready_for_pickup` จาก post ไม่ได้
+- [x] factory สร้างออเดอร์ได้โดยไม่บังคับเลข
+
+**Verification:** `php artisan test --compact tests/Feature/OrderAdminServiceTest.php`
 **Dependencies:** Task 0
 **Scope:** M
+**Files likely touched:** `database/migrations/*_add_parcel_number_to_orders_table.php`, `app/Models/Order.php`, `database/factories/OrderFactory.php`, `app/Services/Order/OrderService.php`, `tests/Feature/OrderAdminServiceTest.php`
 
-### Task 2: Overview
+### Phase 2 — Admin fulfillment
 
-KPI `[ตัวอย่าง]` + attention + recent orders ลิงก์ F1/F2
+#### Task 2: คิว post + ช่องเลขพัสดุบนหน้าจัดส่ง
 
-**Dependencies:** Task 1
-**Scope:** S
+**Description:** ปรับ `pages::admin.fulfillment` ให้รอดำเนินการของ post รวม shipped ที่ยังไม่มีเลข; แผงรายละเอียดมีช่อง unlabeled + `aria-label` เลขพัสดุ; confirmed กดจัดส่งแล้วผ่าน `markShipped`; shipped กดบันทึกเลขพัสดุผ่าน `updateParcelNumber`; toast ผ่าน `admin-toast` ข้อผิดพลาดอยู่ inline; หน้า `order-detail` แสดงเลขแบบอ่านอย่างเดียวสำหรับ post (แก้ที่หน้าจัดส่ง)
 
-### Task 3: F1 คิวสลิป + รายละเอียด
+**Acceptance criteria:**
 
-ยืนยัน/ปฏิเสธ, ถัดไป, hint j/k/c/r
+- [x] คิวรอดำเนินการ post = confirmed + shipped ที่ `parcel_number` null; bookstore/hall ยังเป็น confirmed
+- [x] ล้างเลขแล้วออเดอร์กลับเข้าคิวรอดำเนินการของ post
+- [x] `markShipped` บันทึกเลข; อัปเดตบน shipped ได้; ไม่มีปุ่มปิด completed สำหรับ post
+- [x] หน้า order-detail โชว์เลขพัสดุของ post (read-only)
 
-**Dependencies:** Task 1
-**Scope:** M
-
-### Task 4: F2 Fulfillment
-
-กรองช่องทาง, พร้อมรับ / จัดส่งแล้ว
-
+**Verification:** `php artisan test --compact tests/Feature/AdminPickupTest.php`
 **Dependencies:** Task 1
 **Scope:** M
+**Files likely touched:** `resources/views/pages/admin/fulfillment.blade.php`, `resources/views/pages/admin/order-detail.blade.php`, `tests/Feature/AdminPickupTest.php`
 
-### Task 5: สินค้า + ฟอร์ม
+### Phase 3 — Guest confirmation
 
-ค้นหา, validation ชื่อ/ราคา, ไม่มี SKU
+#### Task 3: ไทม์ไลน์ post + แสดง/คัดลอกเลขพัสดุ
 
+**Description:** `trackingSteps()` แยกตาม fulfillment — pickup คง จองแล้ว → ตรวจสลิป → พร้อมรับ → รับแล้ว; post เป็น จองแล้ว → ตรวจสลิป → จัดส่งแล้ว และ `Shipped` (รวม `Completed` ถ้ามี) = จบทุกขั้น; โชว์เลขพัสดุเมื่อมี คัดลอกแบบรหัสออเดอร์ (`x-storefront` + clipboard); ไม่ใส่ URL ผู้ขนส่ง; ข้อความใบเสร็จตอนรับสินค้าไม่ใช้กับออเดอร์ post
+
+**Acceptance criteria:**
+
+- [x] confirmation ของ post มีสามขั้นและจบที่ shipped
+- [x] pickup ยังสี่ขั้นตามเดิม
+- [x] เลขพัสดุโชว์และคัดลอกได้เมื่อมีค่า; ไม่โชว์เมื่อเป็น null
+- [x] ข้อความสัญญาใบเสร็จตอนรับสินค้าไม่ขึ้นกับออเดอร์ post
+
+**Verification:** `php artisan test --compact tests/Feature/GuestOrderTrackingTest.php`
 **Dependencies:** Task 1
 **Scope:** M
+**Files likely touched:** `resources/views/pages/storefront/order-confirmation.blade.php`, `tests/Feature/GuestOrderTrackingTest.php`
 
-### Task 6: Pickup + สรุปผลิต
+### Phase 4 — Tests + pint
 
-ค้นรหัสนักศึกษา, ตารางไซส์ `[ตัวอย่าง]`
+#### Task 4: เทสต์ครบชุดที่แตะ + pint
 
-**Dependencies:** Task 1
-**Scope:** M
+**Description:** เติมเคสที่ยังไม่ครอบในไฟล์เทสต์ที่เกี่ยว แล้วรันเฉพาะไฟล์นั้น จากนั้นจัดรูปแบบ PHP ที่แก้
 
-### Task 7: รอบจอง + Settings
+**Acceptance criteria:**
 
-รายการรอบ; แท็บค่าส่งช่วงจำนวน + แบนเนอร์
+- [x] service: ส่งมี/ไม่มีเลข; ปฏิเสธเลขบน bookstore; อัปเดต/ล้างหลังส่ง; ข้ามไป ready_for_pickup ไม่ได้
+- [x] Livewire fulfillment: สมาชิกคิว active ของ post; `markShipped` เก็บเลข; อัปเดตบน shipped
+- [x] guest confirmation: ขั้น post + เลขโชว์; ขั้น pickup ไม่เปลี่ยน
+- [x] pint ผ่านบนไฟล์ที่แก้
 
-**Dependencies:** Task 1
-**Scope:** M
-
-### Task 8: Gate + SRS + เทสต์
-
-ลิงก์ข้ามจอ, อัปเดต SRS §4.1, Pest ตรวจไฟล์/`data-od-id`/รหัสออเดอร์ร่วม
-
-**Verification:** `php artisan test --compact tests/Feature/AdminPrototypeTest.php`
-**Dependencies:** Task 2–7
+**Verification:** `php artisan test --compact tests/Feature/OrderAdminServiceTest.php tests/Feature/AdminPickupTest.php tests/Feature/GuestOrderTrackingTest.php` แล้ว `vendor/bin/pint --dirty --format agent`
+**Dependencies:** Task 1, Task 2, Task 3
 **Scope:** S
 
 ## Out of scope
 
-Livewire restyle, แก้ `.ai/rules/admin.md`, Meridian, ล็อกอิน, CRM, SKU, ส่วนลด, กราฟรายได้, Filament, claim lock, auto-verify
+ใบปะหน้า/พิมพ์/packing list, เชื่อมขนส่ง, URL ผู้ขนส่ง, LINE/SMS, verifier, roles, API โรงงาน, เช็คลิสต์นักศึกษา, รวมหน้าจัดส่งกับรับของ, ปุ่มปิด completed สำหรับ post, เปลี่ยนกฎ pickup / bookstore / hall, Filament
 
 ## ลำดับแนะนำ
 
-`0 → 1 → 2 → 3 → 4` (checkpoint F1/F2) `→ 5 → 6 → 7 → 8`
+`0 → 1 → 2 → 3 → 4` (Task 2 กับ Task 3 ทำคู่ขนานได้หลัง Task 1)

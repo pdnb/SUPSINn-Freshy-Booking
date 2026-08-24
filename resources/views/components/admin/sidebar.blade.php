@@ -17,8 +17,8 @@
     <a class="sidebar-brand" href="{{ route('admin.dashboard') }}">
         <div class="sidebar-mark">มร</div>
         <div>
-            <strong>แอดมินปฏิบัติการ</strong>
-            <span>ชุดเฟรชชี่ มรส.</span>
+            <strong>Admin Console</strong>
+            <span>SRU Shop</span>
         </div>
     </a>
     <nav class="nav-group" aria-label="เมนูแอดมิน">

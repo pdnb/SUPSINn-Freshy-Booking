@@ -11,17 +11,16 @@ uses(RefreshDatabase::class);
 
 test('storefront header shows the default logo image', function () {
     Livewire::test('pages::storefront.home')
-        ->assertSeeHtml('alt="ระบบจองชุดเฟรชชี่ มรส."')
         ->assertSeeHtml('images/subsinn-logo.png')
-        ->assertDontSeeHtml('>ระบบจองชุดเฟรชชี่ มรส.</a>');
+        ->assertSeeHtml('aria-label="หน้าหลัก"');
 });
 
-test('storefront header shows brand text after the logo is cleared', function () {
+test('storefront header shows a home icon after the logo is cleared', function () {
     app(StorefrontLogoService::class)->clear();
 
     Livewire::test('pages::storefront.home')
-        ->assertSee('ระบบจองชุดเฟรชชี่ มรส.', false)
-        ->assertDontSeeHtml('alt="ระบบจองชุดเฟรชชี่ มรส."');
+        ->assertSeeHtml('aria-label="หน้าหลัก"')
+        ->assertDontSeeHtml('images/subsinn-logo.png');
 });
 
 test('settings logo tab uses a single-file dropzone', function () {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\FulfillmentMethod;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\PaymentSlip;
@@ -347,6 +348,73 @@ test('the confirmation page shows a thai receipt issued datetime', function () {
     ]))
         ->assertOk()
         ->assertSee('ออกใบเสร็จแล้ว '.$issuedAt->toThaiDatetime(), false);
+});
+
+test('a postal confirmation uses three shipped steps and hides the pickup receipt note', function () {
+    $order = Order::factory()->create([
+        'number' => 'FRPOSTTRK',
+        'tracking_token' => str_repeat('t', 40),
+        'status' => OrderStatus::Shipped,
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => 'EMS123456TH',
+        'address' => '123 ถนนทดสอบ',
+    ]);
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))
+        ->assertOk()
+        ->assertSee('จองแล้ว', false)
+        ->assertSee('ตรวจสลิป', false)
+        ->assertSee('จัดส่งแล้ว', false)
+        ->assertDontSee('พร้อมรับ', false)
+        ->assertDontSee('รับแล้ว', false)
+        ->assertSee('เลขพัสดุ', false)
+        ->assertSee('คัดลอกเลขพัสดุ EMS123456TH', false)
+        ->assertSee('grid-cols-3', false)
+        ->assertDontSee('ใบเสร็จจะได้รับตอนรับสินค้า', false);
+});
+
+test('a shipped postal order without a parcel number does not show a copy control', function () {
+    $order = Order::factory()->create([
+        'number' => 'FRPOSTNON',
+        'tracking_token' => str_repeat('v', 40),
+        'status' => OrderStatus::Shipped,
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => null,
+        'address' => '123 ถนนทดสอบ',
+    ]);
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))
+        ->assertOk()
+        ->assertSee('จัดส่งแล้ว', false)
+        ->assertDontSee('คัดลอกเลขพัสดุ', false);
+});
+
+test('a pickup confirmation keeps four steps and does not show a parcel number', function () {
+    $order = Order::factory()->create([
+        'number' => 'FRPICKTRK',
+        'tracking_token' => str_repeat('u', 40),
+        'status' => OrderStatus::ReadyForPickup,
+        'fulfillment' => FulfillmentMethod::Bookstore,
+    ]);
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))
+        ->assertOk()
+        ->assertSee('จองแล้ว', false)
+        ->assertSee('ตรวจสลิป', false)
+        ->assertSee('พร้อมรับ', false)
+        ->assertSee('รับแล้ว', false)
+        ->assertSee('ใบเสร็จจะได้รับตอนรับสินค้า', false)
+        ->assertDontSee('คัดลอกเลขพัสดุ', false)
+        ->assertDontSee('จัดส่งแล้ว', false);
 });
 
 test('a guest can list matching orders by student id and phone', function () {

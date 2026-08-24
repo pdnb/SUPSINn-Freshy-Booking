@@ -204,6 +204,7 @@ test('order detail summary shows full guest and money breakdown', function () {
         ->assertSee('การตลาด', false)
         ->assertSee('0899999999', false)
         ->assertSee('จัดส่งทางไปรษณีย์', false)
+        ->assertSee('เลขพัสดุ', false)
         ->assertSee('บ้านเลขที่ 1', false)
         ->assertSee('ชุดนักศึกษา · ไซส์เสื้อ · XL', false)
         ->assertSee('ยอดสินค้า', false)
@@ -211,4 +212,22 @@ test('order detail summary shows full guest and money breakdown', function () {
         ->assertSee('1,500', false)
         ->assertSee('90', false)
         ->assertSee('1,590', false);
+});
+
+test('order detail shows a postal parcel number as read-only', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::Shipped,
+        'number' => 'FRPARCEL9',
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => 'EMS888TH',
+        'address' => '123 ถนนทดสอบ',
+    ]);
+
+    $this->actingAs($staff)
+        ->get(route('admin.orders.show', $order))
+        ->assertOk()
+        ->assertSee('เลขพัสดุ', false)
+        ->assertSee('EMS888TH', false)
+        ->assertDontSeeHtml('wire:model="parcelNumber"');
 });

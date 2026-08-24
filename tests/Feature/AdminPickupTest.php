@@ -108,6 +108,105 @@ test('staff can mark a confirmed bookstore order ready for pickup', function () 
     expect($order->fresh()->status)->toBe(OrderStatus::ReadyForPickup);
 });
 
+test('the post fulfillment active queue includes shipped orders missing a parcel number', function () {
+    $staff = User::factory()->create();
+    Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Post,
+        'number' => 'FRPOST001',
+    ]);
+    Order::factory()->create([
+        'status' => OrderStatus::Shipped,
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => null,
+        'number' => 'FRPOST002',
+    ]);
+    Order::factory()->create([
+        'status' => OrderStatus::Shipped,
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => 'EMS999TH',
+        'number' => 'FRPOST003',
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.fulfillment')
+        ->set('channel', FulfillmentMethod::Post->value)
+        ->assertSee('FRPOST001', false)
+        ->assertSee('FRPOST002', false)
+        ->assertDontSee('FRPOST003', false);
+});
+
+test('staff can mark a postal order shipped with a parcel number', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Post,
+        'address' => '123 ถนนทดสอบ',
+        'number' => 'FRSHIP001',
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.fulfillment')
+        ->set('channel', FulfillmentMethod::Post->value)
+        ->set('id', $order->number)
+        ->set('parcelNumber', 'EMS123456TH')
+        ->assertSee('aria-label="เลขพัสดุ"', false)
+        ->call('markShipped')
+        ->assertDispatched('admin-toast');
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Shipped)
+        ->and($order->fresh()->parcel_number)->toBe('EMS123456TH');
+});
+
+test('staff can update a parcel number on a shipped postal order', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::Shipped,
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => 'EMS111',
+        'number' => 'FRSHIP002',
+        'address' => '123 ถนนทดสอบ',
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.fulfillment')
+        ->set('channel', FulfillmentMethod::Post->value)
+        ->set('status', 'all')
+        ->set('id', $order->number)
+        ->set('parcelNumber', 'EMS222')
+        ->call('saveParcelNumber')
+        ->assertDispatched('admin-toast');
+
+    expect($order->fresh()->parcel_number)->toBe('EMS222')
+        ->and($order->fresh()->status)->toBe(OrderStatus::Shipped);
+});
+
+test('clearing a parcel number returns the order to the post active queue', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::Shipped,
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => 'EMS333',
+        'number' => 'FRSHIP003',
+        'address' => '123 ถนนทดสอบ',
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.fulfillment')
+        ->set('channel', FulfillmentMethod::Post->value)
+        ->set('status', 'all')
+        ->set('id', $order->number)
+        ->set('parcelNumber', '')
+        ->call('saveParcelNumber');
+
+    expect($order->fresh()->parcel_number)->toBeNull();
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.fulfillment')
+        ->set('channel', FulfillmentMethod::Post->value)
+        ->assertSee('FRSHIP003', false);
+});
+
 test('fulfillment guest column shows a smaller student id', function () {
     $staff = User::factory()->create();
     Order::factory()->create([

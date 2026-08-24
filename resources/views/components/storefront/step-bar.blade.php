@@ -7,11 +7,14 @@
 
 @php
     $isOrder = $variant === 'order';
+    $columnCount = count($steps);
 @endphp
 
 <ol
     {{ $attributes->class([
-        'mt-4 grid grid-cols-4 text-center',
+        'mt-4 grid text-center',
+        'grid-cols-3' => $columnCount === 3,
+        'grid-cols-4' => $columnCount !== 3,
         'gap-1.5 text-[11px]' => $isOrder,
         'gap-1 text-xs text-muted' => ! $isOrder,
     ]) }}

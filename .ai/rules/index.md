@@ -10,10 +10,11 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Services/Catalog/** | .ai/rules/catalog.md |
 | app/Services/Checkout/**, resources/views/pages/storefront/checkout.blade.php | .ai/rules/checkout-shipping.md |
 | app/Services/Checkout/**, app/Services/Order/**, resources/views/pages/storefront/checkout.blade.php, resources/views/pages/storefront/payment.blade.php | .ai/rules/deposit-payment.md |
-| app/Services/Order/**, resources/views/pages/storefront/order-track.blade.php | .ai/rules/guest-order-lookup.md |
+| app/Services/Order/**, app/Models/Order.php, resources/views/pages/admin/fulfillment.blade.php, resources/views/pages/admin/order-detail.blade.php, resources/views/pages/storefront/order-confirmation.blade.php | .ai/rules/parcel-number.md |
 | app/Services/Order/**, resources/views/pages/admin/settings/** | .ai/rules/order-number.md |
 | resources/views/pages/**, app/Livewire/** | .ai/rules/livewire-pages.md |
 | resources/views/pages/storefront/**, resources/views/components/storefront/**, resources/views/layouts/app.blade.php | .ai/rules/storefront-livewire-loading.md |
 | resources/views/pages/storefront/**, resources/views/components/storefront/**, resources/views/layouts/app.blade.php | .ai/rules/storefront-toast.md |
 | resources/views/pages/admin/**, resources/views/components/admin/**, resources/views/layouts/admin.blade.php | .ai/rules/admin-toast.md |
 | resources/views/components/storefront/**, resources/views/pages/storefront/**, resources/css/app.css | .ai/rules/storefront-design-system.md |
+| resources/views/components/storefront/header-v2.blade.php, resources/views/pages/storefront/header-v2-preview.blade.php, resources/views/pages/storefront/home.blade.php, routes/web.php | .ai/rules/header-v2.md |

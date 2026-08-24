@@ -93,7 +93,16 @@ test('storefront form primitives render labels errors and step states', function
     expect(Blade::render('<x-storefront.input id="student_id" wire:model="student_id" />'))
         ->toContain('min-h-11')
         ->toContain('focus:ring-accent')
+        ->toContain('rounded-brand')
         ->toContain('wire:model="student_id"');
+
+    expect(Blade::render('<x-storefront.input variant="pill" id="header-search" placeholder="ค้นหา" />'))
+        ->toContain('rounded-full')
+        ->toContain('border-0')
+        ->toContain('bg-surface')
+        ->toContain('ps-10')
+        ->not->toContain('rounded-brand')
+        ->not->toContain('mt-1');
 
     $select = Blade::render(
         '<x-storefront.select id="faculty" placeholder="เลือกคณะ" :options="$options" wire:model="faculty" />',

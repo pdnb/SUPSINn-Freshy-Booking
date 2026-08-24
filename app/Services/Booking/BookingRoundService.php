@@ -105,6 +105,22 @@ class BookingRoundService
             ->get();
     }
 
+    /**
+     * @return Collection<int, Product>
+     */
+    public function searchStorefrontProducts(string $query, ?Carbon $at = null): Collection
+    {
+        $needle = mb_strtolower(trim($query));
+
+        if ($needle === '') {
+            return collect();
+        }
+
+        return $this->storefrontProducts($at)
+            ->filter(fn (Product $product): bool => str_contains(mb_strtolower($product->name), $needle))
+            ->values();
+    }
+
     public function isProductAvailable(Product $product, ?Carbon $at = null): bool
     {
         return $this->storefrontProducts($at)->contains('id', $product->id);

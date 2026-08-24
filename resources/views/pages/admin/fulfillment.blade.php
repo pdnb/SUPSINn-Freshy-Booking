@@ -4,6 +4,7 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Services\Order\OrderService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -25,11 +26,25 @@ class extends Component
     #[Url]
     public string $id = '';
 
+    public string $parcelNumber = '';
+
+    public function mount(): void
+    {
+        $this->parcelNumber = $this->selected()?->parcel_number ?? '';
+    }
+
+    public function updatedId(): void
+    {
+        $this->parcelNumber = $this->selected()?->parcel_number ?? '';
+        $this->resetErrorBag('parcel_number');
+    }
+
     public function clearFilters(): void
     {
         $this->status = 'active';
         $this->search = '';
         $this->id = '';
+        $this->parcelNumber = '';
     }
 
     public function select(string $number): void
@@ -58,9 +73,32 @@ class extends Component
             return;
         }
 
-        $orders->transition($order, OrderStatus::Shipped, Auth::user());
-        $this->dispatch('admin-toast', message: 'ทำเครื่องหมายจัดส่งแล้ว');
-        $this->id = $order->number;
+        try {
+            $updated = $orders->markShipped($order, Auth::user(), $this->parcelNumber);
+            $this->dispatch('admin-toast', message: 'ทำเครื่องหมายจัดส่งแล้ว');
+            $this->id = $updated->number;
+            $this->parcelNumber = $updated->parcel_number ?? '';
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+        }
+    }
+
+    public function saveParcelNumber(OrderService $orders): void
+    {
+        $order = $this->selected();
+
+        if ($order === null) {
+            return;
+        }
+
+        try {
+            $updated = $orders->updateParcelNumber($order, Auth::user(), $this->parcelNumber);
+            $this->dispatch('admin-toast', message: 'บันทึกเลขพัสดุแล้ว');
+            $this->id = $updated->number;
+            $this->parcelNumber = $updated->parcel_number ?? '';
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+        }
     }
 
     public function render(OrderService $orders)
@@ -68,17 +106,26 @@ class extends Component
         $channel = FulfillmentMethod::tryFrom($this->channel) ?? FulfillmentMethod::Bookstore;
         $this->channel = $channel->value;
 
-        $statuses = $this->status === 'all'
-            ? [OrderStatus::Confirmed, OrderStatus::ReadyForPickup, OrderStatus::Shipped, OrderStatus::Completed]
-            : [OrderStatus::Confirmed];
-
-        $list = $orders->queue([
+        $filters = [
             'search' => $this->search !== '' ? $this->search : null,
             'status' => null,
-            'statuses' => $statuses,
             'fulfillment' => $channel,
-        ]);
+        ];
 
+        if ($this->status === 'all') {
+            $filters['statuses'] = [
+                OrderStatus::Confirmed,
+                OrderStatus::ReadyForPickup,
+                OrderStatus::Shipped,
+                OrderStatus::Completed,
+            ];
+        } elseif ($channel === FulfillmentMethod::Post) {
+            $filters['awaiting_parcel'] = true;
+        } else {
+            $filters['statuses'] = [OrderStatus::Confirmed];
+        }
+
+        $list = $orders->queue($filters);
         $selected = $this->selected();
 
         return $this->view([
@@ -87,6 +134,9 @@ class extends Component
             'selected' => $selected,
             'canReady' => $selected !== null && in_array(OrderStatus::ReadyForPickup, $orders->allowedTransitions($selected), true),
             'canShip' => $selected !== null && in_array(OrderStatus::Shipped, $orders->allowedTransitions($selected), true),
+            'canUpdateParcel' => $selected !== null
+                && $selected->fulfillment === FulfillmentMethod::Post
+                && $selected->status === OrderStatus::Shipped,
         ]);
     }
 
@@ -176,12 +226,25 @@ class extends Component
                         <p>{{ $selected->address }}</p>
                     @endif
                     <x-admin.status-pill :status="$selected->status" />
+                    @if ($selected->fulfillment === \App\Enums\FulfillmentMethod::Post && ($canShip || $canUpdateParcel))
+                        <input
+                            class="input"
+                            type="text"
+                            wire:model="parcelNumber"
+                            placeholder="เลขพัสดุ"
+                            aria-label="เลขพัสดุ"
+                        >
+                        @error('parcel_number') <span class="error">{{ $message }}</span> @enderror
+                    @endif
                     <div class="row">
                         @if ($canReady)
                             <button type="button" class="btn btn-primary" wire:click="markReady">พร้อมรับของ</button>
                         @endif
                         @if ($canShip)
                             <button type="button" class="btn btn-primary" wire:click="markShipped">จัดส่งแล้ว</button>
+                        @endif
+                        @if ($canUpdateParcel)
+                            <button type="button" class="btn btn-primary" wire:click="saveParcelNumber">บันทึกเลขพัสดุ</button>
                         @endif
                         <a class="btn btn-ghost" href="{{ route('admin.orders.show', $selected) }}">ดูออเดอร์</a>
                     </div>

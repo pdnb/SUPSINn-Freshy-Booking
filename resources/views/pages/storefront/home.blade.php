@@ -8,11 +8,14 @@ use Livewire\Component;
 
 new #[Title('จองชุดเฟรชชี่')] class extends Component
 {
+    public string $search = '';
+
     public function render(BookingRoundService $booking, CartService $cart, AdsBannerService $ads)
     {
         return $this->view([
             'isOpen' => $booking->openRounds()->isNotEmpty(),
             'products' => $booking->storefrontProducts(),
+            'searchResults' => $booking->searchStorefrontProducts($this->search),
             'cartCount' => $cart->count(),
             'banners' => $ads->activeForStorefront(),
         ]);
@@ -21,7 +24,13 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
 ?>
 
 <div class="min-h-dvh bg-bg pb-20 text-fg">
-    <x-storefront.header :cart-count="$cartCount" />
+    {{-- <x-storefront.header :cart-count="$cartCount" /> --}}
+    <x-storefront.header-v2
+        :cart-count="$cartCount"
+        :query="$search"
+        :results="$searchResults"
+        searchable
+    />
 
     <main id="content" class="mx-auto max-w-lg px-4 py-6">
         @if ($banners->isNotEmpty())
@@ -128,12 +137,12 @@ new #[Title('จองชุดเฟรชชี่')] class extends Component
             </section>
         @endif
 
-        <x-storefront.card as="section" padding="5">
+        {{-- <x-storefront.card as="section" padding="5">
             <h1 class="inline-block bg-linear-to-br from-brand to-highlight bg-clip-text text-xl font-semibold text-transparent">
                 ระบบจองชุดเฟรชชี่
             </h1>
             <p class="mt-2 text-sm text-highlight-fg">สำนักจัดการทรัพย์สิน มหาวิทยาลัยราชภัฏสุราษฎร์ธานี</p>
-        </x-storefront.card>
+        </x-storefront.card> --}}
 
         @if (! $isOpen)
             <x-storefront.card as="section" padding="5" class="mt-6" role="status">

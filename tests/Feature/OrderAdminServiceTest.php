@@ -141,6 +141,94 @@ test('confirmed postal orders move to shipped not ready for pickup', function ()
     expect($order->fresh()->status)->toBe(OrderStatus::Shipped);
 });
 
+test('staff can mark postal orders shipped with or without a parcel number', function () {
+    $staff = User::factory()->create();
+    $withNumber = Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Post,
+        'address' => '123 ถนนทดสอบ',
+        'number' => 'FRPARCEL1',
+    ]);
+    $withoutNumber = Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Post,
+        'address' => '456 ถนนทดสอบ',
+        'number' => 'FRPARCEL2',
+    ]);
+
+    $shippedWith = adminOrders()->markShipped($withNumber, $staff, '  EMS123456TH  ');
+    $shippedWithout = adminOrders()->markShipped($withoutNumber, $staff, '   ');
+
+    expect($shippedWith->status)->toBe(OrderStatus::Shipped)
+        ->and($shippedWith->parcel_number)->toBe('EMS123456TH')
+        ->and($shippedWithout->status)->toBe(OrderStatus::Shipped)
+        ->and($shippedWithout->parcel_number)->toBeNull();
+});
+
+test('staff cannot save a parcel number on a bookstore order', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Bookstore,
+    ]);
+
+    expect(fn () => adminOrders()->markShipped($order, $staff, 'EMS123'))
+        ->toThrow(ValidationException::class);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Confirmed)
+        ->and($order->fresh()->parcel_number)->toBeNull();
+});
+
+test('staff can update or clear a parcel number after shipping', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Post,
+        'address' => '123 ถนนทดสอบ',
+        'number' => 'FRPARCEL3',
+    ]);
+
+    $shipped = adminOrders()->markShipped($order, $staff, 'EMS111');
+    $updated = adminOrders()->updateParcelNumber($shipped, $staff, 'EMS222');
+
+    expect($updated->parcel_number)->toBe('EMS222');
+
+    $cleared = adminOrders()->updateParcelNumber($updated, $staff, '');
+
+    expect($cleared->status)->toBe(OrderStatus::Shipped)
+        ->and($cleared->parcel_number)->toBeNull();
+});
+
+test('the post awaiting parcel queue lists confirmed and shipped without a number', function () {
+    Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Post,
+        'number' => 'FRWAIT001',
+    ]);
+    Order::factory()->create([
+        'status' => OrderStatus::Shipped,
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => null,
+        'number' => 'FRWAIT002',
+    ]);
+    Order::factory()->create([
+        'status' => OrderStatus::Shipped,
+        'fulfillment' => FulfillmentMethod::Post,
+        'parcel_number' => 'EMS999',
+        'number' => 'FRDONE001',
+    ]);
+    Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Bookstore,
+        'number' => 'FRBOOK001',
+    ]);
+
+    expect(adminOrders()->queue([
+        'fulfillment' => FulfillmentMethod::Post,
+        'awaiting_parcel' => true,
+    ])->pluck('number')->all())->toEqualCanonicalizing(['FRWAIT001', 'FRWAIT002']);
+});
+
 test('marking pickup issues a receipt and completes the order', function () {
     $staff = User::factory()->create();
     $order = Order::factory()->create(['status' => OrderStatus::ReadyForPickup]);
