@@ -17,7 +17,7 @@ class extends Component
 {
     use WithPagination, WithoutUrlPagination;
 
-    private const PRODUCT_PAGE_SIZE = 9;
+    private const PRODUCT_PAGE_SIZE = 12;
 
     public ?int $roundId = null;
 
