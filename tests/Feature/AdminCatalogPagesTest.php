@@ -34,7 +34,9 @@ test('staff can open catalog rounds production and settings pages', function () 
     $this->actingAs($staff)
         ->get(route('admin.rounds'))
         ->assertOk()
-        ->assertSee('รอบจอง', false);
+        ->assertSee('รอบจอง', false)
+        ->assertSee(route('admin.rounds.create'), false)
+        ->assertDontSee('สินค้าในรอบ', false);
 
     $production = $this->actingAs($staff)
         ->get(route('admin.production'))
@@ -341,18 +343,62 @@ test('product editor image actions stay scoped to the current product', function
         ->toThrow(ModelNotFoundException::class);
 });
 
-test('staff can create a booking round', function () {
+test('staff can open booking round create and edit pages', function () {
     $staff = User::factory()->create();
+    Product::factory()->create(['name' => 'เสื้อในแคตตาล็อก']);
+    $round = BookingRound::factory()->create([
+        'name' => 'รอบเดิม',
+        'starts_at' => now()->subDay(),
+        'ends_at' => now()->addWeek(),
+        'is_enabled' => true,
+    ]);
+
+    $this->actingAs($staff)
+        ->get(route('admin.rounds.create'))
+        ->assertOk()
+        ->assertSee('สร้างรอบ', false)
+        ->assertSee('class="grid-2-1"', false)
+        ->assertSeeInOrder(['สินค้าในรอบ', 'รายละเอียดรอบ'], false)
+        ->assertSee('ค้นหาสินค้า', false)
+        ->assertSee('class="product-picker-grid"', false)
+        ->assertSee('class="product-picker-card', false)
+        ->assertSee('class="nav-link is-active"', false);
+
+    $this->actingAs($staff)
+        ->get(route('admin.rounds.edit', $round))
+        ->assertOk()
+        ->assertSee('แก้ไข', false)
+        ->assertSee('รอบเดิม', false)
+        ->assertSee('class="nav-link is-active"', false);
 
     Livewire::actingAs($staff)
-        ->test('pages::admin.rounds')
-        ->call('create')
+        ->test('pages::admin.round-edit')
+        ->assertSee('เปิดใช้', false)
+        ->set('is_enabled', false)
+        ->assertSee('ปิดใช้', false);
+});
+
+test('staff can create a booking round', function () {
+    $staff = User::factory()->create();
+    $product = Product::factory()->create(['name' => 'เสื้อทดสอบ']);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.round-edit')
         ->set('name', 'รอบเปิดจองทดสอบ')
         ->set('starts_at', now()->subHour()->format('Y-m-d\TH:i'))
         ->set('ends_at', now()->addWeek()->format('Y-m-d\TH:i'))
         ->set('is_enabled', true)
+        ->call('toggleProduct', $product->id)
+        ->assertSet('product_ids', [$product->id])
         ->call('save')
-        ->assertSee('รอบเปิดจองทดสอบ', false);
+        ->assertRedirect(route('admin.rounds'));
+
+    expect(session('status'))->toBe('บันทึกรอบจองแล้ว');
+
+    $round = BookingRound::query()->where('name', 'รอบเปิดจองทดสอบ')->first();
+
+    expect($round)->not->toBeNull()
+        ->and($round->products->pluck('id')->all())->toBe([$product->id]);
 });
 
 test('staff can edit a booking round from the list', function () {
@@ -366,19 +412,117 @@ test('staff can edit a booking round from the list', function () {
 
     Livewire::actingAs($staff)
         ->test('pages::admin.rounds')
-        ->assertSee('แก้ไข', false)
+        ->assertSee($round->name, false)
         ->assertSee($round->starts_at->toThaiDatetime(), false)
         ->assertSee($round->ends_at->toThaiDatetime(), false)
-        ->call('edit', $round->id)
-        ->assertSet('editingId', $round->id)
+        ->assertSee(route('admin.rounds.edit', $round), false)
+        ->assertDontSee('สินค้าในรอบ', false);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.round-edit', ['round' => $round])
+        ->assertSet('roundId', $round->id)
         ->assertSet('name', 'รอบเดิม')
-        ->assertSee('แก้ไขรอบ', false)
+        ->assertSee('แก้ไข', false)
         ->set('name', 'รอบใหม่')
         ->call('save')
-        ->assertSet('editingId', null)
-        ->assertSee('รอบใหม่', false);
+        ->assertRedirect(route('admin.rounds'));
 
-    expect($round->fresh()->name)->toBe('รอบใหม่');
+    expect(session('status'))->toBe('บันทึกรอบจองแล้ว')
+        ->and($round->fresh()->name)->toBe('รอบใหม่');
+});
+
+test('booking round editor keeps validation errors on the page', function () {
+    $staff = User::factory()->create();
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.round-edit')
+        ->set('name', '')
+        ->set('starts_at', now()->format('Y-m-d\TH:i'))
+        ->set('ends_at', now()->addDay()->format('Y-m-d\TH:i'))
+        ->call('save')
+        ->assertHasErrors(['name'])
+        ->assertNoRedirect();
+});
+
+test('booking round editor filters and toggles catalog products', function () {
+    $staff = User::factory()->create();
+    $shirt = Product::factory()->create(['name' => 'เสื้อเชิ้ต']);
+    $pants = Product::factory()->create(['name' => 'กางเกงขายาว']);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.round-edit')
+        ->assertSee($shirt->name, false)
+        ->assertSee($pants->name, false)
+        ->set('productSearch', 'เสื้อ')
+        ->assertSee($shirt->name, false)
+        ->assertDontSee($pants->name)
+        ->call('toggleProduct', $shirt->id)
+        ->assertSet('product_ids', [$shirt->id])
+        ->assertSee($shirt->name, false)
+        ->assertSee('เลือกแล้ว', false)
+        ->call('toggleProduct', $shirt->id)
+        ->assertSet('product_ids', [])
+        ->set('productSearch', '')
+        ->assertSee($pants->name, false);
+});
+
+test('booking round editor paginates catalog product cards', function () {
+    $staff = User::factory()->create();
+
+    foreach (range(1, 10) as $index) {
+        Product::factory()->create(['name' => sprintf('สินค้า %02d', $index)]);
+    }
+
+    $first = Product::query()->where('name', 'สินค้า 01')->firstOrFail();
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.round-edit')
+        ->assertSee('สินค้า 01', false)
+        ->assertDontSee('สินค้า 10')
+        ->assertSee('หน้า 1 / 2', false)
+        ->call('toggleProduct', $first->id)
+        ->assertSet('product_ids', [$first->id])
+        ->call('nextPage')
+        ->assertSee('สินค้า 10', false)
+        ->assertDontSee('สินค้า 01')
+        ->assertSet('product_ids', [$first->id])
+        ->assertSee('1 รายการ', false)
+        ->set('productSearch', 'สินค้า 10')
+        ->assertSee('สินค้า 10', false)
+        ->assertDontSee('สินค้า 01')
+        ->assertDontSee('หน้า 1 / 2');
+});
+
+test('booking round editor can select all matching catalog products', function () {
+    $staff = User::factory()->create();
+    $shirt = Product::factory()->create(['name' => 'เสื้อเชิ้ต']);
+    $polo = Product::factory()->create(['name' => 'เสื้อโปโล']);
+    $pants = Product::factory()->create(['name' => 'กางเกงขายาว']);
+
+    foreach (range(1, 10) as $index) {
+        Product::factory()->create(['name' => sprintf('สินค้า %02d', $index)]);
+    }
+
+    $component = Livewire::actingAs($staff)
+        ->test('pages::admin.round-edit')
+        ->assertSee('เลือกทั้งหมด', false)
+        ->call('toggleProduct', $pants->id)
+        ->set('productSearch', 'เสื้อ')
+        ->call('selectAllProducts');
+
+    expect($component->get('product_ids'))->toEqualCanonicalizing([
+        $pants->id,
+        $shirt->id,
+        $polo->id,
+    ]);
+
+    $component
+        ->set('productSearch', '')
+        ->call('selectAllProducts')
+        ->assertSee('13 รายการ', false);
+
+    expect($component->get('product_ids'))->toHaveCount(13)
+        ->toEqualCanonicalizing(Product::query()->pluck('id')->map(intval(...))->all());
 });
 
 test('staff can create a shipping rate from settings', function () {

@@ -58,7 +58,9 @@ test('admin list filters products by name type and active status', function () {
         ->and(catalogService()->adminList(['type' => ProductType::Bundle->value])->pluck('name')->all())
         ->toBe(['คอมโบเซ็ต ปี 70'])
         ->and(catalogService()->adminList(['is_active' => false])->pluck('name')->all())
-        ->toBe(['เข็มที่ระลึก']);
+        ->toBe(['เข็มที่ระลึก'])
+        ->and(catalogService()->adminPaginate(['search' => 'เสื้อ'], 1)->pluck('name')->all())
+        ->toBe(['เสื้อ ปี 70']);
 });
 
 test('admin list can filter by booking round', function () {

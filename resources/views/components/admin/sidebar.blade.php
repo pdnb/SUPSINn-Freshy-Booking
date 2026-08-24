@@ -8,7 +8,7 @@
         ['id' => 'production', 'route' => 'admin.production', 'match' => 'admin.production', 'label' => 'สรุปยอด', 'icon' => 'chart-bar'],
         ['id' => 'inventory', 'route' => 'admin.inventory', 'match' => 'admin.inventory', 'label' => 'สต็อก', 'icon' => 'cube'],
         ['id' => 'products', 'route' => 'admin.products', 'match' => 'admin.products*', 'label' => 'สินค้า', 'icon' => 'shopping-bag'],
-        ['id' => 'rounds', 'route' => 'admin.rounds', 'match' => 'admin.rounds', 'label' => 'รอบจอง', 'icon' => 'calendar-days'],
+        ['id' => 'rounds', 'route' => 'admin.rounds', 'match' => 'admin.rounds*', 'label' => 'รอบจอง', 'icon' => 'calendar-days'],
         ['id' => 'settings', 'route' => 'admin.settings', 'match' => 'admin.settings', 'label' => 'ตั้งค่า', 'icon' => 'cog-6-tooth'],
     ];
 @endphp

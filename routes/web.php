@@ -47,6 +47,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::livewire('/products/create', 'pages::admin.product-edit')->name('products.create');
     Route::livewire('/products/{product}/edit', 'pages::admin.product-edit')->name('products.edit');
     Route::livewire('/rounds', 'pages::admin.rounds')->name('rounds');
+    Route::livewire('/rounds/create', 'pages::admin.round-edit')->name('rounds.create');
+    Route::livewire('/rounds/{round}/edit', 'pages::admin.round-edit')->name('rounds.edit');
     Route::get('/production/export/{format}', ProductionExportController::class)->name('production.export');
     Route::livewire('/production', 'pages::admin.production')->name('production');
     Route::livewire('/inventory', 'pages::admin.inventory')->name('inventory');

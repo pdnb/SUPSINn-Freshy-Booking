@@ -7,6 +7,8 @@ use App\Models\BookingRound;
 use App\Models\Product;
 use App\Models\ProductComponent;
 use App\Models\ProductOptionGroup;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -35,6 +37,24 @@ class CatalogService
      */
     public function adminList(array $filters = []): Collection
     {
+        return $this->adminFilteredQuery($filters)->get();
+    }
+
+    /**
+     * @param  array{search?: string|null, type?: string|null, is_active?: bool|null, booking_round_id?: int|null}  $filters
+     * @return LengthAwarePaginator<int, Product>
+     */
+    public function adminPaginate(array $filters = [], int $perPage = 9): LengthAwarePaginator
+    {
+        return $this->adminFilteredQuery($filters)->paginate($perPage);
+    }
+
+    /**
+     * @param  array{search?: string|null, type?: string|null, is_active?: bool|null, booking_round_id?: int|null}  $filters
+     * @return Builder<Product>
+     */
+    private function adminFilteredQuery(array $filters = []): Builder
+    {
         $search = trim((string) ($filters['search'] ?? ''));
         $type = $filters['type'] ?? null;
         $isActive = $filters['is_active'] ?? null;
@@ -49,8 +69,7 @@ class CatalogService
                 'bookingRounds',
                 fn ($query) => $query->where((new BookingRound)->getTable().'.id', $roundId),
             ))
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
     }
 
     /**
