@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\Product;
+use App\Models\ProductOptionGroup;
 use App\Services\Booking\BookingRoundService;
 use App\Services\Cart\CartService;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -29,11 +31,45 @@ new #[Title('รายละเอียดสินค้า')] class extends C
     public function selectOption(string $key, string $value): void
     {
         $this->options[$key] = $value;
+        $this->clearInvalidDependentOptions($this->product->optionGroups, $this->options);
     }
 
     public function selectComponentOption(int $componentId, string $key, string $value): void
     {
         $this->componentOptions[$componentId][$key] = $value;
+        $component = $this->product->components->firstWhere('id', $componentId);
+
+        if ($component === null) {
+            return;
+        }
+
+        $selected = $this->componentOptions[$componentId] ?? [];
+        $this->clearInvalidDependentOptions($component->optionGroups, $selected);
+        $this->componentOptions[$componentId] = $selected;
+    }
+
+    /**
+     * @param  Collection<int, ProductOptionGroup>  $groups
+     * @param  array<string, string>  $selected
+     */
+    private function clearInvalidDependentOptions(Collection $groups, array &$selected): void
+    {
+        foreach ($groups as $group) {
+            if (! $group->hasParent()) {
+                continue;
+            }
+
+            $current = $selected[$group->key] ?? null;
+            $parentValue = $selected[$group->depends_on_key] ?? null;
+
+            if (! is_string($current) || $current === '') {
+                continue;
+            }
+
+            if (! $group->allowsValueForParent($current, is_string($parentValue) ? $parentValue : null)) {
+                unset($selected[$group->key]);
+            }
+        }
     }
 
     public function addToCart(CartService $cart): void
@@ -157,11 +193,17 @@ new #[Title('รายละเอียดสินค้า')] class extends C
 
         @if ($product->type === \App\Enums\ProductType::Simple)
             @foreach ($product->optionGroups as $group)
+                @php
+                    $parentValue = $group->hasParent()
+                        ? ($options[$group->depends_on_key] ?? null)
+                        : null;
+                    $visibleValues = $group->valuesAllowedFor(is_string($parentValue) ? $parentValue : null);
+                @endphp
                 <section class="border-b border-border bg-surface px-4 py-5" wire:key="group-{{ $group->id }}">
                     <h3 class="font-semibold">{{ $group->label }}</h3>
                     <p class="mt-1 text-xs text-muted">จำเป็น</p>
                     <div class="mt-3 flex flex-wrap gap-2" role="group" aria-label="{{ $group->label }}">
-                        @foreach ($group->values as $value)
+                        @forelse ($visibleValues as $value)
                             <x-storefront.chip
                                 wire:key="option-{{ $group->id }}-{{ $value->id }}"
                                 wire:click="selectOption('{{ $group->key }}', '{{ $value->value }}')"
@@ -170,7 +212,11 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                             >
                                 {{ $value->value }}
                             </x-storefront.chip>
-                        @endforeach
+                        @empty
+                            <p class="text-sm text-muted">
+                                {{ $group->hasParent() ? 'เลือกตัวเลือกก่อนหน้าก่อน' : 'ไม่มีตัวเลือก' }}
+                            </p>
+                        @endforelse
                     </div>
                 </section>
             @endforeach
@@ -182,10 +228,16 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                         <span class="text-xs text-muted">จำเป็น</span>
                     </div>
                     @foreach ($bundleComponent->optionGroups as $group)
+                        @php
+                            $parentValue = $group->hasParent()
+                                ? ($componentOptions[$bundleComponent->id][$group->depends_on_key] ?? null)
+                                : null;
+                            $visibleValues = $group->valuesAllowedFor(is_string($parentValue) ? $parentValue : null);
+                        @endphp
                         <div class="mt-4" wire:key="component-group-{{ $group->id }}">
                             <p class="text-sm font-medium" id="label-{{ $group->id }}">{{ $group->label }}</p>
                             <div class="mt-2 flex flex-wrap gap-2" role="group" aria-labelledby="label-{{ $group->id }}">
-                                @foreach ($group->values as $value)
+                                @forelse ($visibleValues as $value)
                                     <x-storefront.chip
                                         wire:key="component-option-{{ $group->id }}-{{ $value->id }}"
                                         wire:click="selectComponentOption({{ $bundleComponent->id }}, '{{ $group->key }}', '{{ $value->value }}')"
@@ -194,7 +246,11 @@ new #[Title('รายละเอียดสินค้า')] class extends C
                                     >
                                         {{ $value->value }}
                                     </x-storefront.chip>
-                                @endforeach
+                                @empty
+                                    <p class="text-sm text-muted">
+                                        {{ $group->hasParent() ? 'เลือกตัวเลือกก่อนหน้าก่อน' : 'ไม่มีตัวเลือก' }}
+                                    </p>
+                                @endforelse
                             </div>
                         </div>
                     @endforeach
