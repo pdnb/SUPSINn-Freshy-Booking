@@ -10,6 +10,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Auth/**, app/Http/Controllers/Auth/**, app/Http/Middleware/EnsureAdminAccess.php, app/Services/Auth/**, app/Models/User.php, resources/views/pages/admin/login.blade.php, resources/views/pages/admin/pending-access.blade.php, resources/views/pages/admin/users.blade.php, routes/web.php, bootstrap/app.php, config/services.php | .ai/rules/admin-auth0.md |
 | resources/views/pages/admin/rounds.blade.php, resources/views/pages/admin/round-edit.blade.php, resources/views/components/admin/product-picker.blade.php | .ai/rules/admin-rounds.md |
 | app/Services/Catalog/** | .ai/rules/catalog.md |
+| app/Services/Catalog/**, app/Services/Cart/**, app/Models/ProductOptionGroup.php, resources/views/pages/admin/product-edit/**, resources/views/components/admin/option-group-dependency.blade.php, resources/views/pages/storefront/product-show.blade.php | .ai/rules/conditional-options.md |
 | app/Services/Checkout/**, resources/views/pages/storefront/checkout.blade.php | .ai/rules/checkout-shipping.md |
 | app/Services/Checkout/**, app/Services/Order/**, resources/views/pages/storefront/checkout.blade.php, resources/views/pages/storefront/payment.blade.php | .ai/rules/deposit-payment.md |
 | app/Services/Order/**, app/Models/Order.php, resources/views/pages/admin/fulfillment.blade.php, resources/views/pages/admin/order-detail.blade.php, resources/views/pages/storefront/order-confirmation.blade.php | .ai/rules/parcel-number.md |

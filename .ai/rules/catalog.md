@@ -12,4 +12,4 @@ paths:
 `cloneIntoRound` creates new products (inactive, name suffixed ` (สำเนา)`) and `syncWithoutDetaching` them onto the destination round. Source products and their round attachments stay unchanged. Product-to-round attachment for existing products still happens on the booking-round form.
 
 ## Do not change variant or stock rules
-Keep option groups / components / `choices[]` as they are. No SKU, per-option price, or sellable stock on the catalog. On-hand inventory for ops lives in `InventoryService` and must not be read or written from checkout.
+No SKU, per-option price, or sellable stock on the catalog. On-hand inventory for ops lives in `InventoryService` and must not be read or written from checkout. One-level option-group dependencies (`depends_on_key` / `depends_on_values`) are allowed — see `.ai/rules/conditional-options.md`. Keep `choices[]` as flat label/value snapshots.

@@ -652,6 +652,39 @@ h3 { font-size: var(--fs-h3); line-height: 1.35; }
   height: 44px;
   place-self: end center;
 }
+.option-group-block {
+  display: grid;
+  gap: var(--gap-sm);
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.option-group-dependency { margin-top: 4px; }
+.dependency-allow-row {
+  display: grid;
+  gap: 6px;
+}
+.dependency-parent-value {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.dependency-value-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dependency-chip {
+  cursor: pointer;
+  background: var(--bg);
+  padding: 4px 10px;
+}
+.dependency-chip.is-selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--fg);
+}
 .field-row.tier-row {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
   align-items: end;

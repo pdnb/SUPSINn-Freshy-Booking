@@ -73,25 +73,37 @@
                                 <h3>ตัวเลือก</h3>
                                 <button type="button" class="btn btn-ghost btn-sm" wire:click="addOptionGroup">เพิ่มกลุ่ม</button>
                             </div>
-                            @foreach ($optionGroups as $index => $group)
-                                <div class="field-row option-group-row" wire:key="og-{{ $index }}">
-                                    <div class="field">
-                                        <label>Label</label>
-                                        <input class="input" type="text" wire:model="optionGroups.{{ $index }}.label">
+                            @foreach ($optionGroups as $index => $optionGroupRow)
+                                <div class="option-group-block" wire:key="og-{{ $index }}">
+                                    <div class="field-row option-group-row">
+                                        <div class="field">
+                                            <label>Label</label>
+                                            <input class="input" type="text" wire:model="optionGroups.{{ $index }}.label">
+                                        </div>
+                                        <div class="field">
+                                            <label>Values</label>
+                                            <x-admin.tag-input
+                                                :tags="$optionGroupRow['values']"
+                                                add-method="pushOptionGroupValues"
+                                                :add-args="[$index]"
+                                                remove-method="removeOptionGroupValue"
+                                                :remove-args="[$index]"
+                                            />
+                                        </div>
+                                        <button type="button" class="icon-btn" wire:click="askRemoveOptionGroup({{ $index }})" aria-label="ลบกลุ่ม">
+                                            <x-icon name="trash" size="sm" />
+                                        </button>
                                     </div>
-                                    <div class="field">
-                                        <label>Values</label>
-                                        <x-admin.tag-input
-                                            :tags="$group['values']"
-                                            add-method="pushOptionGroupValues"
-                                            :add-args="[$index]"
-                                            remove-method="removeOptionGroupValue"
-                                            :remove-args="[$index]"
+                                    @if ($index > 0)
+                                        <x-admin.option-group-dependency
+                                            :option-group="$optionGroups[$index]"
+                                            :earlier-groups="array_slice($optionGroups, 0, $index)"
+                                            set-parent-method="setOptionGroupParent"
+                                            :set-parent-args="[$index]"
+                                            toggle-method="toggleOptionGroupAllowedValue"
+                                            :toggle-args="[$index]"
                                         />
-                                    </div>
-                                    <button type="button" class="icon-btn" wire:click="askRemoveOptionGroup({{ $index }})" aria-label="ลบกลุ่ม">
-                                        <x-icon name="trash" size="sm" />
-                                    </button>
+                                    @endif
                                 </div>
                             @endforeach
                             @error('option_groups') <span class="error">{{ $message }}</span> @enderror
@@ -113,25 +125,37 @@
                                         <span class="field-caption">ตัวเลือก</span>
                                         <button type="button" class="btn btn-ghost btn-sm" wire:click="addComponentOptionGroup({{ $index }})">เพิ่มตัวเลือก</button>
                                     </div>
-                                    @foreach ($component['option_groups'] as $groupIndex => $group)
-                                        <div class="field-row option-group-row" wire:key="comp-{{ $index }}-og-{{ $groupIndex }}">
-                                            <div class="field">
-                                                <label>Label</label>
-                                                <input class="input" type="text" wire:model="components.{{ $index }}.option_groups.{{ $groupIndex }}.label">
+                                    @foreach ($component['option_groups'] as $groupIndex => $optionGroupRow)
+                                        <div class="option-group-block" wire:key="comp-{{ $index }}-og-{{ $groupIndex }}">
+                                            <div class="field-row option-group-row">
+                                                <div class="field">
+                                                    <label>Label</label>
+                                                    <input class="input" type="text" wire:model="components.{{ $index }}.option_groups.{{ $groupIndex }}.label">
+                                                </div>
+                                                <div class="field">
+                                                    <label>Values</label>
+                                                    <x-admin.tag-input
+                                                        :tags="$optionGroupRow['values']"
+                                                        add-method="pushComponentOptionGroupValues"
+                                                        :add-args="[$index, $groupIndex]"
+                                                        remove-method="removeComponentOptionGroupValue"
+                                                        :remove-args="[$index, $groupIndex]"
+                                                    />
+                                                </div>
+                                                <button type="button" class="icon-btn" wire:click="askRemoveComponentOptionGroup({{ $index }}, {{ $groupIndex }})" aria-label="ลบกลุ่ม">
+                                                    <x-icon name="trash" size="sm" />
+                                                </button>
                                             </div>
-                                            <div class="field">
-                                                <label>Values</label>
-                                                <x-admin.tag-input
-                                                    :tags="$group['values']"
-                                                    add-method="pushComponentOptionGroupValues"
-                                                    :add-args="[$index, $groupIndex]"
-                                                    remove-method="removeComponentOptionGroupValue"
-                                                    :remove-args="[$index, $groupIndex]"
+                                            @if ($groupIndex > 0)
+                                                <x-admin.option-group-dependency
+                                                    :option-group="$components[$index]['option_groups'][$groupIndex]"
+                                                    :earlier-groups="array_slice($components[$index]['option_groups'], 0, $groupIndex)"
+                                                    set-parent-method="setComponentOptionGroupParent"
+                                                    :set-parent-args="[$index, $groupIndex]"
+                                                    toggle-method="toggleComponentOptionGroupAllowedValue"
+                                                    :toggle-args="[$index, $groupIndex]"
                                                 />
-                                            </div>
-                                            <button type="button" class="icon-btn" wire:click="askRemoveComponentOptionGroup({{ $index }}, {{ $groupIndex }})" aria-label="ลบกลุ่ม">
-                                                <x-icon name="trash" size="sm" />
-                                            </button>
+                                            @endif
                                         </div>
                                     @endforeach
                                     <button type="button" class="btn btn-ghost btn-sm" wire:click="askRemoveComponent({{ $index }})">ลบสินค้า</button>

@@ -3,6 +3,7 @@
 use App\Enums\ProductType;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\ProductOptionGroup;
 use App\Services\Catalog\CatalogService;
 use App\Services\Catalog\ProductImageService;
 use Illuminate\Support\Str;
@@ -32,12 +33,12 @@ class extends Component
     public bool $is_active = false;
 
     /**
-     * @var list<array{key: string, label: string, values: list<string>}>
+     * @var list<array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}>
      */
     public array $optionGroups = [];
 
     /**
-     * @var list<array{name: string, option_groups: list<array{key: string, label: string, values: list<string>}>}>
+     * @var list<array{name: string, option_groups: list<array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}>}>
      */
     public array $components = [];
 
@@ -63,7 +64,7 @@ class extends Component
     public function mount(?Product $product = null): void
     {
         if ($product === null || ! $product->exists) {
-            $this->optionGroups = [['key' => 'size', 'label' => 'ไซส์', 'values' => ['S', 'M', 'L']]];
+            $this->optionGroups = [$this->blankOptionGroup('size', 'ไซส์', ['S', 'M', 'L'])];
 
             return;
         }
@@ -75,24 +76,16 @@ class extends Component
         $this->type = $product->type->value;
         $this->price = (string) $product->price;
         $this->is_active = $product->is_active;
-        $this->optionGroups = $product->optionGroups->map(fn ($group) => [
-            'key' => $group->key,
-            'label' => $group->label,
-            'values' => $group->values->pluck('value')->all(),
-        ])->all();
+        $this->optionGroups = $product->optionGroups->map(fn ($group) => $this->groupFromModel($group))->all();
         $this->components = $product->components->map(fn ($component) => [
             'name' => $component->name,
-            'option_groups' => $component->optionGroups->map(fn ($group) => [
-                'key' => $group->key,
-                'label' => $group->label,
-                'values' => $group->values->pluck('value')->all(),
-            ])->all(),
+            'option_groups' => $component->optionGroups->map(fn ($group) => $this->groupFromModel($group))->all(),
         ])->all();
     }
 
     public function addOptionGroup(): void
     {
-        $this->optionGroups[] = ['key' => '', 'label' => '', 'values' => []];
+        $this->optionGroups[] = $this->blankOptionGroup();
     }
 
     public function askRemoveOptionGroup(int $index): void
@@ -115,8 +108,14 @@ class extends Component
 
     public function removeOptionGroup(int $index): void
     {
+        if (! isset($this->optionGroups[$index])) {
+            return;
+        }
+
+        $removedKey = (string) ($this->optionGroups[$index]['key'] ?? '');
         unset($this->optionGroups[$index]);
         $this->optionGroups = array_values($this->optionGroups);
+        $this->clearDependenciesOnKey($this->optionGroups, $removedKey);
     }
 
     public function pushOptionGroupValues(int $groupIndex, string $raw): void
@@ -137,15 +136,35 @@ class extends Component
             return;
         }
 
+        $removed = (string) $this->optionGroups[$groupIndex]['values'][$valueIndex];
         unset($this->optionGroups[$groupIndex]['values'][$valueIndex]);
         $this->optionGroups[$groupIndex]['values'] = array_values($this->optionGroups[$groupIndex]['values']);
+        $this->pruneValueFromDependencies($this->optionGroups, $groupIndex, $removed);
+    }
+
+    public function setOptionGroupParent(int $groupIndex, string $parentKey): void
+    {
+        if (! isset($this->optionGroups[$groupIndex])) {
+            return;
+        }
+
+        $this->applyParent($this->optionGroups[$groupIndex], $parentKey);
+    }
+
+    public function toggleOptionGroupAllowedValue(int $groupIndex, string $parentValue, string $childValue): void
+    {
+        if (! isset($this->optionGroups[$groupIndex])) {
+            return;
+        }
+
+        $this->toggleAllowed($this->optionGroups[$groupIndex], $parentValue, $childValue);
     }
 
     public function addComponent(): void
     {
         $this->components[] = [
             'name' => '',
-            'option_groups' => [['key' => 'size', 'label' => 'ไซส์', 'values' => ['S', 'M', 'L']]],
+            'option_groups' => [$this->blankOptionGroup('size', 'ไซส์', ['S', 'M', 'L'])],
         ];
     }
 
@@ -179,7 +198,7 @@ class extends Component
             return;
         }
 
-        $this->components[$componentIndex]['option_groups'][] = ['key' => '', 'label' => '', 'values' => []];
+        $this->components[$componentIndex]['option_groups'][] = $this->blankOptionGroup();
     }
 
     public function askRemoveComponentOptionGroup(int $componentIndex, int $groupIndex): void
@@ -206,9 +225,37 @@ class extends Component
             return;
         }
 
+        $removedKey = (string) ($this->components[$componentIndex]['option_groups'][$groupIndex]['key'] ?? '');
         unset($this->components[$componentIndex]['option_groups'][$groupIndex]);
         $this->components[$componentIndex]['option_groups'] = array_values(
             $this->components[$componentIndex]['option_groups'],
+        );
+        $this->clearDependenciesOnKey($this->components[$componentIndex]['option_groups'], $removedKey);
+    }
+
+    public function setComponentOptionGroupParent(int $componentIndex, int $groupIndex, string $parentKey): void
+    {
+        if (! isset($this->components[$componentIndex]['option_groups'][$groupIndex])) {
+            return;
+        }
+
+        $this->applyParent($this->components[$componentIndex]['option_groups'][$groupIndex], $parentKey);
+    }
+
+    public function toggleComponentOptionGroupAllowedValue(
+        int $componentIndex,
+        int $groupIndex,
+        string $parentValue,
+        string $childValue,
+    ): void {
+        if (! isset($this->components[$componentIndex]['option_groups'][$groupIndex])) {
+            return;
+        }
+
+        $this->toggleAllowed(
+            $this->components[$componentIndex]['option_groups'][$groupIndex],
+            $parentValue,
+            $childValue,
         );
     }
 
@@ -322,9 +369,15 @@ class extends Component
             return;
         }
 
+        $removed = (string) $this->components[$componentIndex]['option_groups'][$groupIndex]['values'][$valueIndex];
         unset($this->components[$componentIndex]['option_groups'][$groupIndex]['values'][$valueIndex]);
         $this->components[$componentIndex]['option_groups'][$groupIndex]['values'] = array_values(
             $this->components[$componentIndex]['option_groups'][$groupIndex]['values'],
+        );
+        $this->pruneValueFromDependencies(
+            $this->components[$componentIndex]['option_groups'],
+            $groupIndex,
+            $removed,
         );
     }
 
@@ -396,32 +449,94 @@ class extends Component
     }
 
     /**
-     * @param  list<array{key: string, label: string, values: list<string>|string}>  $groups
-     * @return list<array{key: string, label: string, values: list<string>}>
+     * @param  list<array{key: string, label: string, values: list<string>|string, depends_on_key?: string|null, depends_on_values?: array<string, list<string>>|null}>  $groups
+     * @return list<array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}>
      */
     private function normalizedGroups(array $groups): array
     {
         $usedKeys = [];
+        $keyMap = [];
 
-        return collect($groups)
-            ->map(fn (array $group): array => [
-                'key' => (string) ($group['key'] ?? ''),
-                'label' => trim((string) ($group['label'] ?? '')),
-                'values' => $this->normalizeTagList($group['values'] ?? []),
-            ])
-            ->filter(fn (array $group): bool => $group['label'] !== '' && $group['values'] !== [])
-            ->values()
-            ->map(function (array $group, int $index) use (&$usedKeys): array {
-                $group['key'] = $this->uniqueOptionGroupKey(
-                    $group['key'],
-                    $group['label'],
-                    $index,
+        $normalized = collect($groups)
+            ->map(function (array $group) use (&$usedKeys, &$keyMap): array {
+                $oldKey = (string) ($group['key'] ?? '');
+                $label = trim((string) ($group['label'] ?? ''));
+                $values = $this->normalizeTagList($group['values'] ?? []);
+                $newKey = $this->uniqueOptionGroupKey(
+                    $oldKey,
+                    $label,
+                    count($usedKeys),
                     $usedKeys,
                 );
 
-                return $group;
+                if ($oldKey !== '') {
+                    $keyMap[$oldKey] = $newKey;
+                }
+
+                return [
+                    'key' => $newKey,
+                    'label' => $label,
+                    'values' => $values,
+                    'depends_on_key' => $group['depends_on_key'] ?? null,
+                    'depends_on_values' => is_array($group['depends_on_values'] ?? null)
+                        ? $group['depends_on_values']
+                        : null,
+                ];
             })
+            ->filter(fn (array $group): bool => $group['label'] !== '' && $group['values'] !== [])
+            ->values()
             ->all();
+
+        foreach ($normalized as $index => $group) {
+            $dependsOnKey = $group['depends_on_key'] ?? null;
+
+            if (! is_string($dependsOnKey) || $dependsOnKey === '') {
+                $normalized[$index]['depends_on_key'] = null;
+                $normalized[$index]['depends_on_values'] = null;
+
+                continue;
+            }
+
+            $mappedParent = $keyMap[$dependsOnKey] ?? $dependsOnKey;
+            $normalized[$index]['depends_on_key'] = $mappedParent;
+            $normalized[$index]['depends_on_values'] = $this->sanitizeDependsOnValues(
+                $group['depends_on_values'] ?? null,
+                $group['values'],
+            );
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param  array<string, list<string>>|null  $map
+     * @param  list<string>  $childValues
+     * @return array<string, list<string>>|null
+     */
+    private function sanitizeDependsOnValues(?array $map, array $childValues): ?array
+    {
+        if ($map === null || $map === []) {
+            return null;
+        }
+
+        $sanitized = [];
+
+        foreach ($map as $parentValue => $allowed) {
+            if (! is_array($allowed)) {
+                continue;
+            }
+
+            $filtered = array_values(array_filter(
+                $allowed,
+                fn (mixed $value): bool => is_string($value) && in_array($value, $childValues, true),
+            ));
+
+            if ($filtered !== []) {
+                $sanitized[(string) $parentValue] = $filtered;
+            }
+        }
+
+        return $sanitized === [] ? null : $sanitized;
     }
 
     /**
@@ -485,7 +600,7 @@ class extends Component
     }
 
     /**
-     * @return list<array{name: string, option_groups: list<array{key: string, label: string, values: list<string>}>}>
+     * @return list<array{name: string, option_groups: list<array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}>}>
      */
     private function normalizedComponents(): array
     {
@@ -497,5 +612,141 @@ class extends Component
             ->filter(fn (array $component): bool => $component['name'] !== '')
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}
+     */
+    private function blankOptionGroup(string $key = '', string $label = '', array $values = []): array
+    {
+        if ($key === '') {
+            $key = 'option_'.Str::lower(Str::random(6));
+        }
+
+        return [
+            'key' => $key,
+            'label' => $label,
+            'values' => $values,
+            'depends_on_key' => null,
+            'depends_on_values' => null,
+        ];
+    }
+
+    /**
+     * @param  ProductOptionGroup  $group
+     * @return array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}
+     */
+    private function groupFromModel($group): array
+    {
+        return [
+            'key' => $group->key,
+            'label' => $group->label,
+            'values' => $group->values->pluck('value')->all(),
+            'depends_on_key' => $group->depends_on_key,
+            'depends_on_values' => $group->depends_on_values,
+        ];
+    }
+
+    /**
+     * @param  array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}  $group
+     */
+    private function applyParent(array &$group, string $parentKey): void
+    {
+        $parentKey = trim($parentKey);
+
+        if ($parentKey === '' || $parentKey === ($group['key'] ?? '')) {
+            $group['depends_on_key'] = null;
+            $group['depends_on_values'] = null;
+
+            return;
+        }
+
+        $group['depends_on_key'] = $parentKey;
+        $group['depends_on_values'] = [];
+    }
+
+    /**
+     * @param  array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}  $group
+     */
+    private function toggleAllowed(array &$group, string $parentValue, string $childValue): void
+    {
+        if (($group['depends_on_key'] ?? null) === null) {
+            return;
+        }
+
+        $map = is_array($group['depends_on_values'] ?? null) ? $group['depends_on_values'] : [];
+        $allowed = is_array($map[$parentValue] ?? null) ? $map[$parentValue] : [];
+
+        if (in_array($childValue, $allowed, true)) {
+            $allowed = array_values(array_filter($allowed, fn (string $value): bool => $value !== $childValue));
+        } else {
+            $allowed[] = $childValue;
+        }
+
+        if ($allowed === []) {
+            unset($map[$parentValue]);
+        } else {
+            $map[$parentValue] = $allowed;
+        }
+
+        $group['depends_on_values'] = $map;
+    }
+
+    /**
+     * @param  list<array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}>  $groups
+     */
+    private function clearDependenciesOnKey(array &$groups, string $removedKey): void
+    {
+        if ($removedKey === '') {
+            return;
+        }
+
+        foreach ($groups as $index => $group) {
+            if (($group['depends_on_key'] ?? null) === $removedKey) {
+                $groups[$index]['depends_on_key'] = null;
+                $groups[$index]['depends_on_values'] = null;
+            }
+        }
+    }
+
+    /**
+     * @param  list<array{key: string, label: string, values: list<string>, depends_on_key: string|null, depends_on_values: array<string, list<string>>|null}>  $groups
+     */
+    private function pruneValueFromDependencies(array &$groups, int $changedIndex, string $removedValue): void
+    {
+        $changedKey = (string) ($groups[$changedIndex]['key'] ?? '');
+
+        if (isset($groups[$changedIndex]['depends_on_values']) && is_array($groups[$changedIndex]['depends_on_values'])) {
+            foreach ($groups[$changedIndex]['depends_on_values'] as $parentValue => $allowed) {
+                if (! is_array($allowed)) {
+                    continue;
+                }
+
+                $filtered = array_values(array_filter(
+                    $allowed,
+                    fn (string $value): bool => $value !== $removedValue,
+                ));
+
+                if ($filtered === []) {
+                    unset($groups[$changedIndex]['depends_on_values'][$parentValue]);
+                } else {
+                    $groups[$changedIndex]['depends_on_values'][$parentValue] = $filtered;
+                }
+            }
+        }
+
+        if ($changedKey === '') {
+            return;
+        }
+
+        foreach ($groups as $index => $group) {
+            if (($group['depends_on_key'] ?? null) !== $changedKey) {
+                continue;
+            }
+
+            $map = is_array($group['depends_on_values'] ?? null) ? $group['depends_on_values'] : [];
+            unset($map[$removedValue]);
+            $groups[$index]['depends_on_values'] = $map;
+        }
     }
 };

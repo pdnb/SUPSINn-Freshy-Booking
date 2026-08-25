@@ -235,6 +235,16 @@ class CartService
                 ]);
             }
 
+            if ($group->hasParent()) {
+                $parentValue = $selected[$group->depends_on_key] ?? null;
+
+                if (! $group->allowsValueForParent($value, is_string($parentValue) ? $parentValue : null)) {
+                    throw ValidationException::withMessages([
+                        $errorKey => 'ตัวเลือกที่เลือกไม่เข้ากัน กรุณาเลือกใหม่',
+                    ]);
+                }
+            }
+
             $choices[] = [
                 'label' => $component ? $component->name.' · '.$group->label : $group->label,
                 'value' => $value,
