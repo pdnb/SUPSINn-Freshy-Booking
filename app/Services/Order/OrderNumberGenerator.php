@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 
 class OrderNumberGenerator
 {
-    public const PREFIX = 'FB';
+    public const PREFIX = 'SRU';
 
     public function __construct(private AcademicYearSettingService $academicYear) {}
 
@@ -17,7 +17,7 @@ class OrderNumberGenerator
     {
         return DB::transaction(function (): string {
             $yearPrefix = $this->academicYear->prefix();
-            $pattern = self::PREFIX.'-'.$yearPrefix.'-____';
+            $pattern = self::PREFIX.$yearPrefix.'-____';
 
             $latest = Order::query()
                 ->where('number', 'like', $pattern)
@@ -33,7 +33,7 @@ class OrderNumberGenerator
                 ]);
             }
 
-            return sprintf('%s-%s-%04d', self::PREFIX, $yearPrefix, $sequence);
+            return sprintf('%s%s-%04d', self::PREFIX, $yearPrefix, $sequence);
         });
     }
 }

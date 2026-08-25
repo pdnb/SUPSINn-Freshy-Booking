@@ -9,7 +9,7 @@ return [
      */
     'promptpay_qr_payload' => env('PROMPTPAY_QR_PAYLOAD'),
     'admin_name' => env('ADMIN_NAME', 'Admin'),
-    'admin_email' => env('ADMIN_EMAIL', 'admin@example.com'),
+    'admin_email' => env('ADMIN_EMAIL', 'admin@sru.ac.th'),
     'admin_password' => env('ADMIN_PASSWORD', 'password'),
     'default_storefront_logo' => 'images/subsinn-logo.png',
 ];
