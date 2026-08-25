@@ -14,6 +14,7 @@ class AdminUserSeeder extends Seeder
             [
                 'name' => config('booking.admin_name'),
                 'password' => config('booking.admin_password'),
+                'is_admin' => true,
             ],
         );
     }

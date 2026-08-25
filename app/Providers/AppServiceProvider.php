@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Auth\Auth0Provider;
 use App\Contracts\SlipVerifier;
 use App\Services\Payment\StubSlipVerifier;
 use App\Support\ThaiDate;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Socialite\Socialite;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,6 +45,18 @@ class AppServiceProvider extends ServiceProvider
             return app()->runningUnitTests()
                 ? Limit::none()
                 : Limit::perMinute(30)->by($request->ip());
+        });
+
+        RateLimiter::for('admin-auth0', function (Request $request) {
+            return app()->runningUnitTests()
+                ? Limit::none()
+                : Limit::perMinute(5)->by($request->ip());
+        });
+
+        Socialite::extend('auth0', function ($app) {
+            $config = $app['config']['services.auth0'];
+
+            return Socialite::buildProvider(Auth0Provider::class, $config);
         });
     }
 }

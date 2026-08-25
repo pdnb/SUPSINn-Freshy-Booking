@@ -3,6 +3,7 @@ paths:
   - 'resources/views/components/storefront/header.blade.php'
   - 'resources/views/components/storefront/header-v2.blade.php'
   - 'resources/views/pages/admin/login.blade.php'
+  - 'resources/views/pages/admin/pending-access.blade.php'
   - 'resources/views/pages/admin/settings/**'
   - 'resources/views/components/admin/sidebar.blade.php'
   - 'resources/views/layouts/admin.blade.php'

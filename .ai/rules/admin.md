@@ -14,7 +14,7 @@ Livewire 4 view-based pages under `resources/views/pages/admin` (`pages::admin.*
 ## Page layout vs CSS
 Screen IA, Thai copy, nav items, and flows come from `docs/references/admin-mockup`. Chrome markup and utility classes come from ecommerce-admin: `admin-app` / `sidebar` / `admin-frame` / `topbar` / `content` / `ds-table` / `nav-link` / `panel` / `kpi` / `pill` / `dialog`.
 
-Nav: ภาพรวม, ออเดอร์, จัดส่ง, รับของ, สรุปยอด, สต็อก, สินค้า, รอบจอง, ตั้งค่า. No Customers / Discounts / Analytics.
+Nav: ภาพรวม, ออเดอร์, จัดส่ง, รับของ, สรุปยอด, สต็อก, สินค้า, รอบจอง, ผู้ใช้, ตั้งค่า. No Customers / Discounts / Analytics.
 
 ## Domain
 Mutations go through application services (`OrderService`, `CatalogService`, `BookingRoundService`, `ShippingRateService`, `AdsBannerService`, `StorefrontLogoService`, `ProductionSummaryService`, `InventoryService`). Inventory is on-hand vs confirmed orders and must not block checkout or change catalog SKU/stock rules.
@@ -26,7 +26,7 @@ Body and headings use Anuphan via `@fonts` (same as the storefront). Do not use 
 Admin chrome is gray + white (neutral oklch, chroma 0). Primary actions and active nav use dark gray `--accent`, not the ecommerce-admin green or the storefront blue. Status pills use `--warn`, `--danger`, `--success`, and `--info` chroma; do not put those hues on buttons or nav.
 
 ## Auth
-Staff login at `/admin/login`. Keep `AdminUserSeeder` and auth redirects. Login uses the storefront layout (`layouts.app`) with a brand/form split (brand panel + form); the signed-in console uses `layouts.admin`. Keep brand-first copy (`config('app.name')`, currently SRU Shop), skip link to the form, lock icon beside the title, loading button state, and storefront tokens — do not restyle login with admin gray chrome or Inter/cyan “dashboard” palettes.
+Staff login at `/admin/login`. Keep `AdminUserSeeder`, the email/password form, and auth redirects. When Auth0 credentials are configured, add an Auth0 button under the form — do not replace the password form. Login and the pending-access page use the storefront layout (`layouts.app`) with a brand/form split (brand panel + form); the signed-in console uses `layouts.admin`. Keep brand-first copy (`config('app.name')`, currently SRU Shop), skip link to the form, lock icon beside the title, loading button state, and storefront tokens — do not restyle login with admin gray chrome or Inter/cyan “dashboard” palettes. Console routes require `is_admin`; pending Auth0 users land on `/admin/pending` until granted from the ผู้ใช้ page. Logout is app-session only (no Auth0 SLO).
 
 ## Icons
 Admin CSS does not load Tailwind, so x-icon `size-*` classes have no effect. Size SVGs with `.nav-link svg`, `.icon-btn svg`, and `.btn svg` at 16px.

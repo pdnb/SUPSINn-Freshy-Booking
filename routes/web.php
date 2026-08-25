@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\OrderSlipController;
 use App\Http\Controllers\Admin\ProductionExportController;
+use App\Http\Controllers\Auth\Auth0Controller;
 use App\Http\Controllers\GuestOrderSlipController;
 use App\Http\Controllers\LineSessionController;
 use App\Http\Middleware\HardenOrderTracking;
@@ -26,7 +27,14 @@ Route::post('/line/session', LineSessionController::class)
 
 Route::middleware('guest')->group(function () {
     Route::livewire('/admin/login', 'pages::admin.login')->name('login');
+    Route::get('/admin/auth/auth0/redirect', [Auth0Controller::class, 'redirect'])
+        ->middleware('throttle:admin-auth0')
+        ->name('admin.auth0.redirect');
 });
+
+Route::get('/admin/auth/auth0/callback', [Auth0Controller::class, 'callback'])
+    ->middleware('throttle:admin-auth0')
+    ->name('admin.auth0.callback');
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/logout', function () {
@@ -37,20 +45,25 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         return redirect()->route('login');
     })->name('logout');
 
-    Route::livewire('/', 'pages::admin.dashboard')->name('dashboard');
-    Route::livewire('/orders', 'pages::admin.order-queue')->name('orders');
-    Route::get('/orders/{order}/slip', OrderSlipController::class)->name('orders.slip');
-    Route::livewire('/orders/{order}', 'pages::admin.order-detail')->name('orders.show');
-    Route::livewire('/fulfillment', 'pages::admin.fulfillment')->name('fulfillment');
-    Route::livewire('/pickup', 'pages::admin.pickup')->name('pickup');
-    Route::livewire('/products', 'pages::admin.product-index')->name('products');
-    Route::livewire('/products/create', 'pages::admin.product-edit')->name('products.create');
-    Route::livewire('/products/{product}/edit', 'pages::admin.product-edit')->name('products.edit');
-    Route::livewire('/rounds', 'pages::admin.rounds')->name('rounds');
-    Route::livewire('/rounds/create', 'pages::admin.round-edit')->name('rounds.create');
-    Route::livewire('/rounds/{round}/edit', 'pages::admin.round-edit')->name('rounds.edit');
-    Route::get('/production/export/{format}', ProductionExportController::class)->name('production.export');
-    Route::livewire('/production', 'pages::admin.production')->name('production');
-    Route::livewire('/inventory', 'pages::admin.inventory')->name('inventory');
-    Route::livewire('/settings', 'pages::admin.settings')->name('settings');
+    Route::livewire('/pending', 'pages::admin.pending-access')->name('pending');
+
+    Route::middleware('admin')->group(function () {
+        Route::livewire('/', 'pages::admin.dashboard')->name('dashboard');
+        Route::livewire('/orders', 'pages::admin.order-queue')->name('orders');
+        Route::get('/orders/{order}/slip', OrderSlipController::class)->name('orders.slip');
+        Route::livewire('/orders/{order}', 'pages::admin.order-detail')->name('orders.show');
+        Route::livewire('/fulfillment', 'pages::admin.fulfillment')->name('fulfillment');
+        Route::livewire('/pickup', 'pages::admin.pickup')->name('pickup');
+        Route::livewire('/products', 'pages::admin.product-index')->name('products');
+        Route::livewire('/products/create', 'pages::admin.product-edit')->name('products.create');
+        Route::livewire('/products/{product}/edit', 'pages::admin.product-edit')->name('products.edit');
+        Route::livewire('/rounds', 'pages::admin.rounds')->name('rounds');
+        Route::livewire('/rounds/create', 'pages::admin.round-edit')->name('rounds.create');
+        Route::livewire('/rounds/{round}/edit', 'pages::admin.round-edit')->name('rounds.edit');
+        Route::get('/production/export/{format}', ProductionExportController::class)->name('production.export');
+        Route::livewire('/production', 'pages::admin.production')->name('production');
+        Route::livewire('/inventory', 'pages::admin.inventory')->name('inventory');
+        Route::livewire('/users', 'pages::admin.users')->name('users');
+        Route::livewire('/settings', 'pages::admin.settings')->name('settings');
+    });
 });

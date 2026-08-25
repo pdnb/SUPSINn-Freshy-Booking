@@ -40,4 +40,12 @@ return [
         'channel_id' => env('LINE_CHANNEL_ID'),
     ],
 
+    'auth0' => [
+        'domain' => env('AUTH0_DOMAIN'),
+        'client_id' => env('AUTH0_CLIENT_ID'),
+        'client_secret' => env('AUTH0_CLIENT_SECRET'),
+        'redirect' => '/admin/auth/auth0/callback',
+        'allowed_email_domain' => 'sru.ac.th',
+    ],
+
 ];

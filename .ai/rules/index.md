@@ -7,6 +7,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/views/** | .ai/rules/views.md |
 | resources/views/**, app/Support/ThaiDate.php, app/Providers/AppServiceProvider.php | .ai/rules/thai-date.md |
 | resources/views/pages/admin/**, resources/views/layouts/admin.blade.php, resources/views/components/admin/**, resources/css/admin.css | .ai/rules/admin.md |
+| app/Auth/**, app/Http/Controllers/Auth/**, app/Http/Middleware/EnsureAdminAccess.php, app/Services/Auth/**, app/Models/User.php, resources/views/pages/admin/login.blade.php, resources/views/pages/admin/pending-access.blade.php, resources/views/pages/admin/users.blade.php, routes/web.php, bootstrap/app.php, config/services.php | .ai/rules/admin-auth0.md |
 | resources/views/pages/admin/rounds.blade.php, resources/views/pages/admin/round-edit.blade.php, resources/views/components/admin/product-picker.blade.php | .ai/rules/admin-rounds.md |
 | app/Services/Catalog/** | .ai/rules/catalog.md |
 | app/Services/Checkout/**, resources/views/pages/storefront/checkout.blade.php | .ai/rules/checkout-shipping.md |

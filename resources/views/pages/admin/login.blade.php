@@ -1,4 +1,6 @@
 <?php
+use App\Models\User;
+use App\Services\Auth\Auth0Config;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -40,12 +42,22 @@ class extends Component
         RateLimiter::clear($throttleKey);
         session()->regenerate();
 
+        $user = Auth::user();
+
+        if (! $user instanceof User || ! $user->canAccessAdmin()) {
+            $this->redirect(route('admin.pending'));
+
+            return;
+        }
+
         $this->redirectIntended(route('admin.dashboard'));
     }
 
-    public function render()
+    public function render(Auth0Config $auth0)
     {
-        return $this->view();
+        return $this->view([
+            'auth0Configured' => $auth0->isConfigured(),
+        ]);
     }
 
     private function throttleKey(): string
@@ -97,7 +109,13 @@ class extends Component
                     </span>
                     <div>
                         <h1 class="text-2xl font-semibold tracking-tight text-balance text-brand">เข้าสู่ระบบแอดมิน</h1>
-                        <p class="mt-1 text-sm leading-relaxed text-muted">ใช้อีเมลและรหัสผ่านของเจ้าหน้าที่</p>
+                        <p class="mt-1 text-sm leading-relaxed text-muted">
+                            @if ($auth0Configured)
+                                ใช้อีเมลและรหัสผ่านของเจ้าหน้าที่ หรือเข้าด้วย Google
+                            @else
+                                ใช้อีเมลและรหัสผ่านของเจ้าหน้าที่
+                            @endif
+                        </p>
                     </div>
                 </div>
 
@@ -145,6 +163,18 @@ class extends Component
                         </span>
                     </button>
                 </form>
+
+                @if ($auth0Configured)
+                    <div class="mt-5">
+                        <p class="mb-3 text-center text-sm text-muted">หรือ</p>
+                        <a
+                            href="{{ route('admin.auth0.redirect') }}"
+                            class="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-brand border border-border bg-surface px-4 text-sm font-medium text-fg transition-colors duration-200 hover:bg-accent/5 active:scale-[0.99]"
+                        >
+                            เข้าสู่ระบบด้วย Google
+                        </a>
+                    </div>
+                @endif
 
                 <p class="mt-8 text-sm text-muted">
                     <a href="{{ route('home') }}" wire:navigate class="font-medium text-brand underline-offset-4 transition-colors duration-200 hover:underline">
