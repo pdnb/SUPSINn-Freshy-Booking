@@ -373,7 +373,10 @@ test('a postal confirmation uses three shipped steps and hides the pickup receip
         ->assertSee('เลขพัสดุ', false)
         ->assertSee('คัดลอกเลขพัสดุ EMS123456TH', false)
         ->assertSee('grid-cols-3', false)
-        ->assertDontSee('ใบเสร็จจะได้รับตอนรับสินค้า', false);
+        ->assertDontSee('ใบเสร็จจะได้รับตอนรับสินค้า', false)
+        ->assertDontSee('จุดรับสินค้า', false)
+        ->assertDontSee(FulfillmentMethod::Bookstore->label(), false)
+        ->assertDontSee(FulfillmentMethod::Hall->label(), false);
 });
 
 test('a shipped postal order without a parcel number does not show a copy control', function () {
@@ -416,6 +419,29 @@ test('a pickup confirmation keeps four steps and does not show a parcel number',
         ->assertDontSee('คัดลอกเลขพัสดุ', false)
         ->assertDontSee('จัดส่งแล้ว', false);
 });
+
+test('a pickup confirmation shows only the ordered pickup point', function (FulfillmentMethod $method, FulfillmentMethod $other) {
+    $order = Order::factory()->create([
+        'number' => $method === FulfillmentMethod::Bookstore ? 'FRPNTBOOK' : 'FRPNTHALL',
+        'tracking_token' => str_repeat($method === FulfillmentMethod::Bookstore ? 'w' : 'x', 40),
+        'status' => OrderStatus::ReadyForPickup,
+        'fulfillment' => $method,
+    ]);
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))
+        ->assertOk()
+        ->assertSee('จุดรับสินค้า', false)
+        ->assertSee($method->label(), false)
+        ->assertSee($method->caption(), false)
+        ->assertDontSee($other->label(), false)
+        ->assertDontSee($other->caption(), false);
+})->with([
+    'bookstore' => [FulfillmentMethod::Bookstore, FulfillmentMethod::Hall],
+    'hall' => [FulfillmentMethod::Hall, FulfillmentMethod::Bookstore],
+]);
 
 test('a guest can list matching orders by student id and phone', function () {
     $mineA = Order::factory()->create([

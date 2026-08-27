@@ -284,16 +284,10 @@ new #[Title('คำสั่งซื้อ')] class extends Component
         @if (! $order->fulfillment->chargesShipping())
             <section class="mt-6">
                 <h2 class="font-semibold">จุดรับสินค้า</h2>
-                <div class="mt-3 space-y-3">
-                    <x-storefront.card as="article">
-                        <h3 class="font-medium">{{ \App\Enums\FulfillmentMethod::Bookstore->label() }}</h3>
-                        <p class="mt-1 text-sm text-muted">{{ \App\Enums\FulfillmentMethod::Bookstore->caption() }}</p>
-                    </x-storefront.card>
-                    <x-storefront.card as="article">
-                        <h3 class="font-medium">{{ \App\Enums\FulfillmentMethod::Hall->label() }}</h3>
-                        <p class="mt-1 text-sm text-muted">{{ \App\Enums\FulfillmentMethod::Hall->caption() }}</p>
-                    </x-storefront.card>
-                </div>
+                <x-storefront.card as="article" class="mt-3">
+                    <h3 class="font-medium">{{ $order->fulfillment->label() }}</h3>
+                    <p class="mt-1 text-sm text-muted">{{ $order->fulfillment->caption() }}</p>
+                </x-storefront.card>
             </section>
         @endif
     </main>
