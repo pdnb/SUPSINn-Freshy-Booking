@@ -263,7 +263,7 @@ test('an unknown order number is a 404 without probing a model first', function 
         ->assertDontSee('FRMISSING', false);
 });
 
-test('the tracking page makes the slip filename previewable', function () {
+test('the tracking page opens a slip preview from an icon button', function () {
     $order = Order::factory()->create([
         'number' => 'FRSLIP001',
         'tracking_token' => str_repeat('p', 40),
@@ -279,8 +279,8 @@ test('the tracking page makes the slip filename previewable', function () {
         'token' => $order->tracking_token,
     ]))
         ->assertOk()
-        ->assertSee('sru-creditbank-onboarding-square.png', false)
         ->assertSee('ดูสลิป sru-creditbank-onboarding-square.png', false)
+        ->assertDontSee('>sru-creditbank-onboarding-square.png<', false)
         ->assertSee('/orders/FRSLIP001/slip', false);
 });
 

@@ -267,17 +267,20 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                         <dt class="text-muted">สลิป</dt>
                         <dd class="min-w-0 text-right">
                             @if ($order->slip)
+                                @php
+                                    $slipIsPdf = str_ends_with(mb_strtolower($order->slip->original_name), '.pdf');
+                                @endphp
                                 <div x-data="{ open: false }">
-                                    <button
-                                        type="button"
-                                        class="-my-1 inline-flex min-h-11 max-w-full items-center justify-end break-all text-right text-brand hover:underline"
+                                    <x-storefront.button
+                                        variant="ghost"
+                                        class="-my-1 text-brand"
                                         x-on:click="open = true; $nextTick(() => $refs.preview.showModal())"
                                         aria-haspopup="dialog"
                                         aria-controls="slip-preview"
                                         aria-label="ดูสลิป {{ $order->slip->original_name }}"
                                     >
-                                        {{ $order->slip->original_name }}
-                                    </button>
+                                        <x-icon :name="$slipIsPdf ? 'document-text' : 'photo'" size="md" />
+                                    </x-storefront.button>
                                     <dialog
                                         id="slip-preview"
                                         x-ref="preview"
@@ -294,7 +297,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
                                                 <x-icon name="x-mark" size="md" />
                                             </x-storefront.button>
                                         </div>
-                                        @if (str_ends_with(mb_strtolower($order->slip->original_name), '.pdf'))
+                                        @if ($slipIsPdf)
                                             <iframe
                                                 x-show="open"
                                                 src="{{ route('orders.slip', $order) }}"
