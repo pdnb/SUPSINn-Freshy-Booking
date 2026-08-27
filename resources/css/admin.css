@@ -309,6 +309,24 @@ h3 { font-size: var(--fs-h3); line-height: 1.35; }
   background: color-mix(in oklch, var(--danger) 85%, black);
   color: var(--surface);
 }
+.btn-success {
+  background: var(--success);
+  color: var(--surface);
+  border-color: var(--success);
+}
+.btn-success:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--success) 85%, black);
+  color: var(--surface);
+}
+.btn-warning {
+  background: var(--warn);
+  color: var(--surface);
+  border-color: var(--warn);
+}
+.btn-warning:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--warn) 85%, black);
+  color: var(--fg);
+}
 .btn-sm { min-height: 32px; padding: 0 10px; font-size: 12.5px; }
 
 /* ── surfaces ────────────────────────────────────────────── */

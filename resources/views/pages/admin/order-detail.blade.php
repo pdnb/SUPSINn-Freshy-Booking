@@ -240,8 +240,8 @@ class extends Component
                     @endif
                     @if ($canReview)
                         <div class="row">
-                            <button type="button" class="btn btn-primary" wire:click="confirm">ยืนยันสลิป</button>
-                            <button type="button" class="btn btn-secondary" wire:click="requestReslip">ขอสลิปใหม่</button>
+                            <button type="button" class="btn btn-success" wire:click="confirm">ยืนยันสลิป</button>
+                            <button type="button" class="btn btn-warning" wire:click="requestReslip">ขอสลิปใหม่</button>
                             <button type="button" class="btn btn-danger" wire:click="openCancelConfirm">ยกเลิก</button>
                         </div>
                     @endif

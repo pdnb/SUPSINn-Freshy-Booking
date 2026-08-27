@@ -211,7 +211,19 @@ test('order detail summary shows full guest and money breakdown', function () {
         ->assertSee('ค่าส่ง · EMS', false)
         ->assertSee('1,500', false)
         ->assertSee('90', false)
-        ->assertSee('1,590', false);
+        ->assertSee('1,590', false)
+        ->assertSeeHtml('class="btn btn-success" wire:click="confirm"')
+        ->assertSee('ยืนยันสลิป', false)
+        ->assertSeeHtml('class="btn btn-warning" wire:click="requestReslip"')
+        ->assertSee('ขอสลิปใหม่', false);
+});
+
+test('review action buttons use semantic hues', function () {
+    $css = file_get_contents(resource_path('css/admin.css'));
+
+    expect($css)
+        ->toMatch('/\.btn-success\s*\{[^}]*var\(--success\)/s')
+        ->toMatch('/\.btn-warning\s*\{[^}]*var\(--warn\)/s');
 });
 
 test('order detail shows a postal parcel number as read-only', function () {
