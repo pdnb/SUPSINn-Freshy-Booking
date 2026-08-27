@@ -118,7 +118,7 @@ new #[Title('คำสั่งซื้อ')] class extends Component
 };
 ?>
 
-<div class="@class(['min-h-dvh bg-bg text-fg', 'pb-52' => $needsReslip, 'pb-20' => ! $needsReslip])">
+<div @class(['min-h-dvh bg-bg text-fg', 'pb-52' => $needsReslip, 'pb-20' => ! $needsReslip])>
     <x-storefront.header :cart-count="$cartCount" />
 
     <main id="content" class="mx-auto max-w-lg p-4">
