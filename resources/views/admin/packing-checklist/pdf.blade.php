@@ -24,9 +24,37 @@
         }
 
         .channel {
-            margin: 0 0 14px;
+            margin: 0;
             color: #4b5563;
             font-size: 13px;
+        }
+
+        .sheet-head {
+            display: table;
+            width: 100%;
+            margin: 0 0 14px;
+        }
+
+        .sheet-head .title {
+            display: table-cell;
+            vertical-align: top;
+        }
+
+        .sheet-head .barcode-wrap {
+            display: table-cell;
+            vertical-align: top;
+            text-align: right;
+            width: 180px;
+        }
+
+        .qr {
+            width: 72px;
+            height: 72px;
+            margin: 0 0 6px;
+        }
+
+        .barcode {
+            height: 36px;
         }
 
         .meta {
@@ -108,8 +136,16 @@
 <body>
     @forelse ($orders as $order)
         <div class="sheet">
-            <h1>{{ $order->number }}</h1>
-            <p class="channel">{{ $order->fulfillment->label() }}</p>
+            <div class="sheet-head">
+                <div class="title">
+                    <h1>{{ $order->number }}</h1>
+                    <p class="channel">{{ $order->fulfillment->label() }}</p>
+                </div>
+                <div class="barcode-wrap">
+                    <img class="barcode" src="{{ $barcodes[$order->id] }}" alt="{{ $order->number }}">
+                    <img class="qr" src="{{ $qrs[$order->id] }}" alt="{{ $order->number }}">
+                </div>
+            </div>
             <table class="meta">
                 <tr>
                     <th>ผู้จอง</th>

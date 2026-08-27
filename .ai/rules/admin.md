@@ -14,7 +14,7 @@ Livewire 4 view-based pages under `resources/views/pages/admin` (`pages::admin.*
 ## Page layout vs CSS
 Screen IA, Thai copy, nav items, and flows come from `docs/references/admin-mockup`. Chrome markup and utility classes come from ecommerce-admin: `admin-app` / `sidebar` / `admin-frame` / `topbar` / `content` / `ds-table` / `nav-link` / `panel` / `kpi` / `pill` / `dialog`.
 
-Nav: ภาพรวม, ออเดอร์, จัดส่ง, แพ็คของ, รับของ, สรุปยอด, สต็อก, สินค้า, รอบจอง, ผู้ใช้, ตั้งค่า. No Customers / Discounts / Analytics.
+Nav groups (sidebar): unlabeled ภาพรวม, ออเดอร์, สรุปยอด; **แพ็คและส่ง** แพ็คของ, จัดส่ง, รับของ; **คลัง** สินค้า, สต็อก, รอบจอง; **ระบบ** ผู้ใช้, ตั้งค่า. No คิวงาน heading. No Customers / Discounts / Analytics. `.nav-label` uses Anuphan (body), not uppercase mono.
 
 ## Domain
 Mutations go through application services (`OrderService`, `CatalogService`, `BookingRoundService`, `ShippingRateService`, `AdsBannerService`, `StorefrontLogoService`, `ProductionSummaryService`, `InventoryService`, `PackingChecklistService`). Inventory is on-hand vs confirmed orders and must not block checkout or change catalog SKU/stock rules.

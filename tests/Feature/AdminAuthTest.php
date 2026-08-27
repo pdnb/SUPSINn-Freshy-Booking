@@ -65,6 +65,23 @@ test('staff can log in and reach the admin dashboard', function () {
 
     $this->get('/admin')
         ->assertOk()
+        ->assertSeeInOrder([
+            'ภาพรวม',
+            'ออเดอร์',
+            'สรุปยอด',
+            'แพ็คและส่ง',
+            'แพ็คของ',
+            'จัดส่ง',
+            'รับของ',
+            'คลัง',
+            'สินค้า',
+            'สต็อก',
+            'รอบจอง',
+            'ระบบ',
+            'ผู้ใช้',
+            'ตั้งค่า',
+        ], false)
+        ->assertDontSee('คิวงาน', false)
         ->assertSee('ภาพรวม', false)
         ->assertDontSee('คิวสลิปและจัดส่งน้ำหนักเท่ากัน', false)
         ->assertSee('ดูออเดอร์', false)

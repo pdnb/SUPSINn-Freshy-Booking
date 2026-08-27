@@ -38,6 +38,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'status',
     'booking_round_id',
     'receipt_issued_at',
+    'packed_at',
 ])]
 #[Hidden(['tracking_token'])]
 class Order extends Model
@@ -70,6 +71,7 @@ class Order extends Model
             'amount_remaining' => 'decimal:2',
             'balance_collected_at' => 'datetime',
             'receipt_issued_at' => 'datetime',
+            'packed_at' => 'datetime',
         ];
     }
 

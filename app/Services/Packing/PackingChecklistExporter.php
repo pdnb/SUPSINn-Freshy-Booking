@@ -4,14 +4,17 @@ namespace App\Services\Packing;
 
 use App\Enums\FulfillmentMethod;
 use App\Models\BookingRound;
+use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 
 class PackingChecklistExporter
 {
     public function __construct(
         private PackingChecklistService $checklist,
+        private PackingBarcode $barcode,
         private ViewFactory $views,
     ) {}
 
@@ -41,6 +44,8 @@ class PackingChecklistExporter
 
         $html = $this->views->make('admin.packing-checklist.pdf', [
             'orders' => $orders,
+            'barcodes' => $this->barcodes($orders),
+            'qrs' => $this->qrs($orders),
             'roundName' => $round?->name ?? 'ทุกรอบ',
             'faculty' => filled($filters['faculty'] ?? null) ? $filters['faculty'] : 'ทุกคณะ',
             'channelLabel' => $this->channelLabel($filters),
@@ -60,6 +65,32 @@ class PackingChecklistExporter
         $options->setFontCache($fontCache);
 
         return $pdf->download($this->filename($filters));
+    }
+
+    /**
+     * @param  Collection<int, Order>  $orders
+     * @return array<int, string>
+     */
+    public function barcodes(Collection $orders): array
+    {
+        return $orders
+            ->mapWithKeys(fn (Order $order): array => [
+                $order->id => $this->barcode->dataUri($order->number),
+            ])
+            ->all();
+    }
+
+    /**
+     * @param  Collection<int, Order>  $orders
+     * @return array<int, string>
+     */
+    public function qrs(Collection $orders): array
+    {
+        return $orders
+            ->mapWithKeys(fn (Order $order): array => [
+                $order->id => $this->barcode->qrDataUri($order->number),
+            ])
+            ->all();
     }
 
     /**

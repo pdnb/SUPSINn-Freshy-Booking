@@ -9,6 +9,7 @@ use App\Services\Packing\PackingChecklistExporter;
 use App\Services\Packing\PackingChecklistService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -172,8 +173,12 @@ test('the pdf lists guest fields choices and checkboxes without prices', functio
         ['label' => 'ไซส์เสื้อ', 'value' => 'XL'],
     ]);
 
+    $orders = packingChecklist()->orders();
+
     $html = view('admin.packing-checklist.pdf', [
-        'orders' => packingChecklist()->orders(),
+        'orders' => $orders,
+        'barcodes' => packingExporter()->barcodes($orders),
+        'qrs' => packingExporter()->qrs($orders),
         'roundName' => 'ทุกรอบ',
         'faculty' => 'ทุกคณะ',
         'channelLabel' => 'ทุกช่องทาง',
@@ -181,6 +186,9 @@ test('the pdf lists guest fields choices and checkboxes without prices', functio
     ])->render();
 
     expect($html)->toContain('PACKPDF001')
+        ->and($html)->toContain('data:image/png;base64')
+        ->and($html)->toContain('class="qr"')
+        ->and($html)->toContain('class="barcode"')
         ->and($html)->toContain('สมศรี แพ็คของ')
         ->and($html)->toContain('67019990001')
         ->and($html)->toContain('0811111111')
@@ -255,11 +263,14 @@ test('staff can open packing checklist and clear filters', function () {
         ->assertSee('aria-label="รอบจอง"', false)
         ->assertSee('aria-label="ช่องทาง"', false)
         ->assertSee('aria-label="คณะ"', false)
+        ->assertSee('aria-label="รหัสออเดอร์"', false)
+        ->assertSee('filters-align-start', false)
         ->assertSee('ล้างตัวกรอง', false)
         ->assertDontSeeHtml('<label class="field">')
         ->assertSee('PACKPAGE01', false)
         ->assertSee('นภา ทดสอบ', false)
-        ->assertSee('PDF', false);
+        ->assertSee('PDF', false)
+        ->assertSee('แพ็คแล้ววันนี้', false);
 
     Livewire::actingAs($staff)
         ->test('pages::admin.packing-checklist')
@@ -270,4 +281,193 @@ test('staff can open packing checklist and clear filters', function () {
         ->assertSet('booking_round_id', '')
         ->assertSet('fulfillment', '')
         ->assertSet('faculty', '');
+});
+
+test('pack number actions stay aligned with the input when an error appears', function () {
+    $css = file_get_contents(resource_path('css/admin.css'));
+
+    expect($css)->toMatch('/\.filters-align-start\s*\{[^}]*align-items:\s*flex-start/s');
+
+    $staff = User::factory()->create();
+    $order = packableOrder(['number' => 'PACKALIGN1']);
+    packingChecklist()->markPacked($order->number, $staff);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.packing-checklist')
+        ->set('packNumber', $order->number)
+        ->call('markPacked')
+        ->assertSee('ออเดอร์นี้แพ็คแล้ว', false)
+        ->assertSeeHtml('class="filters filters-align-start"');
+});
+
+test('marking packed drops the order from the print pile and unmarking restores it', function () {
+    $staff = User::factory()->create();
+    $order = packableOrder(['number' => 'PACKMARK01']);
+
+    packingChecklist()->markPacked('  PACKMARK01  ', $staff);
+
+    $packed = $order->fresh();
+
+    expect($packed->packed_at)->not->toBeNull()
+        ->and($packed->status)->toBe(OrderStatus::ReadyForPickup)
+        ->and(packingChecklist()->orders()->pluck('number'))->not->toContain($order->number)
+        ->and(packingChecklist()->packedToday()->pluck('number'))->toContain($order->number);
+
+    packingChecklist()->unmarkPacked($order->number, $staff);
+
+    expect($order->fresh()->packed_at)->toBeNull()
+        ->and($order->fresh()->status)->toBe(OrderStatus::Confirmed)
+        ->and(packingChecklist()->orders()->pluck('number'))->toContain($order->number);
+});
+
+test('packing a bookstore or hall order marks it ready for pickup', function (FulfillmentMethod $channel) {
+    $staff = User::factory()->create();
+    $order = packableOrder([
+        'number' => 'PACKREADY'.$channel->value,
+        'fulfillment' => $channel,
+    ]);
+
+    packingChecklist()->markPacked($order->number, $staff);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::ReadyForPickup)
+        ->and($order->fresh()->packed_at)->not->toBeNull();
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))
+        ->assertOk()
+        ->assertSee('พร้อมรับ', false);
+})->with([
+    'bookstore' => FulfillmentMethod::Bookstore,
+    'hall' => FulfillmentMethod::Hall,
+]);
+
+test('packing a postal order does not change guest-visible status', function () {
+    $staff = User::factory()->create();
+    $order = packableOrder([
+        'number' => 'PACKPOSTST',
+        'fulfillment' => FulfillmentMethod::Post,
+        'address' => '1 ถนนหลัก',
+    ]);
+
+    packingChecklist()->markPacked($order->number, $staff);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Confirmed)
+        ->and($order->fresh()->packed_at)->not->toBeNull();
+});
+
+test('packing a leftover ready for pickup order only sets packed at', function () {
+    $staff = User::factory()->create();
+    $order = packableOrder([
+        'number' => 'PACKLEFT01',
+        'status' => OrderStatus::ReadyForPickup,
+    ]);
+
+    packingChecklist()->markPacked($order->number, $staff);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::ReadyForPickup)
+        ->and($order->fresh()->packed_at)->not->toBeNull();
+});
+
+test('it rejects unmarking a completed pickup order', function () {
+    $staff = User::factory()->create();
+    $order = packableOrder([
+        'number' => 'PACKDONE02',
+        'status' => OrderStatus::Completed,
+        'packed_at' => now(),
+    ]);
+
+    expect(fn () => packingChecklist()->unmarkPacked($order->number, $staff))
+        ->toThrow(ValidationException::class);
+
+    expect($order->fresh()->packed_at)->not->toBeNull()
+        ->and($order->fresh()->status)->toBe(OrderStatus::Completed);
+});
+
+test('it rejects unknown not packable and already packed numbers', function () {
+    $staff = User::factory()->create();
+    packableOrder(['number' => 'PACKALRDY1']);
+    packingChecklist()->markPacked('PACKALRDY1', $staff);
+    packableOrder(['number' => 'PACKPEND02', 'status' => OrderStatus::PendingReview]);
+
+    expect(fn () => packingChecklist()->markPacked('MISSING01', $staff))->toThrow(ValidationException::class)
+        ->and(fn () => packingChecklist()->markPacked('PACKPEND02', $staff))->toThrow(ValidationException::class)
+        ->and(fn () => packingChecklist()->markPacked('PACKALRDY1', $staff))->toThrow(ValidationException::class)
+        ->and(fn () => packingChecklist()->unmarkPacked('PACKPEND02', $staff))->toThrow(ValidationException::class)
+        ->and(fn () => packingChecklist()->unmarkPacked('MISSING01', $staff))->toThrow(ValidationException::class);
+});
+
+test('printing does not set packed at', function () {
+    $order = packableOrder(['number' => 'PACKPRINT1']);
+
+    packingExporter()->pdf();
+
+    expect($order->fresh()->packed_at)->toBeNull();
+});
+
+test('packed today excludes yesterday', function () {
+    $staff = User::factory()->create();
+    $this->travelTo(now()->subDay());
+    $yesterday = packableOrder(['number' => 'PACKYEST01']);
+    packingChecklist()->markPacked($yesterday->number, $staff);
+    $this->travelBack();
+
+    $today = packableOrder(['number' => 'PACKTODAY1']);
+    packingChecklist()->markPacked($today->number, $staff);
+
+    $numbers = packingChecklist()->packedToday()->pluck('number');
+
+    expect($numbers)->toContain($today->number)
+        ->and($numbers)->not->toContain($yesterday->number);
+});
+
+test('staff can mark and unmark packed from the packing page', function () {
+    $staff = User::factory()->create();
+    $order = packableOrder([
+        'number' => 'PACKLIVE01',
+        'full_name' => 'แพ็ค ไลฟ์',
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.packing-checklist')
+        ->set('packNumber', '')
+        ->call('markPacked')
+        ->assertHasErrors('packNumber')
+        ->set('packNumber', 'MISSING01')
+        ->call('markPacked')
+        ->assertHasErrors('packNumber')
+        ->set('packNumber', $order->number)
+        ->call('markPacked')
+        ->assertHasNoErrors()
+        ->assertSet('packNumber', '')
+        ->assertDispatched('admin-toast', message: 'แพ็คแล้ว')
+        ->assertSee('แพ็ค ไลฟ์', false);
+
+    expect($order->fresh()->packed_at)->not->toBeNull()
+        ->and($order->fresh()->status)->toBe(OrderStatus::ReadyForPickup)
+        ->and(packingChecklist()->orders())->toHaveCount(0);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.packing-checklist')
+        ->call('unmarkPacked', $order->number)
+        ->assertHasNoErrors()
+        ->assertDispatched('admin-toast', message: 'ยกเลิกแพ็คแล้ว');
+
+    expect($order->fresh()->packed_at)->toBeNull()
+        ->and($order->fresh()->status)->toBe(OrderStatus::Confirmed);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.packing-checklist')
+        ->set('packNumber', $order->number)
+        ->call('markPacked')
+        ->assertHasNoErrors()
+        ->set('packNumber', $order->number)
+        ->call('unmarkPacked')
+        ->assertHasNoErrors()
+        ->assertSet('packNumber', '')
+        ->assertDispatched('admin-toast', message: 'ยกเลิกแพ็คแล้ว');
+
+    expect($order->fresh()->packed_at)->toBeNull()
+        ->and($order->fresh()->status)->toBe(OrderStatus::Confirmed);
 });

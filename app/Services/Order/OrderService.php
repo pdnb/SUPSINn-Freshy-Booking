@@ -321,9 +321,11 @@ class OrderService
             OrderStatus::Confirmed => $order->fulfillment->chargesShipping()
                 ? [OrderStatus::Shipped, OrderStatus::Cancelled]
                 : [OrderStatus::ReadyForPickup, OrderStatus::Cancelled],
-            OrderStatus::ReadyForPickup => $order->hasOutstandingBalance()
-                ? [OrderStatus::Cancelled]
-                : [OrderStatus::Completed, OrderStatus::Cancelled],
+            OrderStatus::ReadyForPickup => [
+                ...($order->fulfillment->chargesShipping() ? [] : [OrderStatus::Confirmed]),
+                ...($order->hasOutstandingBalance() ? [] : [OrderStatus::Completed]),
+                OrderStatus::Cancelled,
+            ],
             OrderStatus::Shipped => $order->hasOutstandingBalance()
                 ? [OrderStatus::Cancelled]
                 : [OrderStatus::Completed, OrderStatus::Cancelled],

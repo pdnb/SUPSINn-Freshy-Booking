@@ -84,7 +84,7 @@ test('staff must collect the remaining deposit balance before pickup completion'
         ->and($order->fresh()->balance_collected_at)->not->toBeNull();
 });
 
-test('staff can mark a confirmed bookstore order ready for pickup', function () {
+test('fulfillment has no ready for pickup button on bookstore orders', function () {
     $staff = User::factory()->create();
     $order = Order::factory()->create([
         'status' => OrderStatus::Confirmed,
@@ -98,14 +98,16 @@ test('staff can mark a confirmed bookstore order ready for pickup', function () 
         ->get(route('admin.fulfillment'))
         ->assertOk()
         ->assertSee('สมชาย ใจดี', false)
-        ->assertSee('67015555555', false);
+        ->assertSee('67015555555', false)
+        ->assertDontSee('wire:click="markReady"', false)
+        ->assertDontSee('พร้อมรับของ', false);
 
     Livewire::actingAs($staff)
         ->test('pages::admin.fulfillment')
         ->set('id', $order->number)
-        ->call('markReady');
+        ->assertDontSeeHtml('wire:click="markReady"');
 
-    expect($order->fresh()->status)->toBe(OrderStatus::ReadyForPickup);
+    expect($order->fresh()->status)->toBe(OrderStatus::Confirmed);
 });
 
 test('the post fulfillment active queue includes shipped orders missing a parcel number', function () {

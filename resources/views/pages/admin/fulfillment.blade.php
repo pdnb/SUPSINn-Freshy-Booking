@@ -52,19 +52,6 @@ class extends Component
         $this->id = $number;
     }
 
-    public function markReady(OrderService $orders): void
-    {
-        $order = $this->selected();
-
-        if ($order === null) {
-            return;
-        }
-
-        $orders->transition($order, OrderStatus::ReadyForPickup, Auth::user());
-        $this->dispatch('admin-toast', message: 'ทำเครื่องหมายพร้อมรับแล้ว');
-        $this->id = $order->number;
-    }
-
     public function markShipped(OrderService $orders): void
     {
         $order = $this->selected();
@@ -132,7 +119,6 @@ class extends Component
             'channels' => FulfillmentMethod::cases(),
             'orders' => $list,
             'selected' => $selected,
-            'canReady' => $selected !== null && in_array(OrderStatus::ReadyForPickup, $orders->allowedTransitions($selected), true),
             'canShip' => $selected !== null && in_array(OrderStatus::Shipped, $orders->allowedTransitions($selected), true),
             'canUpdateParcel' => $selected !== null
                 && $selected->fulfillment === FulfillmentMethod::Post
@@ -237,9 +223,6 @@ class extends Component
                         @error('parcel_number') <span class="error">{{ $message }}</span> @enderror
                     @endif
                     <div class="row">
-                        @if ($canReady)
-                            <button type="button" class="btn btn-primary" wire:click="markReady">พร้อมรับของ</button>
-                        @endif
                         @if ($canShip)
                             <button type="button" class="btn btn-primary" wire:click="markShipped">จัดส่งแล้ว</button>
                         @endif

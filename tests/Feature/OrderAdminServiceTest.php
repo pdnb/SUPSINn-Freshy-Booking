@@ -125,6 +125,18 @@ test('confirmed pickup orders move to ready for pickup not shipped', function ()
     expect($order->fresh()->status)->toBe(OrderStatus::ReadyForPickup);
 });
 
+test('pickup ready for pickup can revert to confirmed', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::ReadyForPickup,
+        'fulfillment' => FulfillmentMethod::Bookstore,
+    ]);
+
+    adminOrders()->transition($order, OrderStatus::Confirmed, $staff);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Confirmed);
+});
+
 test('confirmed postal orders move to shipped not ready for pickup', function () {
     $staff = User::factory()->create();
     $order = Order::factory()->create([

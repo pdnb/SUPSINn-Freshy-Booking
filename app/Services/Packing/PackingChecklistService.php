@@ -5,13 +5,20 @@ namespace App\Services\Packing;
 use App\Enums\FulfillmentMethod;
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use App\Models\User;
 use App\Services\Checkout\CheckoutService;
+use App\Services\Order\OrderService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PackingChecklistService
 {
-    public function __construct(private CheckoutService $checkout) {}
+    public function __construct(
+        private CheckoutService $checkout,
+        private OrderService $orders,
+    ) {}
 
     /**
      * @param  array{booking_round_id?: int|string|null, fulfillment?: string|FulfillmentMethod|null, faculty?: string|null}  $filters
@@ -25,6 +32,71 @@ class PackingChecklistService
             ->orderBy('faculty')
             ->orderBy('number')
             ->get();
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function packedToday(): Collection
+    {
+        return Order::query()
+            ->where('packed_at', '>=', now()->startOfDay())
+            ->orderByDesc('packed_at')
+            ->get();
+    }
+
+    public function markPacked(string $number, User $actor): Order
+    {
+        $order = $this->orderByNumber($number);
+
+        if ($order->packed_at !== null) {
+            throw ValidationException::withMessages([
+                'packNumber' => 'ออเดอร์นี้แพ็คแล้ว',
+            ]);
+        }
+
+        if (! $this->hasPackableStatus($order)) {
+            throw ValidationException::withMessages([
+                'packNumber' => 'ออเดอร์นี้ไม่ได้อยู่ในกองแพ็ค',
+            ]);
+        }
+
+        return DB::transaction(function () use ($order, $actor): Order {
+            $order->update(['packed_at' => now()]);
+
+            if ($this->isPickup($order) && $order->status === OrderStatus::Confirmed) {
+                return $this->orders->transition($order->fresh(), OrderStatus::ReadyForPickup, $actor);
+            }
+
+            return $order->fresh();
+        });
+    }
+
+    public function unmarkPacked(string $number, User $actor): Order
+    {
+        $order = $this->orderByNumber($number);
+
+        if ($order->packed_at === null) {
+            throw ValidationException::withMessages([
+                'packNumber' => 'ออเดอร์นี้ยังไม่ได้แพ็ค',
+            ]);
+        }
+
+        if ($order->status === OrderStatus::Completed) {
+            throw ValidationException::withMessages([
+                'packNumber' => 'รับของแล้ว ยกเลิกแพ็คไม่ได้',
+            ]);
+        }
+
+        return DB::transaction(function () use ($order, $actor): Order {
+            $order->update(['packed_at' => null]);
+
+            if ($this->isPickup($order) && $order->status === OrderStatus::ReadyForPickup) {
+                return $this->orders->transition($order->fresh(), OrderStatus::Confirmed, $actor);
+            }
+
+            return $order->fresh();
+        });
     }
 
     /**
@@ -57,6 +129,37 @@ class PackingChecklistService
         return FulfillmentMethod::cases();
     }
 
+    private function isPickup(Order $order): bool
+    {
+        return ! $order->fulfillment->chargesShipping();
+    }
+
+    private function orderByNumber(string $number): Order
+    {
+        $number = trim($number);
+
+        $order = Order::query()->where('number', $number)->first();
+
+        if ($order === null) {
+            throw ValidationException::withMessages([
+                'packNumber' => 'ไม่พบออเดอร์นี้',
+            ]);
+        }
+
+        return $order;
+    }
+
+    private function hasPackableStatus(Order $order): bool
+    {
+        if (in_array($order->status, [OrderStatus::Confirmed, OrderStatus::ReadyForPickup], true)) {
+            return true;
+        }
+
+        return $order->status === OrderStatus::Shipped
+            && $order->fulfillment === FulfillmentMethod::Post
+            && $order->parcel_number === null;
+    }
+
     /**
      * @param  array{booking_round_id?: int|string|null, fulfillment?: string|FulfillmentMethod|null, faculty?: string|null}  $filters
      * @return Builder<Order>
@@ -66,6 +169,7 @@ class PackingChecklistService
         $fulfillment = $this->fulfillmentFilter($filters);
 
         return Order::query()
+            ->whereNull('packed_at')
             ->where(function (Builder $query): void {
                 $query->whereIn('status', [
                     OrderStatus::Confirmed,
