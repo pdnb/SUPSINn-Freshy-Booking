@@ -14,10 +14,10 @@ Livewire 4 view-based pages under `resources/views/pages/admin` (`pages::admin.*
 ## Page layout vs CSS
 Screen IA, Thai copy, nav items, and flows come from `docs/references/admin-mockup`. Chrome markup and utility classes come from ecommerce-admin: `admin-app` / `sidebar` / `admin-frame` / `topbar` / `content` / `ds-table` / `nav-link` / `panel` / `kpi` / `pill` / `dialog`.
 
-Nav: ภาพรวม, ออเดอร์, จัดส่ง, รับของ, สรุปยอด, สต็อก, สินค้า, รอบจอง, ผู้ใช้, ตั้งค่า. No Customers / Discounts / Analytics.
+Nav: ภาพรวม, ออเดอร์, จัดส่ง, แพ็คของ, รับของ, สรุปยอด, สต็อก, สินค้า, รอบจอง, ผู้ใช้, ตั้งค่า. No Customers / Discounts / Analytics.
 
 ## Domain
-Mutations go through application services (`OrderService`, `CatalogService`, `BookingRoundService`, `ShippingRateService`, `AdsBannerService`, `StorefrontLogoService`, `ProductionSummaryService`, `InventoryService`). Inventory is on-hand vs confirmed orders and must not block checkout or change catalog SKU/stock rules.
+Mutations go through application services (`OrderService`, `CatalogService`, `BookingRoundService`, `ShippingRateService`, `AdsBannerService`, `StorefrontLogoService`, `ProductionSummaryService`, `InventoryService`, `PackingChecklistService`). Inventory is on-hand vs confirmed orders and must not block checkout or change catalog SKU/stock rules.
 
 ## Type
 Body and headings use Anuphan via `@fonts` (same as the storefront). Do not use IBM Plex Sans Thai or the ecommerce-admin serif display stack.
@@ -32,7 +32,7 @@ Staff login at `/admin/login`. Keep `AdminUserSeeder`, the email/password form, 
 Admin CSS does not load Tailwind, so x-icon `size-*` classes have no effect. Size SVGs with `.nav-link svg`, `.icon-btn svg`, and `.btn svg` at 16px.
 
 ## Filters
-Admin list/filter toolbars (orders, fulfillment, pickup, production, products, inventory) hide visible field labels (placeholders / select options / `aria-label` only). Date filters use unlabeled `type="date"` inputs (`date_from` / `date_to`) against `orders.created_at` in app timezone. Other labeled filter rows use `.filters { align-items: flex-end }` so buttons without labels line up with the inputs. Every filter toolbar includes a ghost `ล้างตัวกรอง` button (`wire:click="clearFilters"`) that resets filters to that page’s defaults (order queue → pending review; fulfillment → active status + empty search/selection, keep channel tab; post active = confirmed plus shipped with null `parcel_number`, bookstore/hall active = confirmed; products → all/all; production/inventory/pickup → empty). Product list filters: search, `ชนิด` (`type`: all/simple/bundle), and `สถานะ` (`status`: all/active/draft labeled เปิดขาย/ปิดขาย).
+Admin list/filter toolbars (orders, fulfillment, packing-checklist, pickup, production, products, inventory) hide visible field labels (placeholders / select options / `aria-label` only). Date filters use unlabeled `type="date"` inputs (`date_from` / `date_to`) against `orders.created_at` in app timezone. Other labeled filter rows use `.filters { align-items: flex-end }` so buttons without labels line up with the inputs. Every filter toolbar includes a ghost `ล้างตัวกรอง` button (`wire:click="clearFilters"`) that resets filters to that page’s defaults (order queue → pending review; fulfillment → active status + empty search/selection, keep channel tab; post active = confirmed plus shipped with null `parcel_number`, bookstore/hall active = confirmed; products → all/all; production/inventory/pickup/packing-checklist → empty). Product list filters: search, `ชนิด` (`type`: all/simple/bundle), and `สถานะ` (`status`: all/active/draft labeled เปิดขาย/ปิดขาย).
 
 ## Tables
 `.ds-table th` uses body font (not mono) at ~12.5px. Keep uppercase / muted. Mono stays on `.meta`, `.num`, `.num-col`, and pills.

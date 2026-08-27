@@ -4,6 +4,7 @@
         ['id' => 'overview', 'route' => 'admin.dashboard', 'match' => 'admin.dashboard', 'label' => 'ภาพรวม', 'icon' => 'squares-2x2'],
         ['id' => 'orders', 'route' => 'admin.orders', 'match' => 'admin.orders*', 'label' => 'ออเดอร์', 'icon' => 'clipboard-document-check', 'badge' => $pending],
         ['id' => 'fulfillment', 'route' => 'admin.fulfillment', 'match' => 'admin.fulfillment', 'label' => 'จัดส่ง', 'icon' => 'truck'],
+        ['id' => 'packing', 'route' => 'admin.packing-checklist', 'match' => 'admin.packing-checklist*', 'label' => 'แพ็คของ', 'icon' => 'printer'],
         ['id' => 'pickup', 'route' => 'admin.pickup', 'match' => 'admin.pickup', 'label' => 'รับของ', 'icon' => 'gift'],
         ['id' => 'production', 'route' => 'admin.production', 'match' => 'admin.production', 'label' => 'สรุปยอด', 'icon' => 'chart-bar'],
         ['id' => 'inventory', 'route' => 'admin.inventory', 'match' => 'admin.inventory', 'label' => 'สต็อก', 'icon' => 'cube'],

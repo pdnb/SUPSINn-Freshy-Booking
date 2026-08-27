@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\OrderSlipController;
+use App\Http\Controllers\Admin\PackingExportController;
 use App\Http\Controllers\Admin\ProductionExportController;
 use App\Http\Controllers\Auth\Auth0Controller;
 use App\Http\Controllers\GuestOrderSlipController;
@@ -53,6 +54,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/orders/{order}/slip', OrderSlipController::class)->name('orders.slip');
         Route::livewire('/orders/{order}', 'pages::admin.order-detail')->name('orders.show');
         Route::livewire('/fulfillment', 'pages::admin.fulfillment')->name('fulfillment');
+        Route::get('/packing-checklist/export', PackingExportController::class)->name('packing-checklist.export');
+        Route::livewire('/packing-checklist', 'pages::admin.packing-checklist')->name('packing-checklist');
         Route::livewire('/pickup', 'pages::admin.pickup')->name('pickup');
         Route::livewire('/products', 'pages::admin.product-index')->name('products');
         Route::livewire('/products/create', 'pages::admin.product-edit')->name('products.create');
