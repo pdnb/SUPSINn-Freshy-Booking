@@ -3,6 +3,7 @@
 use App\Enums\FulfillmentMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMode;
+use App\Enums\SlipVerificationResult;
 use App\Models\Order;
 use App\Models\PaymentSlip;
 use App\Models\Product;
@@ -167,4 +168,83 @@ test('the same slip checksum cannot complete a second order', function () {
         ->toThrow(ValidationException::class);
 
     expect(Order::query()->count())->toBe(1);
+});
+
+function needReslipOrder(array $attributes = []): Order
+{
+    $order = Order::factory()->create(array_merge([
+        'status' => OrderStatus::NeedReslip,
+    ], $attributes));
+
+    $path = 'slips/'.$order->id.'/old-slip.jpg';
+    Storage::disk('local')->put($path, 'old slip bytes');
+
+    $order->slip()->create([
+        'path' => $path,
+        'original_name' => 'old-slip.jpg',
+        'checksum' => hash('sha256', 'old slip bytes'),
+        'verifier_result' => SlipVerificationResult::Pass,
+    ]);
+
+    return $order->fresh(['slip']);
+}
+
+test('replace slip moves a need reslip order back to pending review', function () {
+    Storage::fake('local');
+    $order = needReslipOrder();
+    $oldPath = $order->slip->path;
+
+    $updated = orders()->replaceSlip($order, UploadedFile::fake()->createWithContent('new-slip.jpg', random_bytes(128)));
+
+    expect($updated->status)->toBe(OrderStatus::PendingReview)
+        ->and($updated->slip)->not->toBeNull()
+        ->and($updated->slip->original_name)->toBe('new-slip.jpg')
+        ->and(PaymentSlip::query()->where('order_id', $order->id)->count())->toBe(1)
+        ->and($updated->statusChanges)->toHaveCount(1)
+        ->and($updated->statusChanges->first()->from_status)->toBe(OrderStatus::NeedReslip)
+        ->and($updated->statusChanges->first()->to_status)->toBe(OrderStatus::PendingReview)
+        ->and($updated->statusChanges->first()->user_id)->toBeNull();
+
+    Storage::disk('local')->assertMissing($oldPath);
+    Storage::disk('local')->assertExists($updated->slip->path);
+});
+
+test('a failing reslip keeps the order on need reslip and the old slip', function () {
+    Storage::fake('local');
+    $order = needReslipOrder();
+    $oldPath = $order->slip->path;
+
+    expect(fn () => orders()->replaceSlip($order, UploadedFile::fake()->image('fail-slip.jpg')))
+        ->toThrow(ValidationException::class);
+
+    $order->refresh();
+
+    expect($order->status)->toBe(OrderStatus::NeedReslip)
+        ->and($order->slip->path)->toBe($oldPath);
+
+    Storage::disk('local')->assertExists($oldPath);
+});
+
+test('replace slip is rejected when the order is not awaiting a new slip', function () {
+    Storage::fake('local');
+    $order = Order::factory()->create(['status' => OrderStatus::PendingReview]);
+
+    expect(fn () => orders()->replaceSlip($order, UploadedFile::fake()->image('slip.jpg')))
+        ->toThrow(ValidationException::class);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::PendingReview);
+});
+
+test('a reslip cannot reuse another orders slip checksum', function () {
+    Storage::fake('local');
+    $bytes = random_bytes(128);
+    readyToPay();
+    orders()->place(UploadedFile::fake()->createWithContent('pass-a.jpg', $bytes));
+
+    $order = needReslipOrder();
+
+    expect(fn () => orders()->replaceSlip($order, UploadedFile::fake()->createWithContent('pass-b.jpg', $bytes)))
+        ->toThrow(ValidationException::class);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::NeedReslip);
 });

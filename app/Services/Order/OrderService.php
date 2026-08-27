@@ -18,6 +18,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -185,6 +186,55 @@ class OrderService
             $this->rememberGuestTracking($order, autoOpen: true);
 
             return $order;
+        });
+    }
+
+    public function replaceSlip(Order $order, UploadedFile $slip): Order
+    {
+        if ($order->status !== OrderStatus::NeedReslip) {
+            throw ValidationException::withMessages([
+                'slip' => 'ไม่สามารถแนบสลิปใหม่ได้ในสถานะนี้',
+            ]);
+        }
+
+        $path = $slip->getRealPath();
+
+        if ($path === false) {
+            throw ValidationException::withMessages([
+                'slip' => 'อัปโหลดสลิปไม่สำเร็จ',
+            ]);
+        }
+
+        $checksum = $this->slips->inspect($path, $slip->getClientOriginalName());
+
+        return DB::transaction(function () use ($order, $slip, $checksum) {
+            $existingSlip = $order->slip;
+
+            if ($existingSlip !== null) {
+                Storage::disk('local')->delete($existingSlip->path);
+                $existingSlip->delete();
+            }
+
+            $stored = $slip->store('slips/'.$order->id, 'local');
+
+            $order->slip()->create([
+                'path' => $stored,
+                'original_name' => $slip->getClientOriginalName(),
+                'checksum' => $checksum,
+                'verifier_result' => SlipVerificationResult::Pass,
+            ]);
+
+            $from = $order->status;
+
+            $order->update(['status' => OrderStatus::PendingReview]);
+
+            $order->statusChanges()->create([
+                'from_status' => $from,
+                'to_status' => OrderStatus::PendingReview,
+                'user_id' => null,
+            ]);
+
+            return $order->fresh(['items', 'slip', 'statusChanges']);
         });
     }
 

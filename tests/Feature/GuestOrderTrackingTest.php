@@ -2,10 +2,13 @@
 
 use App\Enums\FulfillmentMethod;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMode;
+use App\Enums\SlipVerificationResult;
 use App\Models\Order;
 use App\Models\PaymentSlip;
 use App\Services\Order\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -558,4 +561,84 @@ test('the tracking token is hidden when the order is serialized', function () {
 
     expect($order->tracking_token)->toBe(str_repeat('h', 40))
         ->and($order->toArray())->not->toHaveKey('tracking_token');
+});
+
+function guestNeedReslipOrder(array $attributes = []): Order
+{
+    $order = Order::factory()->create(array_merge([
+        'number' => 'FRRESLIP1',
+        'tracking_token' => str_repeat('r', 40),
+        'status' => OrderStatus::NeedReslip,
+    ], $attributes));
+
+    $path = 'slips/'.$order->id.'/old-slip.jpg';
+    Storage::disk('local')->put($path, 'old slip bytes');
+
+    $order->slip()->create([
+        'path' => $path,
+        'original_name' => 'old-slip.jpg',
+        'checksum' => hash('sha256', 'old slip bytes'),
+        'verifier_result' => SlipVerificationResult::Pass,
+    ]);
+
+    return $order->fresh(['slip']);
+}
+
+test('a need reslip confirmation shows promptpay and resubmit controls', function () {
+    Storage::fake('local');
+    $order = guestNeedReslipOrder();
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))
+        ->assertOk()
+        ->assertSee('ต้องแนบสลิปใหม่', false)
+        ->assertSee('PromptPay', false)
+        ->assertSee('data:image/svg+xml', false)
+        ->assertSee('แนบสลิปการโอน', false)
+        ->assertSee('ส่งสลิปใหม่', false)
+        ->assertSeeHtml('wire:click="resubmit"')
+        ->assertDontSee('สลิปผ่านการตรวจเบื้องต้นแล้ว', false)
+        ->assertDontSee('ดูสลิป old-slip.jpg', false);
+});
+
+test('a deposit need reslip confirmation shows the amount due now on the qr', function () {
+    Storage::fake('local');
+    $order = guestNeedReslipOrder([
+        'payment_mode' => PaymentMode::Deposit,
+        'total' => '1050.00',
+        'amount_due_now' => '500.00',
+        'amount_remaining' => '550.00',
+    ]);
+
+    $this->get(route('orders.confirmation', [
+        'order' => $order,
+        'token' => $order->tracking_token,
+    ]))
+        ->assertOk()
+        ->assertSee('500.00', false)
+        ->assertSee('คงเหลือตอนรับ', false)
+        ->assertSee('550.00', false);
+});
+
+test('a guest can resubmit a slip from the confirmation page', function () {
+    Storage::fake('local');
+    $order = guestNeedReslipOrder();
+
+    Livewire::test('pages::storefront.order-confirmation', [
+        'order' => $order->number,
+        'token' => $order->tracking_token,
+    ])
+        ->set('slip', UploadedFile::fake()->createWithContent('new-slip.jpg', random_bytes(128)))
+        ->call('resubmit')
+        ->assertHasNoErrors()
+        ->assertSee('รอเจ้าหน้าที่ตรวจสลิป', false)
+        ->assertSee('สลิปผ่านการตรวจเบื้องต้นแล้ว', false)
+        ->assertDontSee('ส่งสลิปใหม่', false);
+
+    $order->refresh();
+
+    expect($order->status)->toBe(OrderStatus::PendingReview)
+        ->and($order->slip->original_name)->toBe('new-slip.jpg');
 });
