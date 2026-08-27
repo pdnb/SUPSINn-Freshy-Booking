@@ -63,7 +63,7 @@ new #[Title('ชำระเงิน')] class extends Component
 };
 ?>
 
-<div class="min-h-dvh bg-bg pb-40 text-fg">
+<div class="min-h-dvh bg-bg pb-52 text-fg">
     <x-storefront.header :cart-count="$cartCount" />
 
     <main id="content" class="mx-auto max-w-lg p-4">
@@ -122,14 +122,13 @@ new #[Title('ชำระเงิน')] class extends Component
                 <p class="font-medium tracking-wide">{{ $promptpayId }}</p>
                 <x-storefront.price :amount="$draft['amount_due_now'] ?? $draft['total']" size="sm" class="mt-2" />
             </x-storefront.card>
-
-            <p class="mt-4 text-sm text-muted" id="slip-hint">ต้องแนบสลิปก่อนกดยืนยันการจอง</p>
-
-            <x-storefront.slip-dropzone
-                wire:model="slip"
-                :filename="$slip?->getClientOriginalName()"
-            />
-            @error('slip') <p class="mt-2 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
+                <x-storefront.slip-dropzone
+                    class="mt-4"
+                    wire:model="slip"
+                    :filename="$slip?->getClientOriginalName()"
+                    :preview-url="$slip?->isPreviewable() ? $slip->temporaryUrl() : null"
+                />
+                @error('slip') <p class="mt-2 text-sm text-danger" role="alert">{{ $message }}</p> @enderror
         @endif
     </main>
 

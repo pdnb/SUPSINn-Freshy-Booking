@@ -45,9 +45,25 @@ test('the payment page shows the amount and promptpay details', function () {
         ->assertSee('images/Thai_QR_Logo.svg', false)
         ->assertSee('data:image/svg+xml', false)
         ->assertSee('ยืนยันการจอง')
+        ->assertSee('สแกน QR เพื่อชำระ')
+        ->assertSee('แนบสลิปการโอน')
+        ->assertSee('จำเป็น')
+        ->assertSee('เลือกไฟล์')
         ->assertSeeHtml('wire:click="confirm"')
         ->assertSeeHtml('wire:target="confirm"')
         ->assertSeeHtml('wire:loading.attr="disabled"');
+});
+
+test('the payment page shows the attached slip filename after upload', function () {
+    payPageReady();
+
+    Livewire::test('pages::storefront.payment')
+        ->set('slip', UploadedFile::fake()->image('slip.jpg'))
+        ->assertSee('แนบแล้ว')
+        ->assertSee('slip.jpg')
+        ->assertSee('แตะเพื่อเปลี่ยนไฟล์')
+        ->assertDontSee('ลากมาวางหรือแตะเพื่อเลือก', false)
+        ->assertDontSee('เลือกไฟล์');
 });
 
 test('a guest can confirm a booking with a passing slip', function () {

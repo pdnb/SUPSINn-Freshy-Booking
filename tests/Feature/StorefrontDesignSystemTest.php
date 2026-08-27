@@ -149,11 +149,37 @@ test('storefront form primitives render labels errors and step states', function
         ->toContain('bg-accent/15')
         ->toContain('bg-border/50');
 
-    expect(Blade::render('<x-storefront.slip-dropzone />'))
+    $empty = Blade::render('<x-storefront.slip-dropzone />');
+
+    expect($empty)
         ->toContain('type="file"')
-        ->toContain('min-h-24')
+        ->toContain('sr-only')
+        ->toContain('min-h-36')
+        ->toContain('border-accent')
         ->toContain('แนบสลิปการโอน')
-        ->toContain('aria-describedby="slip-hint"');
+        ->toContain('เลือกไฟล์')
+        ->toContain('aria-describedby="slip-hint"')
+        ->toContain('x-on:drop.prevent')
+        ->toContain('กำลังอัปโหลด...')
+        ->toContain('<svg');
+
+    $attached = Blade::render('<x-storefront.slip-dropzone filename="slip.jpg" preview-url="/tmp/slip.jpg" />');
+
+    expect($attached)
+        ->toContain('แนบแล้ว')
+        ->toContain('slip.jpg')
+        ->toContain('src="/tmp/slip.jpg"')
+        ->toContain('alt="ตัวอย่างสลิป slip.jpg"')
+        ->toContain('แตะเพื่อเปลี่ยนไฟล์')
+        ->not->toContain('ลากมาวางหรือแตะเพื่อเลือก')
+        ->not->toContain('เลือกไฟล์');
+
+    $pdf = Blade::render('<x-storefront.slip-dropzone filename="slip.pdf" preview-url="/tmp/slip.pdf" />');
+
+    expect($pdf)
+        ->toContain('แนบแล้ว')
+        ->toContain('slip.pdf')
+        ->not->toContain('src="/tmp/slip.pdf"');
 });
 
 test('storefront pages do not paste raw cta card input or palette classes', function () {
