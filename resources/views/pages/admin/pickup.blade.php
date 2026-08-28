@@ -138,7 +138,7 @@ class extends Component
                 type="search"
                 x-ref="pickupSearch"
                 wire:model.live.debounce.300ms="search"
-                placeholder="รหัสออเดอร์หรือรหัสนักศึกษา"
+                placeholder="รหัสออเดอร์ รหัสนักศึกษา ชื่อ หรือเบอร์โทร"
                 aria-label="ค้นหาออเดอร์"
                 autocomplete="off"
                 spellcheck="false"
