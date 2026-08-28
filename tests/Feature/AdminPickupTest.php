@@ -104,7 +104,7 @@ test('fulfillment is a postage queue without channel tabs or pickup orders', fun
     $this->actingAs($staff)
         ->get(route('admin.fulfillment'))
         ->assertOk()
-        ->assertSee('คิวไปรษณีย์หลังยืนยันสลิป', false)
+        ->assertSee('คิวพัสดุลหลังแพ็คของแล้ว', false)
         ->assertDontSee('จัดส่ง / จุดรับ', false)
         ->assertDontSee('แยกตามช่องทาง', false)
         ->assertDontSee('role="tablist"', false)
@@ -149,7 +149,8 @@ test('the post fulfillment active queue includes shipped orders missing a parcel
         ->test('pages::admin.fulfillment')
         ->assertSee('FRPOST001', false)
         ->assertSee('FRPOST002', false)
-        ->assertDontSee('FRPOST003', false);
+        ->assertDontSee('FRPOST003', false)
+        ->assertSee('รอเลขพัสดุ', false);
 });
 
 test('staff can mark a postal order shipped with a parcel number', function () {
@@ -246,6 +247,44 @@ test('fulfillment filter toolbar hides field labels', function () {
         ->assertSee('placeholder="รหัสออเดอร์หรือรหัสนักศึกษา"', false)
         ->assertSee('max-width:360px', false)
         ->assertSee('ล้างตัวกรอง', false)
+        ->assertDontSeeHtml('<label class="field">');
+});
+
+test('fulfillment detail shows address items and a selected row', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'fulfillment' => FulfillmentMethod::Post,
+        'number' => 'FRDETAIL1',
+        'full_name' => 'วิชัย ไปรษณีย์',
+        'student_id' => '67017777777',
+        'address' => "99 ถนนทดสอบ\nแขวงคลองเตย",
+    ]);
+    $order->items()->create([
+        'product_id' => null,
+        'name' => 'ชุดนักศึกษา',
+        'price' => 500,
+        'qty' => 1,
+        'choices' => [
+            ['label' => 'ไซส์เสื้อ', 'value' => 'L'],
+        ],
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.fulfillment')
+        ->assertSee('เลือกแถวทางซ้าย', false)
+        ->set('id', $order->number)
+        ->assertSeeHtml('class="is-clickable is-selected"')
+        ->assertSee('วิชัย ไปรษณีย์', false)
+        ->assertSee('67017777777', false)
+        ->assertSee('99 ถนนทดสอบ', false)
+        ->assertSeeHtml('class="fulfill-items"')
+        ->assertDontSeeHtml('class="choice-list fulfill-items"')
+        ->assertSee('ชุดนักศึกษา × 1', false)
+        ->assertSee('ไซส์เสื้อ · L', false)
+        ->assertSeeHtml('class="choice-list"')
+        ->assertSee('aria-label="เลขพัสดุ"', false)
+        ->assertSee('จัดส่งแล้ว', false)
         ->assertDontSeeHtml('<label class="field">');
 });
 

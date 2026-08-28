@@ -122,7 +122,7 @@ class extends Component
         }
 
         return Order::query()
-            ->with(['items', 'bookingRound'])
+            ->with(['items', 'bookingRound', 'statusChanges.user'])
             ->where('number', $this->id)
             ->where('fulfillment', FulfillmentMethod::Post)
             ->first();
@@ -134,7 +134,7 @@ class extends Component
     <div class="page-head">
         <div>
             <h1>จัดส่ง</h1>
-            <p class="sub">คิวไปรษณีย์หลังยืนยันสลิป</p>
+            <p class="sub">คิวพัสดุลหลังแพ็คของแล้ว</p>
         </div>
     </div>
 
@@ -149,66 +149,208 @@ class extends Component
         </div>
     </div>
 
-    <div class="grid-2">
+    <div class="fulfill-split">
         <section class="panel">
+            <div class="panel-head">
+                <span class="row row-tight">
+                    <x-icon name="truck" size="sm" />
+                    คิวพัสดุ
+                </span>
+                <span class="meta">{{ $orders->count() }}</span>
+            </div>
             @if ($orders->isEmpty())
-                <p class="empty">ไม่มีออเดอร์</p>
+                <div class="empty fulfill-empty">
+                    <x-icon name="inbox" size="lg" />
+                    <p>ไม่มีออเดอร์</p>
+                </div>
             @else
-                <table class="ds-table">
-                    <thead>
-                        <tr>
-                            <th>ออเดอร์</th>
-                            <th>ผู้จอง</th>
-                            <th>สถานะ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($orders as $order)
-                            <tr
-                                class="is-clickable"
-                                wire:key="fulfill-{{ $order->id }}"
-                                wire:click="select('{{ $order->number }}')"
-                            >
-                                <td class="mono">{{ $order->number }}</td>
-                                <td>{{ $order->full_name }}<div class="meta">{{ $order->student_id }}</div></td>
-                                <td><x-admin.status-pill :status="$order->status" /></td>
+                <div class="fulfill-table-wrap">
+                    <table class="ds-table">
+                        <thead>
+                            <tr>
+                                <th>ออเดอร์</th>
+                                <th>ผู้จอง</th>
+                                <th>สถานะ</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach ($orders as $order)
+                                <tr
+                                    @class(['is-clickable', 'is-selected' => $id === $order->number])
+                                    wire:key="fulfill-{{ $order->id }}"
+                                    wire:click="select('{{ $order->number }}')"
+                                    aria-selected="{{ $id === $order->number ? 'true' : 'false' }}"
+                                >
+                                    <td class="mono">{{ $order->number }}</td>
+                                    <td>{{ $order->full_name }}<div class="meta">{{ $order->student_id }}</div></td>
+                                    <td>
+                                        <x-admin.status-pill :status="$order->status" />
+                                        @if ($order->status === OrderStatus::Shipped && blank($order->parcel_number))
+                                            <div class="meta">รอเลขพัสดุ</div>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @endif
         </section>
-        <section class="panel">
-            <div class="panel-head">รายละเอียด</div>
-            <div class="panel-body stack">
+
+        <section
+            class="panel fulfill-detail"
+            x-data
+            x-effect="$wire.id && $nextTick(() => $refs.parcelNumber?.focus())"
+        >
+            <div class="panel-head">
+                <span class="row row-tight">
+                    <x-icon name="clipboard-document-list" size="sm" />
+                    รายละเอียด
+                </span>
                 @if ($selected)
-                    <p><span class="mono">{{ $selected->number }}</span> · {{ $selected->full_name }}</p>
-                    <p class="muted">{{ $selected->phone }} · {{ $selected->fulfillment->label() }}</p>
-                    @if ($selected->address)
-                        <p>{{ $selected->address }}</p>
-                    @endif
                     <x-admin.status-pill :status="$selected->status" />
-                    @if ($canShip || $canUpdateParcel)
-                        <input
-                            class="input"
-                            type="text"
-                            wire:model="parcelNumber"
-                            placeholder="เลขพัสดุ"
-                            aria-label="เลขพัสดุ"
-                        >
-                        @error('parcel_number') <span class="error">{{ $message }}</span> @enderror
-                    @endif
-                    <div class="row">
-                        @if ($canShip)
-                            <button type="button" class="btn btn-primary" wire:click="markShipped">จัดส่งแล้ว</button>
-                        @endif
-                        @if ($canUpdateParcel)
-                            <button type="button" class="btn btn-primary" wire:click="saveParcelNumber">บันทึกเลขพัสดุ</button>
-                        @endif
-                        <a class="btn btn-ghost" href="{{ route('admin.orders.show', $selected) }}">ดูออเดอร์</a>
+                @endif
+            </div>
+            <div class="panel-body stack" wire:key="fulfill-detail-{{ $selected?->id ?? 'none' }}">
+                @if ($selected)
+                    <div class="fulfill-identity">
+                        <p class="mono fulfill-number">{{ $selected->number }}</p>
+                        <p>{{ $selected->full_name }}</p>
                     </div>
+
+                    <dl class="detail-list">
+                        <div>
+                            <dt>รหัสนักศึกษา</dt>
+                            <dd class="mono">{{ $selected->student_id }}</dd>
+                        </div>
+                        <div>
+                            <dt>โทร</dt>
+                            <dd class="mono">{{ $selected->phone }}</dd>
+                        </div>
+                        @if ($selected->faculty)
+                            <div>
+                                <dt>คณะ</dt>
+                                <dd>{{ $selected->faculty }}</dd>
+                            </div>
+                        @endif
+                        @if ($selected->address)
+                            <div>
+                                <dt>ที่อยู่จัดส่ง</dt>
+                                <dd class="address">{{ $selected->address }}</dd>
+                            </div>
+                        @endif
+                        @if ($selected->packed_at)
+                            <div>
+                                <dt>แพ็คแล้ว</dt>
+                                <dd class="mono">{{ $selected->packed_at->toThaiDatetime() }}</dd>
+                            </div>
+                        @endif
+                        @if (! $canShip && ! $canUpdateParcel)
+                            <div>
+                                <dt>เลขพัสดุ</dt>
+                                <dd class="mono">{{ $selected->parcel_number ?: 'ไม่มี' }}</dd>
+                            </div>
+                        @endif
+                    </dl>
+
+                    @if ($selected->items->isNotEmpty())
+                        <ul class="fulfill-items">
+                            @foreach ($selected->items as $item)
+                                <li wire:key="fulfill-item-{{ $item->id }}">
+                                    {{ $item->name }} × {{ $item->qty }}
+                                    @if (($item->choices ?? []) !== [])
+                                        <ul class="choice-list">
+                                            @foreach ($item->choices as $index => $choice)
+                                                <li wire:key="fulfill-choice-{{ $item->id }}-{{ $index }}">
+                                                    {{ $choice['label'] ?? '' }} · {{ $choice['value'] ?? '' }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+
+                    @if ($selected->statusChanges->isNotEmpty())
+                        <ol class="timeline fulfill-timeline">
+                            @foreach ($selected->statusChanges as $change)
+                                <li @class(['is-latest' => $loop->first]) wire:key="fulfill-change-{{ $change->id }}">
+                                    <div>{{ $change->to_status->label() }}</div>
+                                    <div class="muted">{{ $change->created_at?->toThaiDatetime() }} · {{ $change->user?->name }}</div>
+                                </li>
+                            @endforeach
+                        </ol>
+                    @endif
+
+                    @if ($canShip || $canUpdateParcel)
+                        <div class="fulfill-action">
+                            <p class="field-caption">เลขพัสดุ</p>
+                            <div @class(['fulfill-parcel-bar', 'is-invalid' => $errors->has('parcel_number')])>
+                                <input
+                                    class="input"
+                                    type="text"
+                                    x-ref="parcelNumber"
+                                    wire:model="parcelNumber"
+                                    @if ($canShip)
+                                        wire:keydown.enter.prevent="markShipped"
+                                    @else
+                                        wire:keydown.enter.prevent="saveParcelNumber"
+                                    @endif
+                                    placeholder="เลขพัสดุ"
+                                    aria-label="เลขพัสดุ"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                >
+                                @if ($canShip)
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        wire:click="markShipped"
+                                        wire:loading.attr="disabled"
+                                        wire:target="markShipped"
+                                    >
+                                        <x-icon name="check" size="sm" />
+                                        <span wire:loading.remove wire:target="markShipped">จัดส่งแล้ว</span>
+                                        <span wire:loading wire:target="markShipped">กำลังบันทึก…</span>
+                                    </button>
+                                @endif
+                                @if ($canUpdateParcel)
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        wire:click="saveParcelNumber"
+                                        wire:loading.attr="disabled"
+                                        wire:target="saveParcelNumber"
+                                    >
+                                        <x-icon name="check" size="sm" />
+                                        <span wire:loading.remove wire:target="saveParcelNumber">บันทึกเลขพัสดุ</span>
+                                        <span wire:loading wire:target="saveParcelNumber">กำลังบันทึก…</span>
+                                    </button>
+                                @endif
+                            </div>
+                            @error('parcel_number') <span class="error packing-scan-error">{{ $message }}</span> @enderror
+                            <div class="packing-scan-meta">
+                                <p class="muted packing-scan-hint">
+                                    @if ($canShip)
+                                        กด Enter เพื่อจัดส่ง ไม่บังคับ
+                                    @else
+                                        กด Enter เพื่อบันทึก
+                                    @endif
+                                </p>
+                                <a class="btn btn-ghost" href="{{ route('admin.orders.show', $selected) }}">ดูออเดอร์</a>
+                            </div>
+                        </div>
+                    @else
+                        <div class="row">
+                            <a class="btn btn-ghost" href="{{ route('admin.orders.show', $selected) }}">ดูออเดอร์</a>
+                        </div>
+                    @endif
                 @else
-                    <p class="empty">เลือกแถวทางซ้าย</p>
+                    <div class="empty fulfill-empty">
+                        <x-icon name="queue-list" size="lg" />
+                        <p>เลือกแถวทางซ้าย</p>
+                    </div>
                 @endif
             </div>
         </section>

@@ -306,7 +306,7 @@ class extends Component
 
         <section class="panel">
             <div class="panel-head">
-                <span>กองพิมพ์</span>
+                <span>ออเดอร์</span>
                 <span class="meta">{{ $orders->count() }}</span>
             </div>
             @if ($orders->isEmpty())

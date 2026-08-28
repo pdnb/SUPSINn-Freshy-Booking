@@ -15,4 +15,6 @@ Ship and edit only through `OrderService::markShipped()` (post + confirmed) and 
 
 The จัดส่ง page is postage-only (no channel tabs). **รอดำเนินการ** is `awaiting_parcel`: confirmed, plus shipped with a null number. Pickup (bookstore/hall) does not appear on this page. Guest confirmation for post is จองแล้ว → ตรวจสลิป → จัดส่งแล้ว (shipped = all done) and must not promise a pickup receipt.
 
+The screen is a dispatch station (same visual language as แพ็คของ): `.fulfill-split` queue + sticky detail, selected-row highlight (`.is-selected`), count in `panel-head`, `.fulfill-empty` empty states, and `.fulfill-parcel-bar` for จัดส่งแล้ว / บันทึกเลขพัสดุ. Detail shows guest, address (`pre-line`), items with one choice per line, and timeline when present. Do not add a KPI row or channel tabs. Filter toolbar still hides field labels.
+
 Guest confirmation **จุดรับสินค้า** shows only the order’s fulfillment method (bookstore or hall label + caption). Post hides that section. Do not list every pickup option.

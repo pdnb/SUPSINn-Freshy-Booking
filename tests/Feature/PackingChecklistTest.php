@@ -284,7 +284,7 @@ test('staff can open packing checklist and clear filters', function () {
         ->assertSee('67018880001', false)
         ->assertSee('PDF', false)
         ->assertSee('PDF · 1 ใบ', false)
-        ->assertSee('กองพิมพ์', false)
+        ->assertSee('ออเดอร์', false)
         ->assertDontSee('packing-scan', false)
         ->assertDontSeeHtml('class="kpi"');
 
@@ -335,7 +335,7 @@ test('the packing station shows empty copy when the pile is empty', function () 
         ->assertOk()
         ->assertSee('ไม่มีออเดอร์ในตัวกรองนี้', false)
         ->assertSee('PDF · 0 ใบ', false)
-        ->assertSee('กองพิมพ์', false);
+        ->assertSee('ออเดอร์', false);
 });
 
 test('an unknown tab query falls back to scan', function () {

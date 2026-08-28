@@ -415,6 +415,11 @@ h3 { font-size: var(--fs-h3); line-height: 1.35; }
 .ds-table tbody tr { cursor: default; }
 .ds-table tbody tr.is-clickable { cursor: pointer; }
 .ds-table tbody tr:hover { background: var(--fg-soft); }
+.ds-table tbody tr.is-selected,
+.ds-table tbody tr.is-selected:hover {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
 .ds-table .num-col {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -1068,7 +1073,14 @@ img.slip-frame {
   object-fit: contain !important;
   display: block;
 }
-.choice-list { margin: 0; padding-left: 1.1em; color: var(--muted); font-size: 12px; }
+.choice-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.choice-list > li + li { margin-top: 2px; }
 .detail-list,
 .totals-list {
   display: grid;
@@ -1295,18 +1307,134 @@ img.slip-frame {
   cursor: default;
 }
 .packing-group .meta { margin-left: 8px; }
-.packing-empty {
+.packing-empty,
+.fulfill-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
 }
-.packing-empty svg {
+.packing-empty svg,
+.fulfill-empty svg {
   width: 32px;
   height: 32px;
   color: var(--muted);
 }
-.packing-empty p { margin: 0; }
+.packing-empty p,
+.fulfill-empty p { margin: 0; }
+
+/* ── fulfillment station ─────────────────────────────────── */
+.fulfill-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+  gap: var(--gap-md);
+  align-items: start;
+}
+.fulfill-split .panel-head svg {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+}
+.fulfill-table-wrap { overflow-x: auto; }
+.fulfill-detail {
+  position: sticky;
+  top: calc(var(--topbar-h) + 12px);
+}
+.fulfill-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.fulfill-number {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.fulfill-items {
+  list-style: none;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--border);
+  color: var(--fg);
+  font-size: var(--fs-body);
+}
+.fulfill-items > li { margin-bottom: 8px; }
+.fulfill-items > li:last-child { margin-bottom: 0; }
+.fulfill-items .choice-list { margin-top: 4px; }
+.fulfill-timeline {
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.fulfill-action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+  padding: 14px 16px 16px;
+  margin: 0 -16px -16px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+.fulfill-parcel-bar {
+  display: flex;
+  align-items: stretch;
+  min-height: 56px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.fulfill-parcel-bar:focus-within {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent-soft);
+}
+.fulfill-parcel-bar.is-invalid { border-color: var(--danger); }
+.fulfill-parcel-bar.is-invalid:focus-within {
+  outline-color: var(--danger-soft);
+}
+.fulfill-parcel-bar .input {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+.fulfill-parcel-bar .input:focus {
+  outline: none;
+  border-color: transparent;
+}
+.fulfill-parcel-bar .btn {
+  flex-shrink: 0;
+  min-width: 160px;
+  min-height: 56px;
+  height: auto;
+  border-radius: 0;
+  border: 0;
+  border-left: 1px solid var(--accent);
+  white-space: nowrap;
+}
+.fulfill-parcel-bar .btn:active { transform: none; }
+.fulfill-parcel-bar .btn:focus-visible { outline-offset: -2px; }
+@media (max-width: 920px) {
+  .fulfill-split { grid-template-columns: 1fr; }
+  .fulfill-detail { position: static; }
+}
+@media (max-width: 640px) {
+  .fulfill-parcel-bar { flex-direction: column; }
+  .fulfill-parcel-bar .btn {
+    min-width: 0;
+    border-left: 0;
+    border-top: 1px solid var(--accent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fulfill-parcel-bar .btn { transition: none; }
+}
 @media (max-width: 640px) {
   .packing-scan-bar { flex-direction: column; }
   .packing-scan-bar .btn {
