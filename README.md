@@ -116,7 +116,7 @@ php artisan migrate:fresh --seed
 
 แล้วเปิด [http://supsinn-freshy-booking.test/admin](http://supsinn-freshy-booking.test/admin)
 
-ค่าเริ่มต้นจาก `.env.example`: `admin@example.com` / `password` — เปลี่ยนก่อนใช้ร่วมกับคนอื่น
+ค่าเริ่มต้นจาก `.env.example`: `admin@sru.ac.th` / `password` — เปลี่ยนก่อนใช้ร่วมกับคนอื่น
 
 หลังล็อกอินมีคอนโซล Livewire (ไม่ใช้ Filament): ภาพรวม · ออเดอร์ · จัดส่ง · รับของ · สรุปยอด · สต็อก · สินค้า · รอบจอง · ตั้งค่า  
 ยืนยัน/ปฏิเสธสลิปและเปลี่ยนสถานะออเดอร์ทำที่คิวออเดอร์ / หน้ารายละเอียด

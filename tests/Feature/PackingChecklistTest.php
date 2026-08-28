@@ -278,7 +278,7 @@ test('staff can open packing checklist and clear filters', function () {
         ->assertSee('aria-label="รอบจอง"', false)
         ->assertSee('aria-label="ช่องทาง"', false)
         ->assertSee('aria-label="คณะ"', false)
-        ->assertSee('ล้างตัวกรอง', false)
+        ->assertSee('เคลียร์', false)
         ->assertSee('PACKPAGE01', false)
         ->assertSee('นภา ทดสอบ', false)
         ->assertSee('67018880001', false)

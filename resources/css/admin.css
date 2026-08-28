@@ -1448,3 +1448,45 @@ img.slip-frame {
 @media (prefers-reduced-motion: reduce) {
   .packing-scan .btn { transition: none; }
 }
+
+/* ── pickup desk ─────────────────────────────────────────── */
+.pickup-due {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in oklch, var(--warn) 40%, var(--border));
+  border-radius: var(--radius);
+  background: var(--warn-soft);
+}
+.pickup-due .field-caption { margin: 0; }
+.pickup-due-amount {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.pickup-action-btn {
+  width: 100%;
+  min-height: 56px;
+}
+.pickup-detail {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - var(--topbar-h) - 180px);
+}
+.pickup-detail .panel-body {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+}
+.pickup-detail-action {
+  margin: 0;
+  flex-shrink: 0;
+}
+@media (max-width: 920px) {
+  .pickup-detail { max-height: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pickup-action-btn { transition: none; }
+}

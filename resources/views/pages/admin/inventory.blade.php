@@ -118,7 +118,7 @@ class extends Component
                 <option value="low">ต่ำกว่าเกณฑ์</option>
                 <option value="ok">พอ</option>
             </select>
-            <button type="button" class="btn btn-ghost" wire:click="clearFilters">ล้างตัวกรอง</button>
+            <button type="button" class="btn btn-ghost" wire:click="clearFilters">เคลียร์</button>
         </div>
     </div>
 

@@ -44,7 +44,7 @@ Mail and database notifications have different priorities. Use `viaQueues()` to 
 Avoid creating dummy models to send notifications to arbitrary addresses.
 
 ```php
-Notification::route('mail', 'admin@example.com')->notify(new SystemAlert());
+Notification::route('mail', 'admin@sru.ac.th')->notify(new SystemAlert());
 ```
 
 ## Implement `HasLocalePreference` on Notifiable Models

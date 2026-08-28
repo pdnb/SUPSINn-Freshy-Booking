@@ -28,7 +28,7 @@ test('staff can adjust on-hand stock from the inventory page', function () {
     Livewire::actingAs($staff)
         ->test('pages::admin.inventory')
         ->assertSee('เสื้อ ปี 69', false)
-        ->assertSee('ล้างตัวกรอง', false)
+        ->assertSee('เคลียร์', false)
         ->set('search', 'ไม่มีสินค้านี้')
         ->set('stock', 'low')
         ->call('clearFilters')

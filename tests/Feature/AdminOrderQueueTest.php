@@ -35,7 +35,7 @@ test('staff can see pending review orders in the slip queue', function () {
         ->assertSee($order->created_at->toThaiDatetime(), false)
         ->assertSee('aria-label="ค้นหา"', false)
         ->assertDontSeeHtml('<label class="field">')
-        ->assertSee('ล้างตัวกรอง', false)
+        ->assertSee('เคลียร์', false)
         ->assertSee('FRQUEUE99', false)
         ->assertDontSee('FRHIDDEN1', false);
 });

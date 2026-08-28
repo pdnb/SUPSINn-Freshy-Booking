@@ -27,11 +27,11 @@ test('the storefront stays public', function () {
 
 test('invalid credentials do not authenticate', function () {
     User::factory()->create([
-        'email' => 'admin@example.com',
+        'email' => 'admin@sru.ac.th',
     ]);
 
     Livewire::test('pages::admin.login')
-        ->set('email', 'admin@example.com')
+        ->set('email', 'admin@sru.ac.th')
         ->set('password', 'wrong-password')
         ->call('authenticate')
         ->assertHasErrors('email')
@@ -52,11 +52,11 @@ test('the admin console uses a gray and white palette', function () {
 
 test('staff can log in and reach the admin dashboard', function () {
     $user = User::factory()->create([
-        'email' => 'admin@example.com',
+        'email' => 'admin@sru.ac.th',
     ]);
 
     Livewire::test('pages::admin.login')
-        ->set('email', 'admin@example.com')
+        ->set('email', 'admin@sru.ac.th')
         ->set('password', 'password')
         ->call('authenticate')
         ->assertRedirect(route('admin.dashboard'));
@@ -111,11 +111,11 @@ test('staff can log out and lose admin access', function () {
 
 test('login is rate limited after too many failures', function () {
     User::factory()->create([
-        'email' => 'admin@example.com',
+        'email' => 'admin@sru.ac.th',
     ]);
 
     $login = Livewire::test('pages::admin.login')
-        ->set('email', 'admin@example.com')
+        ->set('email', 'admin@sru.ac.th')
         ->set('password', 'wrong-password');
 
     foreach (range(1, 5) as $attempt) {

@@ -33,7 +33,7 @@ test('staff can search pickup by student id or name', function () {
         ->test('pages::admin.pickup')
         ->assertSee('placeholder="รหัสออเดอร์หรือรหัสนักศึกษา"', false)
         ->assertSee('aria-label="ค้นหาออเดอร์"', false)
-        ->assertSee('ล้างตัวกรอง', false)
+        ->assertSee('เคลียร์', false)
         ->assertDontSeeHtml('<label class="field"')
         ->set('search', '67019999999')
         ->assertSee('FRPICK001', false)
@@ -82,6 +82,114 @@ test('staff must collect the remaining deposit balance before pickup completion'
 
     expect($order->fresh()->status)->toBe(OrderStatus::Completed)
         ->and($order->fresh()->balance_collected_at)->not->toBeNull();
+});
+
+test('a unique pickup search hit is selected for the desk', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->create([
+        'status' => OrderStatus::ReadyForPickup,
+        'number' => 'FRONLY001',
+        'full_name' => 'หนึ่ง คนเดียว',
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.pickup')
+        ->set('search', 'FRONLY001')
+        ->assertSet('selectedId', $order->id)
+        ->assertSeeHtml('class="is-clickable is-selected"')
+        ->assertSee('หนึ่ง คนเดียว', false)
+        ->assertSeeHtml('wire:click="markPickedUp"');
+});
+
+test('two pickup search hits stay unselected until staff pick a row', function () {
+    $staff = User::factory()->create();
+    $first = Order::factory()->create([
+        'status' => OrderStatus::ReadyForPickup,
+        'number' => 'FRPAIR001',
+        'full_name' => 'คู่ หนึ่ง',
+    ]);
+    Order::factory()->create([
+        'status' => OrderStatus::ReadyForPickup,
+        'number' => 'FRPAIR002',
+        'full_name' => 'คู่ สอง',
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.pickup')
+        ->set('search', 'FRPAIR')
+        ->assertSet('selectedId', null)
+        ->assertSee('เลือกแถวทางซ้าย', false)
+        ->assertDontSeeHtml('wire:click="markPickedUp"')
+        ->call('select', $first->id)
+        ->assertSet('selectedId', $first->id)
+        ->assertSeeHtml('class="is-clickable is-selected"')
+        ->assertSee('คู่ หนึ่ง', false);
+});
+
+test('pickup empty search asks staff to type', function () {
+    $staff = User::factory()->create();
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.pickup')
+        ->assertSee('พิมพ์เพื่อค้นหา', false)
+        ->assertDontSee('เลือกแถวทางซ้าย', false)
+        ->assertSeeHtml('class="fulfill-split"')
+        ->assertSee('max-width:420px', false)
+        ->assertSeeHtml('class="empty fulfill-empty"')
+        ->set('search', 'ไม่มีออเดอร์นี้')
+        ->assertSee('ไม่พบออเดอร์', false);
+});
+
+test('pickup detail shows guest method items and remaining deposit', function () {
+    $staff = User::factory()->create();
+    $order = Order::factory()->deposit()->create([
+        'status' => OrderStatus::ReadyForPickup,
+        'fulfillment' => FulfillmentMethod::Hall,
+        'number' => 'FRDESK001',
+        'full_name' => 'วิชัย รับของ',
+        'student_id' => '67017777777',
+        'phone' => '0811111111',
+    ]);
+    $order->items()->create([
+        'product_id' => null,
+        'name' => 'ชุดนักศึกษา',
+        'price' => 2000,
+        'qty' => 1,
+        'choices' => [
+            ['label' => 'ไซส์เสื้อ', 'value' => 'L'],
+        ],
+    ]);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.pickup')
+        ->set('search', 'FRDESK001')
+        ->assertSeeHtml('class="is-clickable is-selected"')
+        ->assertSeeHtml('<div class="meta">67017777777</div>')
+        ->assertSee('วิชัย รับของ', false)
+        ->assertSee('0811111111', false)
+        ->assertSee('รับที่หอประชุมฯ วันรายงานตัว', false)
+        ->assertSeeHtml('class="fulfill-items"')
+        ->assertSee('ชุดนักศึกษา × 1', false)
+        ->assertSee('ไซส์เสื้อ · L', false)
+        ->assertSee('ยอดสุทธิ', false)
+        ->assertSee('ต้องเก็บส่วนที่เหลือ', false)
+        ->assertSee('ยังไม่เก็บ', false)
+        ->assertSee('บันทึกเก็บส่วนที่เหลือ', false)
+        ->assertDontSeeHtml('wire:click="markPickedUp"')
+        ->assertDontSeeHtml('<label class="field">');
+});
+
+test('pickup filter toolbar hides field labels', function () {
+    $staff = User::factory()->create();
+
+    $this->actingAs($staff)
+        ->get(route('admin.pickup'))
+        ->assertOk()
+        ->assertSee('aria-label="ค้นหาออเดอร์"', false)
+        ->assertSee('placeholder="รหัสออเดอร์หรือรหัสนักศึกษา"', false)
+        ->assertSee('max-width:420px', false)
+        ->assertSee('เคลียร์', false)
+        ->assertDontSeeHtml('<label class="field">');
 });
 
 test('fulfillment is a postage queue without channel tabs or pickup orders', function () {
@@ -246,7 +354,7 @@ test('fulfillment filter toolbar hides field labels', function () {
         ->assertSee('aria-label="สถานะ"', false)
         ->assertSee('placeholder="รหัสออเดอร์หรือรหัสนักศึกษา"', false)
         ->assertSee('max-width:360px', false)
-        ->assertSee('ล้างตัวกรอง', false)
+        ->assertSee('เคลียร์', false)
         ->assertDontSeeHtml('<label class="field">');
 });
 

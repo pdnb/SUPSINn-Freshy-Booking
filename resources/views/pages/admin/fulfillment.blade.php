@@ -145,7 +145,7 @@ class extends Component
                 <option value="all">ทั้งหมด</option>
             </select>
             <input class="input" type="search" wire:model.live.debounce.300ms="search" placeholder="รหัสออเดอร์หรือรหัสนักศึกษา" aria-label="ค้นหา" style="max-width:360px; width:100%">
-            <button type="button" class="btn btn-ghost" wire:click="clearFilters">ล้างตัวกรอง</button>
+            <button type="button" class="btn btn-ghost" wire:click="clearFilters">เคลียร์</button>
         </div>
     </div>
 

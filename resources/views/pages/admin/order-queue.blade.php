@@ -82,7 +82,7 @@ class extends Component
             </select>
             <input class="input" type="date" wire:model.live="date_from" aria-label="ตั้งแต่วันที่" style="max-width:160px">
             <input class="input" type="date" wire:model.live="date_to" aria-label="ถึงวันที่" style="max-width:160px">
-            <button type="button" class="btn btn-ghost" wire:click="clearFilters">ล้างตัวกรอง</button>
+            <button type="button" class="btn btn-ghost" wire:click="clearFilters">เคลียร์</button>
         </div>
     </div>
 

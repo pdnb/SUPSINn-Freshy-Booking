@@ -45,11 +45,11 @@ test('the storefront stays public', function () {
 
 test('password login still reaches the admin dashboard', function () {
     $user = User::factory()->create([
-        'email' => 'admin@example.com',
+        'email' => 'admin@sru.ac.th',
     ]);
 
     Livewire::test('pages::admin.login')
-        ->set('email', 'admin@example.com')
+        ->set('email', 'admin@sru.ac.th')
         ->set('password', 'password')
         ->call('authenticate')
         ->assertRedirect(route('admin.dashboard'));

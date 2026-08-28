@@ -300,7 +300,7 @@ class extends Component
                         <option value="{{ $name }}">{{ $name }}</option>
                     @endforeach
                 </select>
-                <button type="button" class="btn btn-ghost" wire:click="clearFilters">ล้างตัวกรอง</button>
+                <button type="button" class="btn btn-ghost" wire:click="clearFilters">เคลียร์</button>
             </div>
         </div>
 
@@ -314,7 +314,7 @@ class extends Component
                     <x-icon name="inbox" size="lg" />
                     <p>ไม่มีออเดอร์ในตัวกรองนี้</p>
                     @if ($hasActiveFilters)
-                        <button type="button" class="btn btn-ghost" wire:click="clearFilters">ล้างตัวกรอง</button>
+                        <button type="button" class="btn btn-ghost" wire:click="clearFilters">เคลียร์</button>
                     @endif
                 </div>
             @else

@@ -84,7 +84,7 @@ class extends Component
                 <option value="active">เปิดขาย</option>
                 <option value="draft">ปิดขาย</option>
             </select>
-            <button type="button" class="btn btn-ghost" wire:click="clearFilters">ล้างตัวกรอง</button>
+            <button type="button" class="btn btn-ghost" wire:click="clearFilters">เคลียร์</button>
         </div>
     </div>
 
