@@ -102,7 +102,11 @@
                   </div>
                 ` : `
                   <p class="page-sub">ออเดอร์นี้ออกจากคิวตรวจแล้ว — ไปต่อที่
-                    <a href="admin-fulfillment.html?id=${order.id}&channel=${order.fulfillment}">จัดส่ง</a>
+                    ${order.fulfillment === "post"
+                      ? `<a href="admin-fulfillment.html?id=${order.id}">จัดส่ง</a>`
+                      : order.status === "ready_for_pickup"
+                        ? `<a href="admin-pickup.html">รับของ</a>`
+                        : `<a href="admin-orders.html">ออเดอร์</a>`}
                   </p>
                 `}
               </div>

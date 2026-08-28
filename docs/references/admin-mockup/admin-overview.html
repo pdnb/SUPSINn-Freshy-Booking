@@ -74,9 +74,12 @@
     `).join("") || `<p class="empty">ไม่มีรายการค้าง</p>`;
 
     document.getElementById("recent-list").innerHTML = state.orders.slice(0, 6).map((order) => {
-      const href = order.status === "confirmed" || order.status === "ready_for_pickup" || order.status === "shipped"
-        ? `admin-fulfillment.html?id=${order.id}&channel=${order.fulfillment}`
-        : `admin-order-detail.html?id=${order.id}`;
+      let href = `admin-order-detail.html?id=${order.id}`;
+      if (order.fulfillment === "post" && (order.status === "confirmed" || order.status === "shipped")) {
+        href = `admin-fulfillment.html?id=${order.id}`;
+      } else if (order.fulfillment !== "post" && order.status === "ready_for_pickup") {
+        href = `admin-pickup.html?search=${order.id}`;
+      }
 
       return `
         <a class="attn-row" href="${href}" data-od-id="recent-${order.id}">

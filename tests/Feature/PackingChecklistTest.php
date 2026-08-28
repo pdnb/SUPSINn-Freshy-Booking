@@ -260,20 +260,38 @@ test('staff can open packing checklist and clear filters', function () {
         ->assertDontSee('ใบแพ็ค', false)
         ->assertDontSee('แพ็คสินค้า', false)
         ->assertSee('พิมพ์ checklist หนึ่งออเดอร์ต่อหน้า สำหรับโต๊ะแพ็ค', false)
+        ->assertSee('aria-label="รหัสออเดอร์"', false)
+        ->assertSee('packing-scan-bar', false)
+        ->assertDontSee('filters-align-start', false)
+        ->assertDontSeeHtml('<label class="field">')
+        ->assertDontSee('PACKPAGE01', false)
+        ->assertDontSee('PDF ·', false)
+        ->assertSee('แพ็คแล้ววันนี้', false)
+        ->assertSee('packing-scan', false)
+        ->assertSee('wire:loading.attr="disabled"', false)
+        ->assertSee("wire:click=\"\$set('tab', 'print')\"", false)
+        ->assertDontSeeHtml('class="kpi"');
+
+    $this->actingAs($staff)
+        ->get(route('admin.packing-checklist', ['tab' => 'print']))
+        ->assertOk()
         ->assertSee('aria-label="รอบจอง"', false)
         ->assertSee('aria-label="ช่องทาง"', false)
         ->assertSee('aria-label="คณะ"', false)
-        ->assertSee('aria-label="รหัสออเดอร์"', false)
-        ->assertSee('filters-align-start', false)
         ->assertSee('ล้างตัวกรอง', false)
-        ->assertDontSeeHtml('<label class="field">')
         ->assertSee('PACKPAGE01', false)
         ->assertSee('นภา ทดสอบ', false)
+        ->assertSee('67018880001', false)
         ->assertSee('PDF', false)
-        ->assertSee('แพ็คแล้ววันนี้', false);
+        ->assertSee('PDF · 1 ใบ', false)
+        ->assertSee('กองพิมพ์', false)
+        ->assertDontSee('packing-scan', false)
+        ->assertDontSeeHtml('class="kpi"');
 
     Livewire::actingAs($staff)
         ->test('pages::admin.packing-checklist')
+        ->assertSet('tab', 'scan')
+        ->set('tab', 'print')
         ->set('booking_round_id', '1')
         ->set('fulfillment', 'post')
         ->set('faculty', 'คณะวิศวกรรมศาสตร์')
@@ -283,10 +301,12 @@ test('staff can open packing checklist and clear filters', function () {
         ->assertSet('faculty', '');
 });
 
-test('pack number actions stay aligned with the input when an error appears', function () {
+test('pack stays attached to the scan bar when an error appears', function () {
     $css = file_get_contents(resource_path('css/admin.css'));
 
-    expect($css)->toMatch('/\.filters-align-start\s*\{[^}]*align-items:\s*flex-start/s');
+    expect($css)->toMatch('/\.packing-scan-bar\s*\{[^}]*display:\s*flex/s')
+        ->and($css)->toMatch('/\.packing-scan-bar \.input\s*\{[^}]*min-height:\s*56px/s')
+        ->and($css)->toMatch('/\.packing-scan-bar \.btn\s*\{[^}]*min-height:\s*56px/s');
 
     $staff = User::factory()->create();
     $order = packableOrder(['number' => 'PACKALIGN1']);
@@ -297,7 +317,84 @@ test('pack number actions stay aligned with the input when an error appears', fu
         ->set('packNumber', $order->number)
         ->call('markPacked')
         ->assertSee('ออเดอร์นี้แพ็คแล้ว', false)
-        ->assertSeeHtml('class="filters filters-align-start"');
+        ->assertSeeHtml('packing-scan-bar is-invalid');
+});
+
+test('the packing station shows empty copy when the pile is empty', function () {
+    $staff = User::factory()->create();
+
+    $this->actingAs($staff)
+        ->get(route('admin.packing-checklist'))
+        ->assertOk()
+        ->assertSee('ยังไม่มีออเดอร์ที่แพ็ควันนี้', false)
+        ->assertDontSee('ไม่มีออเดอร์ในตัวกรองนี้', false)
+        ->assertDontSee('PDF ·', false);
+
+    $this->actingAs($staff)
+        ->get(route('admin.packing-checklist', ['tab' => 'print']))
+        ->assertOk()
+        ->assertSee('ไม่มีออเดอร์ในตัวกรองนี้', false)
+        ->assertSee('PDF · 0 ใบ', false)
+        ->assertSee('กองพิมพ์', false);
+});
+
+test('an unknown tab query falls back to scan', function () {
+    $staff = User::factory()->create();
+
+    $this->actingAs($staff)
+        ->get(route('admin.packing-checklist', ['tab' => 'nope']))
+        ->assertOk()
+        ->assertSee('packing-scan', false)
+        ->assertDontSee('PDF ·', false);
+
+    Livewire::actingAs($staff)
+        ->test('pages::admin.packing-checklist')
+        ->set('tab', 'nope')
+        ->assertSet('tab', 'scan');
+});
+
+test('the packing station groups channels shows qty and packed time', function () {
+    $staff = User::factory()->create();
+
+    $post = packableOrder([
+        'number' => 'PACKUIPOST',
+        'fulfillment' => FulfillmentMethod::Post,
+        'address' => '1 ถนนหลัก',
+        'faculty' => 'คณะครุศาสตร์',
+    ]);
+    $post->items()->update(['qty' => 3]);
+
+    packableOrder([
+        'number' => 'PACKUIBOOK',
+        'fulfillment' => FulfillmentMethod::Bookstore,
+        'faculty' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+    ]);
+
+    $packed = packableOrder([
+        'number' => 'PACKUIDONE',
+        'full_name' => 'แพ็ค เสร็จแล้ว',
+        'fulfillment' => FulfillmentMethod::Hall,
+    ]);
+    packingChecklist()->markPacked($packed->number, $staff);
+
+    $this->actingAs($staff)
+        ->get(route('admin.packing-checklist'))
+        ->assertOk()
+        ->assertSee('แพ็ค เสร็จแล้ว', false)
+        ->assertSee('น.', false)
+        ->assertSee('aria-label="ยกเลิกแพ็ค PACKUIDONE"', false)
+        ->assertSee('wire:loading.attr="disabled"', false)
+        ->assertDontSee('PDF ·', false);
+
+    $this->actingAs($staff)
+        ->get(route('admin.packing-checklist', ['tab' => 'print']))
+        ->assertOk()
+        ->assertSee('PDF · 2 ใบ', false)
+        ->assertSee('packing-group', false)
+        ->assertSee('จัดส่งทางไปรษณีย์', false)
+        ->assertSee('รับที่ศูนย์หนังสือและเอกสารตำรา', false)
+        ->assertSeeHtml('<td class="num-col">3</td>')
+        ->assertDontSee('แพ็ค เสร็จแล้ว', false);
 });
 
 test('marking packed drops the order from the print pile and unmarking restores it', function () {

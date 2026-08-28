@@ -63,6 +63,7 @@ test('queue fulfillment and pickup share the same sample order ids', function ()
         ->and($orders)->toContain('data-od-id="orders-table"')
         ->and($fulfillment)->toContain('admin-data.js')
         ->and($fulfillment)->toContain('data-od-id="fulfillment-table"')
+        ->and($fulfillment)->not->toContain('data-od-id="channel-tabs"')
         ->and($pickup)->toContain('admin-data.js')
         ->and($pickup)->toContain('data-od-id="pickup-search"');
 });

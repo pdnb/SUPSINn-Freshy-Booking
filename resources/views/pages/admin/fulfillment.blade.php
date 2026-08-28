@@ -15,9 +15,6 @@ new #[Layout('layouts.admin')]
 class extends Component
 {
     #[Url]
-    public string $channel = 'bookstore';
-
-    #[Url]
     public string $status = 'active';
 
     #[Url]
@@ -90,13 +87,10 @@ class extends Component
 
     public function render(OrderService $orders)
     {
-        $channel = FulfillmentMethod::tryFrom($this->channel) ?? FulfillmentMethod::Bookstore;
-        $this->channel = $channel->value;
-
         $filters = [
             'search' => $this->search !== '' ? $this->search : null,
             'status' => null,
-            'fulfillment' => $channel,
+            'fulfillment' => FulfillmentMethod::Post,
         ];
 
         if ($this->status === 'all') {
@@ -106,23 +100,18 @@ class extends Component
                 OrderStatus::Shipped,
                 OrderStatus::Completed,
             ];
-        } elseif ($channel === FulfillmentMethod::Post) {
-            $filters['awaiting_parcel'] = true;
         } else {
-            $filters['statuses'] = [OrderStatus::Confirmed];
+            $filters['awaiting_parcel'] = true;
         }
 
         $list = $orders->queue($filters);
         $selected = $this->selected();
 
         return $this->view([
-            'channels' => FulfillmentMethod::cases(),
             'orders' => $list,
             'selected' => $selected,
             'canShip' => $selected !== null && in_array(OrderStatus::Shipped, $orders->allowedTransitions($selected), true),
-            'canUpdateParcel' => $selected !== null
-                && $selected->fulfillment === FulfillmentMethod::Post
-                && $selected->status === OrderStatus::Shipped,
+            'canUpdateParcel' => $selected !== null && $selected->status === OrderStatus::Shipped,
         ]);
     }
 
@@ -135,6 +124,7 @@ class extends Component
         return Order::query()
             ->with(['items', 'bookingRound'])
             ->where('number', $this->id)
+            ->where('fulfillment', FulfillmentMethod::Post)
             ->first();
     }
 };
@@ -143,30 +133,16 @@ class extends Component
 <div>
     <div class="page-head">
         <div>
-            <h1>จัดส่ง / จุดรับ</h1>
-            <p class="sub">บอร์ดหลังยืนยันสลิป แยกตามช่องทาง</p>
+            <h1>จัดส่ง</h1>
+            <p class="sub">คิวไปรษณีย์หลังยืนยันสลิป</p>
         </div>
-    </div>
-
-    <div class="tabs" role="tablist" aria-label="ช่องทาง">
-        @foreach ($channels as $method)
-            <button
-                type="button"
-                class="tab {{ $channel === $method->value ? 'is-active' : '' }}"
-                wire:click="$set('channel', '{{ $method->value }}')"
-                role="tab"
-                aria-selected="{{ $channel === $method->value ? 'true' : 'false' }}"
-            >
-                {{ $method->label() }}
-            </button>
-        @endforeach
     </div>
 
     <div class="toolbar">
         <div class="filters">
             <select class="select" wire:model.live="status" aria-label="สถานะ" style="max-width:200px">
                 <option value="active">รอดำเนินการ</option>
-                <option value="all">ทั้งหมดในช่องทาง</option>
+                <option value="all">ทั้งหมด</option>
             </select>
             <input class="input" type="search" wire:model.live.debounce.300ms="search" placeholder="รหัสออเดอร์หรือรหัสนักศึกษา" aria-label="ค้นหา" style="max-width:360px; width:100%">
             <button type="button" class="btn btn-ghost" wire:click="clearFilters">ล้างตัวกรอง</button>
@@ -176,7 +152,7 @@ class extends Component
     <div class="grid-2">
         <section class="panel">
             @if ($orders->isEmpty())
-                <p class="empty">ไม่มีออเดอร์ในช่องทางนี้</p>
+                <p class="empty">ไม่มีออเดอร์</p>
             @else
                 <table class="ds-table">
                     <thead>
@@ -212,7 +188,7 @@ class extends Component
                         <p>{{ $selected->address }}</p>
                     @endif
                     <x-admin.status-pill :status="$selected->status" />
-                    @if ($selected->fulfillment === \App\Enums\FulfillmentMethod::Post && ($canShip || $canUpdateParcel))
+                    @if ($canShip || $canUpdateParcel)
                         <input
                             class="input"
                             type="text"

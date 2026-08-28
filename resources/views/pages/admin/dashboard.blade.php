@@ -1,4 +1,5 @@
 <?php
+use App\Enums\FulfillmentMethod;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Services\Order\OrderService;
@@ -24,6 +25,25 @@ class extends Component
             'attention' => $attention,
             'recent' => Order::query()->with('items')->latest()->limit(6)->get(),
         ]);
+    }
+
+    public function recentOrderHref(Order $order): string
+    {
+        if (
+            $order->fulfillment === FulfillmentMethod::Post
+            && in_array($order->status, [OrderStatus::Confirmed, OrderStatus::Shipped], true)
+        ) {
+            return route('admin.fulfillment', ['id' => $order->number]);
+        }
+
+        if (
+            $order->fulfillment !== FulfillmentMethod::Post
+            && $order->status === OrderStatus::ReadyForPickup
+        ) {
+            return route('admin.pickup', ['search' => $order->number]);
+        }
+
+        return route('admin.orders.show', $order);
     }
 };
 ?>
@@ -69,16 +89,7 @@ class extends Component
             <div class="panel-head">ออเดอร์ล่าสุด</div>
             <div class="panel-body">
                 @forelse ($recent as $order)
-                    @php
-                        $href = in_array($order->status, [
-                            \App\Enums\OrderStatus::Confirmed,
-                            \App\Enums\OrderStatus::ReadyForPickup,
-                            \App\Enums\OrderStatus::Shipped,
-                        ], true)
-                            ? route('admin.fulfillment', ['id' => $order->number])
-                            : route('admin.orders.show', $order);
-                    @endphp
-                    <a class="list-row" href="{{ $href }}" wire:key="recent-{{ $order->id }}">
+                    <a class="list-row" href="{{ $this->recentOrderHref($order) }}" wire:key="recent-{{ $order->id }}">
                         <span><span class="mono">{{ $order->number }}</span> · {{ $order->full_name }}</span>
                         <x-admin.status-pill :status="$order->status" />
                     </a>

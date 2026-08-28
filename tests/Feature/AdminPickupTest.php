@@ -84,30 +84,45 @@ test('staff must collect the remaining deposit balance before pickup completion'
         ->and($order->fresh()->balance_collected_at)->not->toBeNull();
 });
 
-test('fulfillment has no ready for pickup button on bookstore orders', function () {
+test('fulfillment is a postage queue without channel tabs or pickup orders', function () {
     $staff = User::factory()->create();
-    $order = Order::factory()->create([
+    Order::factory()->create([
         'status' => OrderStatus::Confirmed,
-        'number' => 'FRFULFILL',
-        'full_name' => 'สมชาย ใจดี',
+        'number' => 'FRBOOK001',
+        'full_name' => 'สมชาย จุดรับ',
         'student_id' => '67015555555',
         'fulfillment' => FulfillmentMethod::Bookstore,
+    ]);
+    Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'number' => 'FRPOST001',
+        'full_name' => 'ปิยะ ไปรษณีย์',
+        'student_id' => '67016666666',
+        'fulfillment' => FulfillmentMethod::Post,
     ]);
 
     $this->actingAs($staff)
         ->get(route('admin.fulfillment'))
         ->assertOk()
-        ->assertSee('สมชาย ใจดี', false)
-        ->assertSee('67015555555', false)
+        ->assertSee('คิวไปรษณีย์หลังยืนยันสลิป', false)
+        ->assertDontSee('จัดส่ง / จุดรับ', false)
+        ->assertDontSee('แยกตามช่องทาง', false)
+        ->assertDontSee('role="tablist"', false)
+        ->assertDontSee('FRBOOK001', false)
+        ->assertDontSee('สมชาย จุดรับ', false)
+        ->assertSee('FRPOST001', false)
+        ->assertSee('ปิยะ ไปรษณีย์', false)
         ->assertDontSee('wire:click="markReady"', false)
-        ->assertDontSee('พร้อมรับของ', false);
+        ->assertDontSee('พร้อมรับของ', false)
+        ->assertDontSee('ทั้งหมดในช่องทาง', false)
+        ->assertSee('>ทั้งหมด</option>', false);
 
     Livewire::actingAs($staff)
         ->test('pages::admin.fulfillment')
-        ->set('id', $order->number)
-        ->assertDontSeeHtml('wire:click="markReady"');
-
-    expect($order->fresh()->status)->toBe(OrderStatus::Confirmed);
+        ->set('id', 'FRBOOK001')
+        ->assertDontSee('สมชาย จุดรับ', false)
+        ->assertDontSeeHtml('wire:click="markReady"')
+        ->assertSee('เลือกแถวทางซ้าย', false);
 });
 
 test('the post fulfillment active queue includes shipped orders missing a parcel number', function () {
@@ -132,7 +147,6 @@ test('the post fulfillment active queue includes shipped orders missing a parcel
 
     Livewire::actingAs($staff)
         ->test('pages::admin.fulfillment')
-        ->set('channel', FulfillmentMethod::Post->value)
         ->assertSee('FRPOST001', false)
         ->assertSee('FRPOST002', false)
         ->assertDontSee('FRPOST003', false);
@@ -149,7 +163,6 @@ test('staff can mark a postal order shipped with a parcel number', function () {
 
     Livewire::actingAs($staff)
         ->test('pages::admin.fulfillment')
-        ->set('channel', FulfillmentMethod::Post->value)
         ->set('id', $order->number)
         ->set('parcelNumber', 'EMS123456TH')
         ->assertSee('aria-label="เลขพัสดุ"', false)
@@ -172,7 +185,6 @@ test('staff can update a parcel number on a shipped postal order', function () {
 
     Livewire::actingAs($staff)
         ->test('pages::admin.fulfillment')
-        ->set('channel', FulfillmentMethod::Post->value)
         ->set('status', 'all')
         ->set('id', $order->number)
         ->set('parcelNumber', 'EMS222')
@@ -195,7 +207,6 @@ test('clearing a parcel number returns the order to the post active queue', func
 
     Livewire::actingAs($staff)
         ->test('pages::admin.fulfillment')
-        ->set('channel', FulfillmentMethod::Post->value)
         ->set('status', 'all')
         ->set('id', $order->number)
         ->set('parcelNumber', '')
@@ -205,7 +216,6 @@ test('clearing a parcel number returns the order to the post active queue', func
 
     Livewire::actingAs($staff)
         ->test('pages::admin.fulfillment')
-        ->set('channel', FulfillmentMethod::Post->value)
         ->assertSee('FRSHIP003', false);
 });
 
@@ -216,7 +226,7 @@ test('fulfillment guest column shows a smaller student id', function () {
         'number' => 'FRMETA001',
         'full_name' => 'สมชาย ใจดี',
         'student_id' => '67015555555',
-        'fulfillment' => FulfillmentMethod::Bookstore,
+        'fulfillment' => FulfillmentMethod::Post,
     ]);
 
     $this->actingAs($staff)
@@ -251,4 +261,33 @@ test('staff can clear fulfillment filters', function () {
         ->assertSet('status', 'active')
         ->assertSet('search', '')
         ->assertSet('id', '');
+});
+
+test('dashboard recent links send postage to fulfillment and pickup to the desk', function () {
+    $staff = User::factory()->create();
+    $post = Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'number' => 'FRDASHPOST',
+        'fulfillment' => FulfillmentMethod::Post,
+        'created_at' => now()->subMinute(),
+    ]);
+    $ready = Order::factory()->create([
+        'status' => OrderStatus::ReadyForPickup,
+        'number' => 'FRDASHPICK',
+        'fulfillment' => FulfillmentMethod::Hall,
+        'created_at' => now()->subSeconds(30),
+    ]);
+    $confirmedPickup = Order::factory()->create([
+        'status' => OrderStatus::Confirmed,
+        'number' => 'FRDASHBOOK',
+        'fulfillment' => FulfillmentMethod::Bookstore,
+        'created_at' => now(),
+    ]);
+
+    $this->actingAs($staff)
+        ->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSee('href="'.route('admin.fulfillment', ['id' => $post->number]).'"', false)
+        ->assertSee('href="'.route('admin.pickup', ['search' => $ready->number]).'"', false)
+        ->assertSee('href="'.route('admin.orders.show', $confirmedPickup).'"', false);
 });
